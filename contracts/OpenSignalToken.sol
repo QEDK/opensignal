@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -10,12 +10,20 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract OpenSignalToken is Initializable, ERC20Upgradeable, ERC20SnapshotUpgradeable, AccessControlUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
+contract OpenSignalToken is
+    Initializable,
+    ERC20Upgradeable,
+    ERC20SnapshotUpgradeable,
+    AccessControlUpgradeable,
+    PausableUpgradeable,
+    ERC20PermitUpgradeable,
+    ERC20VotesUpgradeable,
+    UUPSUpgradeable {
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-    function initialize() initializer public {
+    function initialize() public initializer {
         __ERC20_init("OpenSignal", "SIGNAL");
         __ERC20Snapshot_init();
         __AccessControl_init();
@@ -45,16 +53,16 @@ contract OpenSignalToken is Initializable, ERC20Upgradeable, ERC20SnapshotUpgrad
     function _beforeTokenTransfer(address from, address to, uint256 amount)
         internal
         whenNotPaused
-        override(ERC20Upgradeable, ERC20SnapshotUpgradeable)
-    {
+        override(ERC20Upgradeable, ERC20SnapshotUpgradeable) {
         super._beforeTokenTransfer(from, to, amount);
     }
 
     function _authorizeUpgrade(address newImplementation)
         internal
         onlyRole(UPGRADER_ROLE)
-        override
-    {}
+        override {
+
+    }
 
     function _afterTokenTransfer(address from, address to, uint256 amount)
         internal
