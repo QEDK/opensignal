@@ -22,11 +22,14 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         uint256 timestamp;
     }
 
+    uint32 public constant epoch = 2592000;
+
     address public governor;
     IERC20 public nativeToken;
     uint256 public minStake;
-    uint256 public epoch;
-    mapping(bytes32 => mapping(address => uint256)) public shares;
+    uint32 public reserveRatio;
+    uint8 public minLockinTimeInEpochs;
+
     mapping(bytes32 => Project) public projects;
 
     BancorFormula private BF = new BancorFormula();
@@ -44,7 +47,23 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         governor = msg.sender;
         nativeToken = _nativeToken;
         minStake = 2 ether;
-        epoch = 2592000;
+        reserveRatio = 500000;
+        minLockinTimeInEpochs = 3;
+    }
+
+    function changeMinLockinTimeInEpochs(uint8 newLockinTime) onlyGovernor {
+        require(newLockinTime > 0, "INVALID_DURATION")
+        minLockinTimeInEpochs = newLockinTime;
+    }
+
+    function changeMinStake(uint256 newMinStake) onlyGovernor {
+        require(amount > 0, "INVALID_AMOUNT");
+        minStake = newMinStake;
+    }
+
+    function changeReserveRatio(uint32 newRatio) onlyGovernor {
+        require(reserveRatio > 0 && reserveRatio <= 1000000, "INVALID_RESERVE_WEIGHT");
+        reserveRatio = newRatio;
     }
 
     function createProject(string calldata name, uint256 amount) external {
