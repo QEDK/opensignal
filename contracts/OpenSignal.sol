@@ -51,17 +51,17 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         minLockinTimeInEpochs = 3;
     }
 
-    function changeMinLockinTimeInEpochs(uint8 newLockinTime) onlyGovernor {
-        require(newLockinTime > 0, "INVALID_DURATION")
+    function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
+        require(newLockinTime > 0, "INVALID_DURATION");
         minLockinTimeInEpochs = newLockinTime;
     }
 
-    function changeMinStake(uint256 newMinStake) onlyGovernor {
-        require(amount > 0, "INVALID_AMOUNT");
+    function changeMinStake(uint256 newMinStake) external onlyGovernor {
+        require(newMinStake > 0, "INVALID_AMOUNT");
         minStake = newMinStake;
     }
 
-    function changeReserveRatio(uint32 newRatio) onlyGovernor {
+    function changeReserveRatio(uint32 newRatio) external onlyGovernor {
         require(reserveRatio > 0 && reserveRatio <= 1000000, "INVALID_RESERVE_WEIGHT");
         reserveRatio = newRatio;
     }
@@ -100,10 +100,9 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         uint256 sharesAmt = BF.calculatePurchaseReturn(
             project.signal,
             _deployment.totalSupply(),
-            500000,
+            reserveRatio,
             amount
         );
-        shares[id][_msgSender()] += sharesAmt;
         projects[id].signal += amount;
         _deployment.mint(_msgSender(), sharesAmt);
         emit IncreaseSignal(id, amount);
@@ -112,17 +111,17 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
     function removeSignal(bytes32 id, uint256 sharesAmt, uint256 minAmount) external nonReentrant {
         Project memory project = projects[id];
         require(project.deployment != address(0), "NON_EXISTENT_PROJECT");
-        require(shares[id][_msgSender()] >= sharesAmt, "NOT_ENOUGH_BALANCE");
         OpenSignalShares _deployment = OpenSignalShares(project.deployment);
+        require(_deployment.balanceOf(_msgSender()) > sharesAmt, "NOT_ENOUGH_BALANCE");
         uint256 amount = BF.calculateSaleReturn(
             project.signal,
             _deployment.totalSupply(),
-            500000,
+            reserveRatio,
             sharesAmt
         );
         require(amount >= minAmount, "SLIPPAGE_PROTECTION");
-        shares[id][_msgSender()] -= sharesAmt;
         projects[id].signal -= amount;
+        _deployment.burn(_msgSender(), sharesAmt);
         emit DecreaseSignal(id, amount);
     }
 }
