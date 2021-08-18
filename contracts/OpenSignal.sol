@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
+import "./BancorFormula.sol";
 import "./OpenSignalShares.sol";
 
 contract OpenSignal is ERC2771Context, ReentrancyGuard {
@@ -21,13 +22,15 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         uint256 timestamp;
     }
 
-    Counters.Counter private projectId;
     address public governor;
     IERC20 public nativeToken;
     uint256 public minStake;
     uint256 public epoch;
     mapping(bytes32 => mapping(address => uint256)) public shares;
     mapping(bytes32 => Project) public projects;
+
+    BancorFormula private BF = new BancorFormula();
+    Counters.Counter private projectId;
 
     event IncreaseSignal(bytes32 indexed id, uint256 indexed amount);
     event DecreaseSignal(bytes32 indexed id, uint256 indexed amount);
@@ -75,19 +78,31 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         require(project.creator != address(0), "NON_EXISTENT_PROJECT");
         nativeToken.safeTransferFrom(_msgSender(), address(this), amount);
         OpenSignalShares _deployment = OpenSignalShares(project.deployment);
-        uint256 shares = BancorFormula.calculatePurchaseReturn(
+        uint256 sharesAmt = BF.calculatePurchaseReturn(
             project.signal,
             _deployment.totalSupply(),
             500000,
             amount
         );
+        shares[id][_msgSender()] += sharesAmt;
         projects[id].signal += amount;
-        _deployment.mint(_msgSender(), shares);
+        _deployment.mint(_msgSender(), sharesAmt);
         emit IncreaseSignal(id, amount);
     }
 
-    function removeSignal(bytes32 id, uint256 amount, uint256 minTokenOut) external nonReentrant {
+    function removeSignal(bytes32 id, uint256 sharesAmt, uint256 minAmount) external nonReentrant {
         Project memory project = projects[id];
+        require(project.deployment != address(0), "NON_EXISTENT_PROJECT");
+        require(shares[id][_msgSender()] >= sharesAmt, "NOT_ENOUGH_BALANCE");
+        OpenSignalShares _deployment = OpenSignalShares(project.deployment);
+        uint256 amount = BF.calculateSaleReturn(
+            project.signal,
+            _deployment.totalSupply(),
+            500000,
+            sharesAmt
+        );
+        require(amount >= minAmount, "SLIPPAGE_PROTECTION");
+        shares[id][_msgSender()] -= sharesAmt;
         projects[id].signal -= amount;
         emit DecreaseSignal(id, amount);
     }
