@@ -112,7 +112,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         Project memory project = projects[id];
         require(project.deployment != address(0), "NON_EXISTENT_PROJECT");
         OpenSignalShares _deployment = OpenSignalShares(project.deployment);
-        require(_deployment.balanceOf(_msgSender()) > sharesAmt, "NOT_ENOUGH_BALANCE");
+        require(_deployment.balanceOf(_msgSender()) >=  sharesAmt, "NOT_ENOUGH_BALANCE");
         uint256 amount = BF.calculateSaleReturn(
             project.signal,
             _deployment.totalSupply(),
