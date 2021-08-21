@@ -124,4 +124,6 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         _deployment.burn(_msgSender(), sharesAmt);
         emit DecreaseSignal(id, amount);
     }
+
+    // add rewards pool PoC
 }
