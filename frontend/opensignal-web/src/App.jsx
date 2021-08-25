@@ -27,13 +27,6 @@ import Fortmatic from "fortmatic";
 import Authereum from "authereum";
 
 import { deployContract } from "./contracts";
-deployContract("OpenSignal").then(() => {
-  deployContract("OpenSignal", [
-    "0x9B00B2A3514CC05Ea9957ad5e4D279D724a81Afb",
-    localStorage.getItem("OpenSignalToken"),
-  ]).then();
-  deployContract("OpenSignalShares").then();
-});
 
 const { ethers } = require("ethers");
 /*
@@ -354,6 +347,17 @@ function App(props) {
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
     setInjectedProvider(new ethers.providers.Web3Provider(provider));
+
+    let forceRedeploy = false;
+    deployContract("OpenSignalToken", [], new ethers.providers.Web3Provider(provider), forceRedeploy).then(() => {
+      deployContract(
+        "OpenSignal",
+        ["0x9B00B2A3514CC05Ea9957ad5e4D279D724a81Afb", localStorage.getItem("OpenSignalToken")],
+        new ethers.providers.Web3Provider(provider),
+        forceRedeploy,
+      ).then();
+      deployContract("OpenSignalShares", [], new ethers.providers.Web3Provider(provider), forceRedeploy).then();
+    });
 
     provider.on("chainChanged", chainId => {
       console.log(`chain changed to ${chainId}! updating providers`);

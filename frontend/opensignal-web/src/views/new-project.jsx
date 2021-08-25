@@ -70,7 +70,7 @@ const NewProject = ({
       setNewProjecError("");
       setNewProjecLoading(true);
 
-      console.log(address)
+      console.log(address);
       const amountInWei = ethers.utils.parseEther(project.amount.toString());
       const contract = writeContracts["OpenSignal"];
       contract

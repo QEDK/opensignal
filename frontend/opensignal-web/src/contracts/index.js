@@ -1,17 +1,20 @@
 import { BigNumber, ethers } from "ethers";
 
-const deployContract = (name, args = []) => {
-  console.log(`\n\n\n\n\n redeploying contracts  ${name}`);
+const deployContract = (name, args = [], providerOrSigner, forceRedeploy = false) => {
   return new Promise(async (resolve, reject) => {
     let opensognalAddr = localStorage.getItem(name);
-    if (opensognalAddr) {
+    console.log("\n\n\n\n\n???opensognalAddr", opensognalAddr);
+    if (!forceRedeploy && opensognalAddr) {
       return resolve(opensognalAddr);
     }
     try {
-      const provider = new ethers.providers.Web3Provider(
-        window.ethereum,
-        "any", // getNetworkName(chainId).toLocaleLowerCase()
-      );
+      console.log(` redeploying contracts  ${name}`);
+      const provider =
+        providerOrSigner ||
+        new ethers.providers.Web3Provider(
+          window.ethereum,
+          "any", // getNetworkName(chainId).toLocaleLowerCase()
+        );
 
       let contractList = {};
 
