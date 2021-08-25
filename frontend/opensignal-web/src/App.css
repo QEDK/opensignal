@@ -1,3 +1,11 @@
 .App {
   text-align: center;
 }
+
+.btn {
+  cursor: pointer;
+}
+.btn :hover {
+  position: relative;
+  top: 2px;
+}

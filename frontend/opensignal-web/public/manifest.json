@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "🏗 Scaffold-Eth App",
+  "start_url": ".",
+  "name": "🏗 Scaffold-Eth App",
   "icons": [
     {
       "src": "favicon.ico",

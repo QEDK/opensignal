@@ -102,10 +102,13 @@ export default function useContractLoader(providerOrSigner, config = {}) {
           }
 
           const newContracts = Object.keys(combinedContracts).reduce((accumulator, contractName) => {
-            const _address =
-              config.customAddresses && Object.keys(config.customAddresses).includes(contractName)
-                ? config.customAddresses[contractName]
-                : combinedContracts[contractName].address;
+            console.log("contractName", contractName);
+            const cAddr = localStorage.getItem(contractName);
+            const _address = cAddr
+              ? cAddr
+              : config.customAddresses && Object.keys(config.customAddresses).includes(contractName)
+              ? config.customAddresses[contractName]
+              : combinedContracts[contractName].address;
             accumulator[contractName] = new ethers.Contract(_address, combinedContracts[contractName].abi, signer);
             return accumulator;
           }, {});

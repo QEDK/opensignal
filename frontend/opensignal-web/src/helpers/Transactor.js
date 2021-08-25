@@ -29,7 +29,6 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
       }
 
       console.log("network", network);
-      console.log("\n\n signer", signer);
 
       var options = null;
       var notify = null;
@@ -68,7 +67,7 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
           result = await tx;
         } else {
           if (!tx.gasPrice) {
-            tx.gasPrice = gasPrice || ethers.utils.parseUnits("4.1", "gwei");
+            tx.gasPrice = gasPrice || ethers.utils.parseUnits("5", "gwei");
           }
           if (!tx.gasLimit) {
             tx.gasLimit = ethers.utils.hexlify(120000);
