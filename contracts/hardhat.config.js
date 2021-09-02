@@ -1,5 +1,7 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-etherscan')
+
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -22,5 +24,8 @@ module.exports = {
       url: process.env.RINKEBY_RPC_URL || 'https://rinkeby-light.eth.linkpool.io',
       accounts: [`0x${process.env.PRIVATE_KEY}`]
     }
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY
   }
 }
