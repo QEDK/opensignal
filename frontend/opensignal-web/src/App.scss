@@ -1,0 +1,247 @@
+$PRIMARY: #fafbfc;
+$SECONDARY: #23272a;
+$TEXT_PRIMARY: #fafbfc;
+$TEXT_SECONDARY: #6d68cc;
+$DI: #6d68cc;
+$PADDING: 0.375rem;
+$PADDING_BIG: 0.75rem;
+$FONT_SMALL: calc(0.25rem + 1vmin);
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./assets/fonts/Roboto-Medium.ttf');
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Roboto';
+    src: url('./assets/fonts/Roboto-Italic.ttf');
+    font-style: italic;
+}
+@font-face {
+    font-family: 'Roboto';
+    src: url('./assets/fonts/Roboto-Thin.ttf');
+    font-weight: 300;
+}
+@font-face {
+    font-family: 'Roboto';
+    src: url('./assets/fonts/Roboto-Bold.ttf');
+    font-weight: 700;
+}
+
+html,
+body {
+    font-family: Roboto;
+    height: 100vh;
+    color: $TEXT_PRIMARY;
+    font-size: calc(0.375rem + 1vmin);
+    font-family: Roboto;
+}
+
+* {
+    box-sizing: border-box;
+}
+.root {
+    height: 100vh;
+    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.btn {
+    cursor: pointer;
+
+    &:hover {
+        position: relative;
+        top: 1px;
+    }
+}
+
+.nav-bar {
+    width: 100%;
+    border-bottom: 1px solid $PRIMARY;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    padding: $PADDING_BIG;
+    .nav {
+        flex: 1;
+        margin-left: 10rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: stretch;
+        .nav-item {
+            a {
+                @extend .btn;
+                margin: 0;
+                padding: 0 $PADDING_BIG;
+                color: $TEXT_PRIMARY;
+                font-weight: bold;
+                font-size: calc(0.75rem + 1vmin);
+                text-shadow: 1px 2px 3px $SECONDARY;
+                &:hover {
+                    text-shadow: 2px 4px 5px $SECONDARY;
+                }
+            }
+        }
+    }
+
+    .wallet {
+        width: 15rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+
+        .address {
+            @extend .btn;
+            margin: 0 0.5rem;
+            border: 1px solid $PRIMARY;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: stretch;
+            background-color: transparent;
+            padding: 0;
+            color: $TEXT_PRIMARY;
+            box-shadow: 1px 2px 8px 2px
+                transparentize($color: $SECONDARY, $amount: 0.5);
+            h3 {
+                display: inline-flex;
+                align-items: center;
+                margin: 0;
+                padding: $PADDING $PADDING_BIG;
+            }
+            span {
+                border: 1px solid $PRIMARY;
+                font-size: $FONT_SMALL;
+
+                background-color: $PRIMARY;
+                color: $TEXT_SECONDARY;
+                padding: $PADDING;
+                align-self: stretch;
+                font-weight: bold;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            &:hover {
+                box-shadow: 1px 2px 8px 2px $SECONDARY;
+            }
+        }
+        .wallet-btn {
+            width: 3rem;
+            height: 3rem;
+            padding: $PADDING;
+            position: relative;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+}
+
+.page-header {
+    margin-top: 2rem;
+    width: 100%;
+    position: relative;
+
+    h3 {
+        width: 100%;
+        font-size: calc(1rem + 2vmin);
+
+        text-shadow: 1px 2px 3px $SECONDARY;
+        text-align: center;
+        text-decoration: underline;
+    }
+    span {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        &.btn {
+            position: absolute;
+            &:hover {
+                top: 1px;
+                text-decoration: underline;
+                text-shadow: 1px 2px 3px $SECONDARY;
+            }
+        }
+    }
+}
+
+.projects {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    .project {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+
+        border: 3px solid $PRIMARY;
+        border-radius: 5px;
+        width: 20rem;
+        h3 {
+            width: 100%;
+            padding: $PADDING_BIG;
+            margin: 0;
+            text-align: center;
+            border-bottom: 1px solid $SECONDARY;
+            box-shadow: 0 2px 5px 1px $SECONDARY;
+            z-index: 10;
+        }
+        .project-avatar {
+            height: 15rem;
+            background-color: $PRIMARY;
+            width: 100%;
+            border-bottom: 1px solid $SECONDARY;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+        .project-actions {
+            width: 100%;
+            box-shadow: 0 -2px 5px 1px $SECONDARY;
+            .buttons {
+                display: flex;
+                flex-direction: row;
+
+                .button {
+                    flex: 1;
+                    border-radius: 0;
+                    &:nth-child(2) {
+                        background-color: pink;
+                    }
+                    &:nth-child(1) {
+                        background-color: lightgreen;
+                    }
+                }
+            }
+        }
+        .project-subheader {
+            width: 100%;
+
+            p {
+                border-bottom: 1px solid $SECONDARY;
+                width: 100%;
+                text-align: center;
+                background-color: lightsalmon;
+                color: transparentize($PRIMARY, 0.25);
+                text-shadow: 1px 1px 1px $SECONDARY;
+                margin: 0;
+                padding: $PADDING;
+            }
+        }
+    }
+}
