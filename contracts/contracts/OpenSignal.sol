@@ -7,12 +7,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./BancorFormula.sol";
 import "./OpenSignalShares.sol";
 
 contract OpenSignal is ERC2771Context, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct Project {
         address creator;
@@ -31,10 +33,13 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
     uint8 public minLockinTimeInEpochs;
 
     mapping(bytes32 => Project) public projects;
+    mapping(bytes32 => string) public projectURIs;
 
     BancorFormula private BF = new BancorFormula();
     Counters.Counter private projectId;
+    EnumerableSet.Bytes32Set private projectIDs;
 
+    event NewProject(bytes32 indexed id, string indexed URI);
     event IncreaseSignal(bytes32 indexed id, uint256 indexed amount);
     event DecreaseSignal(bytes32 indexed id, uint256 indexed amount);
 
@@ -66,17 +71,21 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         reserveRatio = newRatio;
     }
 
-    function createProject(string calldata name, uint256 amount) external {
+    function createProject(string calldata name, string calldata URI, uint256 amount) external returns (bytes32) {
         require(amount >= minStake, "SELF_STAKE_TOO_LOW");
         nativeToken.safeTransferFrom(_msgSender(), address(this), amount);
         bytes32 id = keccak256(abi.encode(name, block.number, projectId.current()));
         address _deployment = Create2.computeAddress(id, keccak256(type(OpenSignalShares).creationCode));
         projects[id] = Project(_msgSender(), _deployment, amount, amount, block.timestamp);
         projectId.increment();
+        projectURIs[id] = URI;
+        projectIDs.add(id);
         Create2.deploy(0, id, type(OpenSignalShares).creationCode);
         OpenSignalShares deployment = OpenSignalShares(_deployment);
         deployment.mint(_msgSender(), amount); // 1-to-1 worth of shares
         emit IncreaseSignal(id, amount);
+        emit NewProject(id, URI);
+        return id;
     }
 
     function deleteProject(bytes32 id, uint256 amount) external nonReentrant {
@@ -84,6 +93,8 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         require(_msgSender() == project.creator, "ONLY_CREATOR");
         require(block.timestamp - project.timestamp > (3 * epoch), "THREE_EPOCHS_INCOMPLETE");
         delete projects[id];
+        delete projectURIs[id];
+        projectIDs.remove(id);
         nativeToken.safeTransferFrom(address(this), _msgSender(), project.selfStake);
     }
 
@@ -125,5 +136,11 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         emit DecreaseSignal(id, amount);
     }
 
-    // add rewards pool PoC
+    function allProjects() external view returns (bytes32[] memory) {
+        return projectIDs.values();
+    }
+
+    function projectURI(bytes32 id) external view returns (string memory) {
+        return projectURIs[id];
+    }
 }
