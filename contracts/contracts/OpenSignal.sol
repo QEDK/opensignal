@@ -88,7 +88,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         return id;
     }
 
-    function deleteProject(bytes32 id, uint256 amount) external nonReentrant {
+    function deleteProject(bytes32 id) external nonReentrant {
         Project memory project = projects[id];
         require(_msgSender() == project.creator, "ONLY_CREATOR");
         require(block.timestamp - project.timestamp > (3 * epoch), "THREE_EPOCHS_INCOMPLETE");
@@ -96,11 +96,6 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         delete projectURIs[id];
         projectIDs.remove(id);
         nativeToken.safeTransferFrom(address(this), _msgSender(), project.selfStake);
-    }
-
-    function increaseStake(bytes32 id, uint256 amount) external {
-        Project memory project = projects[id];
-        require(_msgSender() == project.creator, "ONLY_CREATOR");
     }
 
     function addSignal(bytes32 id, uint256 amount) external {
