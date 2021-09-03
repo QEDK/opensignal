@@ -180,6 +180,7 @@ body {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+
     .project {
         display: flex;
         flex-direction: column;
@@ -190,6 +191,11 @@ body {
         border: 3px solid $PRIMARY;
         border-radius: 5px;
         width: 20rem;
+        box-shadow: 2px 4px 16px 3px black;
+        transition: 0.3s all;
+        &:hover {
+            transform: scale(1.01);
+        }
         h3 {
             width: 100%;
             padding: $PADDING_BIG;
@@ -233,10 +239,10 @@ body {
             width: 100%;
 
             p {
-                border-bottom: 1px solid $SECONDARY;
+                border-bottom: 1px solid $PRIMARY;
                 width: 100%;
                 text-align: center;
-                background-color: lightsalmon;
+                background-color: #232731;
                 color: transparentize($PRIMARY, 0.25);
                 text-shadow: 1px 1px 1px $SECONDARY;
                 margin: 0;

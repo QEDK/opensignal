@@ -3,6 +3,7 @@ import './App.scss';
 // import {SnackbarProvider} from 'material-ui-snackbar-provider';
 import {GitcoinProvider} from './store';
 import Pages from './pages';
+
 function App() {
     return (
         <GitcoinProvider>

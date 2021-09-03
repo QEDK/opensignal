@@ -3,9 +3,12 @@ import {BigNumber} from 'ethers';
 import {useGetOpenSignalTokenContract} from '../hooks/Contract.hook';
 import React from 'react';
 import {GitcoinContext} from '../store';
+
 const TokenPage = () => {
     const {state} = React.useContext(GitcoinContext);
-    const [tokenContract] = useGetOpenSignalTokenContract();
+    const [tokenContract] = useGetOpenSignalTokenContract(
+        state.openSignalContract
+    );
 
     const onClaim = () => {
         if (tokenContract) {
@@ -18,6 +21,7 @@ const TokenPage = () => {
                 .catch(console.log);
         }
     };
+
     return (
         <Container>
             <div className="page-header">

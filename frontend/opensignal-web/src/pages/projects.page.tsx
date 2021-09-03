@@ -2,6 +2,10 @@ import {Container, Grid, Button, Icon} from 'semantic-ui-react';
 import {useHistory} from 'react-router';
 //@ts-ignore
 import makeBlockie from 'ethereum-blockies-base64';
+import {BigNumber} from 'ethers';
+import {useGetOpenSignalContract} from '../hooks/Contract.hook';
+import {GitcoinContext} from '../store';
+import React from 'react';
 
 const projects: Project[] = [
     {
@@ -48,7 +52,28 @@ const ProjectPage = () => {
 export {ProjectPage};
 
 const ProjectCard = ({project}: {project: Project}) => {
-    console.log('project', project);
+    const {state} = React.useContext(GitcoinContext);
+    const [openSignalContract] = useGetOpenSignalContract(
+        state.openSignalContract
+    );
+    const OnIncreaseSignal = () => {
+        openSignalContract.methods
+            .addSignal(state.wallets[0], BigNumber.from(10).pow(18))
+            .send({
+                from: state.wallets[0],
+            })
+            .then(console.log)
+            .catch(console.log);
+    };
+    const OnDecreaseSignal = () => {
+        openSignalContract.methods
+            .removeSignal(state.wallets[0], BigNumber.from(10).pow(18))
+            .send({
+                from: state.wallets[0],
+            })
+            .then(console.log)
+            .catch(console.log);
+    };
     return (
         <div className="project">
             <h3>{project.name}</h3>
@@ -58,11 +83,11 @@ const ProjectCard = ({project}: {project: Project}) => {
             </div>
             <div className="project-actions">
                 <Button.Group size="large">
-                    <Button>
+                    <Button onClick={() => OnIncreaseSignal()}>
                         <Icon name="angle up" />
                     </Button>
 
-                    <Button>
+                    <Button onClick={() => OnDecreaseSignal()}>
                         <Icon name="angle down" />
                     </Button>
                 </Button.Group>

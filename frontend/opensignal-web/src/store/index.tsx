@@ -9,14 +9,23 @@ type State = {
     provider: any;
     wallets: string[];
     pendingTransactions: any[];
+    openSignalContract: any;
+    openSignalTokenContract: any;
 };
 type GitcoinProviderProps = {children: React.ReactNode};
 let myweb3: any = new Web3(window.ethereum);
+
+const openSignalContract =
+    'ipfs://bafyreih4m7d7l5fbkh3kqnzmefowi45vfjetc6hqn3vsl2jpadpqz6jmyu/metadata.json';
+const openSignalTokenContract =
+    'ipfs://bafyreid2o6wajtzdztxklgdym22h2nbm6zjh2npctainhykbsbotn6a554/metadata.json';
 const initialState: State = {
     chain_id: '42',
     provider: myweb3.currentProvider,
     wallets: [],
     pendingTransactions: [],
+    openSignalContract: openSignalContract,
+    openSignalTokenContract: openSignalTokenContract,
 };
 
 const GitcoinContext = React.createContext<{state: State; dispatch: Dispatch}>(

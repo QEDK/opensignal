@@ -1,5 +1,5 @@
 import React from 'react';
-import {isAddress} from '../util/eth.util';
+import {NFTStorage, File} from 'nft.storage';
 
 const useGetOpenSignalContract = (trigger = false) => {
     const [contract, setcontract] = React.useState('');
