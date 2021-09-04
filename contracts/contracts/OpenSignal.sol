@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./BancorFormula.sol";
 import "./OpenSignalShares.sol";
+import "./RewardsDistribution";
 
 contract OpenSignal is ERC2771Context, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -48,12 +49,13 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         _;
     }
 
-    constructor(address _trustedForwarder, IERC20 _nativeToken) ERC2771Context(_trustedForwarder) {
+    constructor(address _trustedForwarder, IERC20 _nativeToken, address _rewardsDistribution ) ERC2771Context(_trustedForwarder) {
         governor = msg.sender;
         nativeToken = _nativeToken;
         minStake = 2 ether;
         reserveRatio = 500000;
         minLockinTimeInEpochs = 3;
+        RewardsDistribution rewardsDistribution = RewardsDistribution(_rewardsDistribution);
     }
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
@@ -111,6 +113,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         );
         projects[id].signal += amount;
         _deployment.mint(_msgSender(), sharesAmt);
+        rewardsDistribution.tokenStaked(_msgSender(), amount);
         emit IncreaseSignal(id, amount);
     }
 
