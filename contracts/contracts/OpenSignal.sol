@@ -85,6 +85,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         Create2.deploy(0, id, type(OpenSignalShares).creationCode);
         OpenSignalShares deployment = OpenSignalShares(_deployment);
         deployment.mint(_msgSender(), amount); // 1-to-1 worth of shares
+        rewardsDistribution.tokenStaked(_msgSender(), amount, false);
         emit IncreaseSignal(id, amount);
         emit NewProject(id, URI);
         return id;
@@ -97,6 +98,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         delete projects[id];
         delete projectURIs[id];
         projectIDs.remove(id);
+        rewardsDistribution.tokenStaked(_msgSender(), project.selfStake, true);
         nativeToken.safeTransferFrom(address(this), _msgSender(), project.selfStake);
     }
 
@@ -114,7 +116,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         require(sharesAmt >= minShares, "SLIPPAGE_PROTECTION");
         projects[id].signal += amount;
         _deployment.mint(_msgSender(), sharesAmt);
-        rewardsDistribution.tokenStaked(_msgSender(), amount);
+        rewardsDistribution.tokenStaked(_msgSender(), amount, false);
         emit IncreaseSignal(id, amount);
     }
 
@@ -134,6 +136,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         );
         require(amount >= minAmount, "SLIPPAGE_PROTECTION");
         projects[id].signal -= amount;
+        rewardsDistribution.tokenStaked(_msgSender(), amount, true);
         _deployment.burn(_msgSender(), sharesAmt);
         emit DecreaseSignal(id, amount);
     }

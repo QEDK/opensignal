@@ -9,8 +9,7 @@ import "./libraries/SafeDecimalMath.sol";
 
 // Internal references
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/IFeePool.sol";
-import "./interfaces/IRewardsDistribution.sol";
+// import "./interfaces/IFeePool.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/rewardsdistribution
 contract RewardsDistribution is Ownable {
@@ -30,17 +29,17 @@ contract RewardsDistribution is Ownable {
     /**
      * @notice Address of the Synthetix ProxyERC20
      */
-    address public synthetixProxy;
+    address public openSignalProxy;
 
     /**
      * @notice Address of the RewardEscrow contract
      */
     address public rewardEscrow;
 
-    /**
-     * @notice Address of the FeePoolProxy
-     */
-    address public feePoolProxy;
+    // /**
+    //  * @notice Address of the FeePoolProxy
+    //  */
+    // address public feePoolProxy;
 
     /**
      * @notice An array of addresses and amounts to send
@@ -56,29 +55,29 @@ contract RewardsDistribution is Ownable {
     constructor(
         address _owner,
         address _authority,
-        address _synthetixProxy,
-        address _rewardEscrow,
-        address _feePoolProxy
+        address _openSignalProxy,
+        address _rewardEscrow
+        // address _feePoolProxy
     ) public {
         authority = _authority;
-        synthetixProxy = _synthetixProxy;
+        openSignalProxy = _openSignalProxy;
         rewardEscrow = _rewardEscrow;
-        feePoolProxy = _feePoolProxy;
+        // feePoolProxy = _feePoolProxy;
     }
 
     // ========== EXTERNAL SETTERS ==========
 
-    function setSynthetixProxy(address _synthetixProxy) external onlyOwner {
-        synthetixProxy = _synthetixProxy;
+    function setOpenSignalProxy(address _openSignalProxy) external onlyOwner {
+        openSignalProxy = _openSignalProxy;
     }
 
     function setRewardEscrow(address _rewardEscrow) external onlyOwner {
         rewardEscrow = _rewardEscrow;
     }
 
-    function setFeePoolProxy(address _feePoolProxy) external onlyOwner {
-        feePoolProxy = _feePoolProxy;
-    }
+    // function setFeePoolProxy(address _feePoolProxy) external onlyOwner {
+    //     feePoolProxy = _feePoolProxy;
+    // }
 
     /**
      * @notice Set the address of the contract authorised to call distributeRewards()
@@ -90,7 +89,7 @@ contract RewardsDistribution is Ownable {
 
     // ========== EXTERNAL FUNCTIONS ==========
 
-    function tokenStaked(address destination, uint256 amount) external onlyOwner returns (bool) {
+    function tokenStaked(address destination, uint256 amount, bool _tokenRedeemed) external onlyOwner returns (bool) {
       require(destination != address(0), "Cant add a zero address");
       require(amount != 0, "Cant add a zero amount");
 
@@ -99,7 +98,7 @@ contract RewardsDistribution is Ownable {
         userIndex[destination] = distributions.length - 1;
       } else {
         uint256 index = userIndex[destination];
-        editRewardDistribution(index, destination, amount);
+        editRewardDistribution(index, amount, _tokenRedeemed);
       }
     }
 
@@ -145,30 +144,37 @@ contract RewardsDistribution is Ownable {
     /**
      * @notice Edits a RewardDistribution in the distributions array.
      * @param index The index of the DistributionData to edit
-     * @param destination The destination address. Send the same address to keep or different address to change it.
      * @param amount The amount of tokens to edit. Send the same number to keep or change the amount of tokens to send.
+     * @param tokenRedeemed Have they unstaked tokens? If true, we must subtract from their staked token balance.
      */
     function editRewardDistribution(
         uint index,
-        address destination,
-        uint amount
+        uint amount,
+        bool tokenRedeemed
     ) public onlyOwner returns (bool) {
         require(index <= distributions.length - 1, "index out of bounds");
-
-        distributions[index].destination = destination;
+        if (tokenRedeemed) { //unstaked tokens
+            distributions[index].amount =  distributions[index].amount.sub(amount);
+            if (distributions[index].amount == 0) { // they no longer have any staked tokens so remove them from the rewards array
+                removeRewardDistribution(index);
+            }
+        }
         distributions[index].amount =  distributions[index].amount.plus(amount);
-
         return true;
     }
 
-    function distributeRewards(uint amount) external returns (bool) {
+    /**
+        * @notice Edits a RewardDistribution in the distributions array.
+        * @param amount this is the total amount of tokens that will be distributed. Each participant will get their proportion of amount based on their total tokens staked
+     */
+    function distributeRewards(uint amount, uint256 totalTokensStaked) external returns (bool) {
         require(amount > 0, "Nothing to distribute");
         require(msg.sender == authority, "Caller is not authorised");
         require(rewardEscrow != address(0), "RewardEscrow is not set");
-        require(synthetixProxy != address(0), "SynthetixProxy is not set");
-        require(feePoolProxy != address(0), "FeePoolProxy is not set");
+        require(OpenSignalProxy != address(0), "OpenSignalProxy is not set");
+        // require(feePoolProxy != address(0), "FeePoolProxy is not set");
         require(
-            IERC20(synthetixProxy).balanceOf(address(this)) >= amount,
+            IERC20(OpenSignalProxy).balanceOf(address(this)) >= amount,
             "RewardsDistribution contract does not have enough tokens to distribute"
         );
 
@@ -179,26 +185,16 @@ contract RewardsDistribution is Ownable {
             if (distributions[i].destination != address(0) || distributions[i].amount != 0) {
                 remainder = remainder.sub(distributions[i].amount);
 
-                // Transfer the SNX
-                IERC20(synthetixProxy).transfer(distributions[i].destination, distributions[i].amount);
-
-                // If the contract implements RewardsDistributionRecipient.sol, inform it how many SNX its received.
-                bytes memory payload = abi.encodeWithSignature("notifyRewardAmount(uint256)", distributions[i].amount);
-
-                // solhint-disable avoid-low-level-calls
-                (bool success, ) = distributions[i].destination.call(payload);
-
-                if (!success) {
-                    // Note: we're ignoring the return value as it will fail for contracts that do not implement RewardsDistributionRecipient.sol
-                }
+                // Transfer the OS Tokens
+                IERC20(openSignalProxy).transfer(distributions[i].destination, distributions[i].amount * amount / totalTokensStaked);
             }
         }
 
         // After all ditributions have been sent, send the remainder to the RewardsEscrow contract
-        IERC20(synthetixProxy).transfer(rewardEscrow, remainder);
+        // IERC20(openSignalProxy).transfer(rewardEscrow, remainder);
 
-        // Tell the FeePool how much it has to distribute to the stakers
-        IFeePool(feePoolProxy).setRewardsToDistribute(remainder);
+        // // Tell the FeePool how much it has to distribute to the stakers
+        // IFeePool(feePoolProxy).setRewardsToDistribute(remainder);
 
         emit RewardsDistributed(amount);
         return true;
