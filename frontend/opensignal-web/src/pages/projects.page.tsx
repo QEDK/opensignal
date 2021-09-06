@@ -94,7 +94,8 @@ const ProjectCard = ({
 
     const [projectURI] = useGetProjectURI(project.id, contract);
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
-
+    console.log('projectURI', projectURI);
+    console.log('projectMeta', projectMeta);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
@@ -183,7 +184,7 @@ const ProjectCard = ({
                     <h3>{`${
                         projectMetaLoading
                             ? 'Loading'
-                            : projectMeta?.name || 'Loading'
+                            : projectMeta?.properties.name || 'Loading'
                     } (${minimizeAddress(project.creator)})`}</h3>
                     <p>{`Deployment: ${project.deployment}`}</p>
                 </div>{' '}
