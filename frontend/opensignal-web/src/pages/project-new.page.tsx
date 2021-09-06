@@ -15,35 +15,99 @@ import {
     useGetOpenSignalTokenContract,
 } from '../hooks/Contract.hook';
 import {NFTStorage, File, Blob} from 'nft.storage';
+import Web3 from 'web3';
+import {useGetMetadata} from '../hooks/Ipfs.hook';
+import {BigNumber} from 'ethers';
+const initialState: Project = {
+    id: '',
+    creator: '',
+    deployment: '',
+    name: '',
+    description: '',
+    link: '',
+    avatar: '',
+    selfStake: 0,
+    signal: 0,
+    project_id: '',
+    tags: [],
+};
 const ProjectNewPage = () => {
     const {state} = React.useContext(GitcoinContext);
-    const [openSignalContract] = useGetOpenSignalContract(
-        state.openSignalContract
-    );
-    const [tokenContract] = useGetOpenSignalTokenContract(
-        state.openSignalTokenContract
-    );
+    const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
+    const [createLoading, setCreateLoading] = React.useState<boolean>(false);
+    const [newProject, setNewProject] = React.useState<Project>(initialState);
+    const [opensignalMeta] = useGetMetadata(state.openSignalContract);
+    const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
+    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
+
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
-        openSignalContract.address
+        opensignalMeta,
+        approveLoading
     );
+
     const history = useHistory();
     const goToProject = () => {
         history.push('/');
     };
 
     const onNewProject = async () => {
+        if (!opensignalMeta || !tokenMeta) {
+            return;
+        }
+        if (newProject.selfStake > 0) {
+            if (notEnoughAllowance) {
+                setApproveLoading(true);
+                tokenContract.methods
+                    .approve(
+                        opensignalMeta.properties.address,
+                        Web3.utils.toWei(newProject.selfStake.toString())
+                    )
+                    .send({
+                        from: state.wallets[0],
+                    })
+                    .then((res: any) => {
+                        setApproveLoading(false);
+                        console.log(res);
+                    })
+                    .catch((err: any) => {
+                        setApproveLoading(false);
+                        console.log(err);
+                    });
+                return;
+            }
+        } else {
+            return;
+        }
+        const metadata = await saveOnIPFS();
+        setNewProject({...newProject, link: metadata.url});
+        if (!openSignalContract) {
+            return console.log('contract not found');
+        }
+
+        setCreateLoading(true);
         openSignalContract.methods
-            .createProject('Test', 'a', 2 * 1e18)
+            .createProject(
+                newProject.name,
+                metadata.url,
+                Web3.utils.toWei(newProject.selfStake.toString())
+            )
             .send({
                 from: state.wallets[0],
             })
-            .then(console.log)
-            .catch(console.log);
+            .then((res: any) => {
+                setCreateLoading(false);
+                console.log(res);
+            })
+            .catch((err: any) => {
+                setCreateLoading(false);
+                console.log(err);
+            });
     };
 
-    const saveId = async (projectId: string) => {
+    const saveOnIPFS = async () => {
         const apiKey =
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGFmRDg4MmY5YzlCZGE2QjMyOTVlZjIwZDFiM0VDNjA4NDJCREQxMTIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMDQ4NTQ2MDM0OSwibmFtZSI6Ik9wZW5TaWduYWwifQ.-Am4LeJJXbE6ONW6NfHdU2qIHGedHNuuIrfZPcpV0jU';
         const client = new NFTStorage({token: apiKey});
@@ -52,12 +116,20 @@ const ProjectNewPage = () => {
             name: 'OpenSignalToken',
             description: 'OpenSignalToken Contract Address',
             image: new Blob(),
-            properties: {
-                custom: [projectId],
-            },
+            properties: newProject,
         });
+
         return metadata;
     };
+
+    const notEnoughAllowance =
+        newProject.selfStake == 0 ||
+        (!allowanceLoading &&
+            BigNumber.from(allowance).lt(
+                BigNumber.from(newProject.selfStake).mul(
+                    BigNumber.from(10).pow(18)
+                )
+            ));
     return (
         <Container>
             <div className="page-header">
@@ -73,50 +145,80 @@ const ProjectNewPage = () => {
                     }}
                 >
                     <Form>
-                        <Container stacked>
+                        <Container>
                             <Form.Field>
                                 <Form.Input
                                     icon="book"
                                     iconPosition="left"
                                     placeholder="Name"
-                                />{' '}
-                                <Form.Input
+                                    value={newProject.name}
+                                    onChange={(e) =>
+                                        setNewProject({
+                                            ...newProject,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                />
+                                {/* <Form.Input
                                     fluid
                                     icon="linkify"
                                     iconPosition="left"
                                     placeholder="Link"
-                                />
+                                    value={newProject.link}
+                                    onChange={(e) =>
+                                        setNewProject({
+                                            ...newProject,
+                                            link: e.target.value,
+                                        })
+                                    }
+                                /> */}
                                 <Form.TextArea
                                     icon="lock"
                                     placeholder="Description"
+                                    value={newProject.description}
+                                    onChange={(e) =>
+                                        setNewProject({
+                                            ...newProject,
+                                            description: e.target.value,
+                                        })
+                                    }
                                 />
                                 <Form.Input
+                                    type="number"
                                     fluid
                                     icon="dollar"
                                     iconPosition="left"
                                     placeholder="Initial Stake Amount"
+                                    value={newProject.selfStake}
+                                    onChange={(e) =>
+                                        setNewProject({
+                                            ...newProject,
+                                            selfStake:
+                                                Number(e.target.value) > 0
+                                                    ? Number(e.target.value)
+                                                    : 0,
+                                        })
+                                    }
                                 />
                             </Form.Field>
 
                             <Button
                                 onClick={() => onNewProject()}
                                 className="btn"
-                                color={
-                                    !allowanceLoading && allowance > 0
-                                        ? 'pink'
-                                        : 'purple'
-                                }
+                                color={notEnoughAllowance ? 'pink' : 'purple'}
                                 fluid
                                 size="large"
+                                disabled={newProject.selfStake == 0}
+                                loading={approveLoading || createLoading}
                             >
-                                {!allowanceLoading && allowance > 0
-                                    ? 'APPROVE'
+                                {notEnoughAllowance
+                                    ? 'APPROVE TOKEN'
                                     : 'CREATE'}
                             </Button>
                         </Container>
                     </Form>
                 </Grid.Column>
-            </Grid>{' '}
+            </Grid>
         </Container>
     );
 };

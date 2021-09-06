@@ -4,26 +4,28 @@ import {isAddress} from '../util/eth.util';
 const useGetAllowance = (
     addr: string,
     tokenContract: any,
-    opensignalContractAddr: string,
+    opensignalMeta: any,
     trigger = false
 ) => {
     const [allowance, setallowance] = React.useState(0);
-    const [loading, setloading] = React.useState<boolean>(false);
+    const [loading, setloading] = React.useState<boolean>(true);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
         if (
             addr &&
+            tokenContract &&
+            opensignalMeta &&
             isAddress(addr) &&
-            isAddress(tokenContract.address) &&
-            isAddress(opensignalContractAddr)
+            isAddress(tokenContract._address) &&
+            isAddress(opensignalMeta.properties.address)
         ) {
             setallowance(0);
             setloading(true);
             seterr(null);
             try {
-                const allowance = await tokenContract.methods.allowance(
-                    opensignalContractAddr
-                );
+                const allowance = await tokenContract.methods
+                    .allowance(addr, opensignalMeta.properties.address)
+                    .call();
                 setallowance(allowance);
                 setloading(false);
                 seterr(null);
@@ -37,7 +39,7 @@ const useGetAllowance = (
             setloading(false);
             seterr(null);
         }
-    }, [addr, tokenContract, opensignalContractAddr, trigger]);
+    }, [addr, tokenContract, opensignalMeta, trigger]);
     return [allowance, loading, err];
 };
 const useGetTokenBalance = (
@@ -54,7 +56,9 @@ const useGetTokenBalance = (
             setloading(true);
             seterr(null);
             try {
-                const balance = await tokenContract.methods.balance(addr);
+                const balance = await tokenContract.methods
+                    .balance(addr)
+                    .call();
                 setbalance(balance);
                 setloading(false);
                 seterr(null);

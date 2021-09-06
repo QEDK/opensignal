@@ -12,10 +12,13 @@ import {
 
 import {ProjectNewPage} from './project-new.page';
 import {ProjectPage} from './projects.page';
+import {GuidePage} from './guide';
+import {StakingPage} from './staking.page';
 
 import {GitcoinContext} from '../store';
 import {StatusbarComponent} from '../components';
 import {TokenPage} from './token.page';
+import {DeployPage} from './deploy.page';
 
 const Pages = () => {
     const {dispatch} = React.useContext(GitcoinContext);
@@ -98,6 +101,21 @@ const Pages = () => {
                                     path={'/token'}
                                     exact={true}
                                     component={TokenPage}
+                                />{' '}
+                                <Route
+                                    path={'/staking'}
+                                    exact={true}
+                                    component={StakingPage}
+                                />{' '}
+                                <Route
+                                    path={'/guide'}
+                                    exact={true}
+                                    component={GuidePage}
+                                />{' '}
+                                <Route
+                                    path={'/deploy'}
+                                    exact={true}
+                                    component={DeployPage}
                                 />
                             </Switch>
                         </Container>

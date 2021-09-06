@@ -1,12 +1,15 @@
 /// <reference types="react-scripts" />
 
 interface Project {
-    id?: string;
+    id: string;
     name: string;
     description?: string;
     link?: string;
     avatar?: string;
-    staked: number;
+    selfStake: number;
     signal: number;
     project_id?: string;
+    deployment: string;
+    creator: string;
+    tags: string[];
 }

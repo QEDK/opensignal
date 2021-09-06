@@ -15,10 +15,14 @@ type State = {
 type GitcoinProviderProps = {children: React.ReactNode};
 let myweb3: any = new Web3(window.ethereum);
 
+const OPENSIGNAL_LABEL = 'OpenSignal';
+const TOKEN_LABEL = 'OpenSignalToken';
 const openSignalContract =
-    'ipfs://bafyreih4m7d7l5fbkh3kqnzmefowi45vfjetc6hqn3vsl2jpadpqz6jmyu/metadata.json';
+    localStorage.getItem(OPENSIGNAL_LABEL) ||
+    'ipfs://bafyreiaws6ptz3lp5w6fg2nwohstn7nxkiarnxlv4lnmgv3e7bxfat42ji/metadata.json';
 const openSignalTokenContract =
-    'ipfs://bafyreid2o6wajtzdztxklgdym22h2nbm6zjh2npctainhykbsbotn6a554/metadata.json';
+    localStorage.getItem(TOKEN_LABEL) ||
+    'ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json';
 const initialState: State = {
     chain_id: '42',
     provider: myweb3.currentProvider,
@@ -61,6 +65,21 @@ const gitcoinReducer = (state: State, action: Action): State => {
                 ...state,
                 chain_id: action.payload,
                 provider: myweb3.currentProvider,
+            };
+        }
+        case 'SET_OPENSIGNAL_URL': {
+            localStorage.setItem(OPENSIGNAL_LABEL, action.payload);
+            return {
+                ...state,
+                openSignalContract: action.payload,
+            };
+        }
+        case 'SET_OPENSIGNALTOKEN_URL': {
+            console.log('action.payload', action.payload);
+            localStorage.setItem(TOKEN_LABEL, action.payload);
+            return {
+                ...state,
+                openSignalTokenContract: action.payload,
             };
         }
         default: {

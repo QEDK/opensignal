@@ -29,6 +29,10 @@ const StatusbarComponent = () => {
                 <div className="nav-item">
                     {' '}
                     <NavLink to="/guide">Guide</NavLink>
+                </div>{' '}
+                <div className="nav-item">
+                    {' '}
+                    <NavLink to="/deploy">Deploy</NavLink>
                 </div>
             </div>
 

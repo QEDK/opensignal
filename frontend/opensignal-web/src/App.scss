@@ -53,6 +53,82 @@ body {
     }
 }
 
+.boucny-balls {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+
+    .loading {
+        position: relative;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 4rem;
+        font-style: italic;
+    }
+    .boucny-balls-wrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        height: 2rem;
+        div {
+            position: relative;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: #aa2464;
+            margin: 0 0.5rem;
+            animation-name: bounce;
+            animation-duration: 0.6s;
+            animation-timing-function: linear;
+            animation-delay: 0s;
+            animation-iteration-count: infinite;
+            &:nth-child(2) {
+                animation-delay: 0.4s;
+                background-color: #0066aa;
+            }
+            &:nth-child(3) {
+                animation-delay: 0.8s;
+                background-color: #118a55;
+            }
+            &:nth-child(4) {
+                animation-delay: 1.2s;
+                background-color: #e7be2b;
+            }
+            &:nth-child(5) {
+                animation-delay: 1.6s;
+                background-color: #ff5500;
+            }
+        }
+    }
+}
+
+@keyframes bounce {
+    0% {
+        top: 0;
+    }
+
+    25% {
+        top: 1rem;
+    }
+
+    50% {
+        top: 0;
+    }
+
+    75% {
+        top: -1rem;
+    }
+
+    100% {
+        top: 0;
+    }
+}
+
 .nav-bar {
     width: 100%;
     border-bottom: 1px solid $PRIMARY;
@@ -176,6 +252,155 @@ body {
 
 .projects {
     display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    .project {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: stretch;
+        border: 1px solid white;
+        width: 100%;
+
+        margin: 0 1rem;
+
+        .project-avatar {
+            width: 20rem;
+            height: 10rem;
+            background-color: $PRIMARY;
+
+            border: 1px solid $SECONDARY;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+        .project-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: stretch;
+
+            .project-actions {
+                width: 100%;
+                box-shadow: 0 -2px 5px 1px $SECONDARY;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: center;
+                align-items: stretch;
+                .signal-amount {
+                    flex: 1;
+                    input {
+                        background-color: transparentize(
+                            $color: #232323,
+                            $amount: 0.5
+                        );
+                        color: white;
+                        border-radius: 0;
+                        border: none;
+                    }
+                }
+                .buttons {
+                    display: flex;
+                    flex-direction: row;
+                    width: 16rem;
+                    .button {
+                        display: flex;
+                        flex-direction: row;
+                        flex-wrap: nowrap;
+                        justify-content: center;
+                        align-items: stretch;
+                        flex: 1;
+                        border-radius: 0;
+                        font-size: 2rem;
+                        padding: 0;
+                        transition: 0.3s all;
+                        line-height: 3rem;
+                        &:hover {
+                            font-size: 2.3rem;
+                        }
+                        &:nth-child(2) {
+                            background-color: #aa0066;
+                        }
+                        &:nth-child(1) {
+                            background-color: #00af44;
+                        }
+                        i {
+                            height: 100%;
+                            width: 100%;
+                            margin: auto;
+                        }
+                        &.signal-approve {
+                            @extend .btn;
+                            font-size: 1.5rem;
+                            background-color: palevioletred;
+                            color: white;
+                        }
+                    }
+                }
+            }
+
+            .project-signal {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: center;
+                align-items: center;
+                div {
+                    flex: 1;
+                }
+            }
+            .project-header {
+                width: 100%;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                justify-content: center;
+                flex: 1;
+                background-color: #232323;
+                h3 {
+                    flex: 1;
+                    padding: $PADDING;
+                    width: 100%;
+                    text-align: left;
+                    color: transparentize($PRIMARY, 0.25);
+                    text-shadow: 1px 1px 1px $SECONDARY;
+                    margin: 0;
+                }
+
+                p {
+                    padding: $PADDING;
+                    color: grey;
+                }
+            }
+            .project-subheader {
+                width: 100%;
+
+                p {
+                    border: 1px solid white;
+                    border-bottom: 1px solid $PRIMARY;
+                    width: 100%;
+                    text-align: center;
+                    background-color: #232731;
+                    color: transparentize($PRIMARY, 0.25);
+                    text-shadow: 1px 1px 1px $SECONDARY;
+                    margin: 0;
+                    padding: $PADDING;
+                }
+            }
+        }
+    }
+}
+
+.staking-projects {
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
@@ -193,6 +418,7 @@ body {
         width: 20rem;
         box-shadow: 2px 4px 16px 3px black;
         transition: 0.3s all;
+        margin: 0 1rem;
         &:hover {
             transform: scale(1.01);
         }
@@ -227,10 +453,10 @@ body {
                     flex: 1;
                     border-radius: 0;
                     &:nth-child(2) {
-                        background-color: pink;
+                        background-color: #aa0066;
                     }
                     &:nth-child(1) {
-                        background-color: lightgreen;
+                        background-color: #00af44;
                     }
                 }
             }

@@ -3,17 +3,16 @@ import {BigNumber} from 'ethers';
 import {useGetOpenSignalTokenContract} from '../hooks/Contract.hook';
 import React from 'react';
 import {GitcoinContext} from '../store';
+import {useGetMetadata} from '../hooks/Ipfs.hook';
 
 const TokenPage = () => {
     const {state} = React.useContext(GitcoinContext);
-    const [tokenContract] = useGetOpenSignalTokenContract(
-        state.openSignalContract
-    );
-
+    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
     const onClaim = () => {
         if (tokenContract) {
             tokenContract.methods
-                .getCandy(state.wallets[0], BigNumber.from(10).pow(20))
+                .fooClaim()
                 .send({
                     from: state.wallets[0],
                 })
