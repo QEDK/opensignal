@@ -7,6 +7,10 @@ import MetamaskIcon from '../assets/icons/metamask.png';
 
 import {minimizeAddress, getNetworkName} from '../util/eth.util';
 import {NavLink} from 'react-router-dom';
+import {useGetMetadata} from '../hooks/Ipfs.hook';
+import {useGetOpenSignalTokenContract} from '../hooks/Contract.hook';
+import {useGetTokenBalance} from '../hooks/Token.hook';
+import {ethers} from 'ethers';
 
 const StatusbarComponent = () => {
     const {state, dispatch} = React.useContext(GitcoinContext);
@@ -15,24 +19,7 @@ const StatusbarComponent = () => {
         <div className={'nav-bar'}>
             <div className={'nav'}>
                 <div className="nav-item">
-                    {' '}
-                    <NavLink to="/">Projects</NavLink>
-                </div>{' '}
-                <div className="nav-item">
-                    {' '}
-                    <NavLink to="/staking">Staking</NavLink>
-                </div>{' '}
-                <div className="nav-item">
-                    {' '}
-                    <NavLink to="/token">Token</NavLink>
-                </div>{' '}
-                <div className="nav-item">
-                    {' '}
-                    <NavLink to="/guide">Guide</NavLink>
-                </div>{' '}
-                <div className="nav-item">
-                    {' '}
-                    <NavLink to="/deploy">Deploy</NavLink>
+                    <NavLink to="/">OpenSignal</NavLink>
                 </div>
             </div>
 
@@ -45,9 +32,13 @@ export {StatusbarComponent};
 
 const WalletComponent = () => {
     const {state, dispatch} = React.useContext(GitcoinContext);
-    const [open, setopen] = React.useState(false);
+    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
     const balance = useGetBalance(state.wallets[0], state.provider);
-
+    const [tokenBalance, loading] = useGetTokenBalance(
+        state.wallets[0],
+        tokenContract
+    );
     const onMetamaskConnect = async () => {
         const permissions = await window.ethereum.request({
             method: 'wallet_requestPermissions',
@@ -70,20 +61,32 @@ const WalletComponent = () => {
     };
     return (
         <div className="wallet">
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <div
+                    style={{marginLeft: 8, textAlign: 'center'}}
+                >{`Token ${ethers.utils.formatEther(
+                    loading ? '0' : tokenBalance || '0'
+                )}`}</div>
+                <div
+                    style={{marginLeft: 8, textAlign: 'center'}}
+                >{`三 ${balance}`}</div>
+            </div>
             {state.wallets[0] ? (
                 <button className="address">
-                    <span>{`三 ${balance}`}</span>
                     <h3> {minimizeAddress(state.wallets[0])}</h3>
-                    <span>{getNetworkName(state.chain_id)}</span>
                 </button>
             ) : (
                 <button className="address" onClick={onMetamaskConnect}>
                     <h3>{`Connect`}</h3>
-                    <span>{getNetworkName(state.chain_id)}</span>
                 </button>
             )}
-            <div onClick={onMetamaskConnect} className={'wallet-btn'}>
-                <img alt="wallet" src={MetamaskIcon} />
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <div>
+                    <span>{getNetworkName(state.chain_id)}</span>
+                </div>
+                <div onClick={onMetamaskConnect} className={'wallet-btn'}>
+                    <img alt="wallet" src={MetamaskIcon} />
+                </div>
             </div>
         </div>
     );

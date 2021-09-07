@@ -57,7 +57,7 @@ const useGetTokenBalance = (
             seterr(null);
             try {
                 const balance = await tokenContract.methods
-                    .balance(addr)
+                    .balanceOf(addr)
                     .call();
                 setbalance(balance);
                 setloading(false);

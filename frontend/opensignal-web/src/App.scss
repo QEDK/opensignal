@@ -40,6 +40,11 @@ body {
 * {
     box-sizing: border-box;
 }
+
+a {
+    cursor: pointer;
+    color: aqua;
+}
 .root {
     height: 100vh;
     background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -140,11 +145,11 @@ body {
     padding: $PADDING_BIG;
     .nav {
         flex: 1;
-        margin-left: 10rem;
+
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: stretch;
         .nav-item {
             a {
@@ -153,7 +158,7 @@ body {
                 padding: 0 $PADDING_BIG;
                 color: $TEXT_PRIMARY;
                 font-weight: bold;
-                font-size: calc(0.75rem + 1vmin);
+                font-size: calc(1rem + 1vmin);
                 text-shadow: 1px 2px 3px $SECONDARY;
                 &:hover {
                     text-shadow: 2px 4px 5px $SECONDARY;
@@ -163,7 +168,6 @@ body {
     }
 
     .wallet {
-        width: 15rem;
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -182,8 +186,7 @@ body {
             background-color: transparent;
             padding: 0;
             color: $TEXT_PRIMARY;
-            box-shadow: 1px 2px 8px 2px
-                transparentize($color: $SECONDARY, $amount: 0.5);
+
             h3 {
                 display: inline-flex;
                 align-items: center;
@@ -221,6 +224,12 @@ body {
     }
 }
 
+.page-container {
+    height: 100vh;
+    overflow: auto;
+    overflow-x: hidden;
+    padding-bottom: 5rem;
+}
 .page-header {
     margin-top: 2rem;
     width: 100%;
@@ -270,8 +279,6 @@ body {
 
         .project-avatar {
             width: 20rem;
-            height: 10rem;
-            background-color: $PRIMARY;
 
             border: 1px solid $SECONDARY;
 
@@ -285,12 +292,11 @@ body {
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: stretch;
 
             .project-actions {
                 width: 100%;
-                box-shadow: 0 -2px 5px 1px $SECONDARY;
                 display: flex;
                 flex-direction: row;
                 flex-wrap: nowrap;
@@ -299,13 +305,10 @@ body {
                 .signal-amount {
                     flex: 1;
                     input {
-                        background-color: transparentize(
-                            $color: #232323,
-                            $amount: 0.5
-                        );
                         color: white;
                         border-radius: 0;
-                        border: none;
+                        border: 1px solid white;
+                        background-color: transparent;
                     }
                 }
                 .buttons {
@@ -324,6 +327,7 @@ body {
                         padding: 0;
                         transition: 0.3s all;
                         line-height: 3rem;
+                        color: white;
                         &:hover {
                             font-size: 2.3rem;
                         }
@@ -363,21 +367,20 @@ body {
                 flex-direction: column;
                 flex-wrap: nowrap;
                 justify-content: center;
-                flex: 1;
-                background-color: #232323;
+
                 h3 {
                     flex: 1;
                     padding: $PADDING;
                     width: 100%;
                     text-align: left;
-                    color: transparentize($PRIMARY, 0.25);
+                    color: transparentize($PRIMARY, 0.15);
                     text-shadow: 1px 1px 1px $SECONDARY;
                     margin: 0;
                 }
 
                 p {
                     padding: $PADDING;
-                    color: grey;
+                    color: #cacaca;
                 }
             }
             .project-subheader {
@@ -388,7 +391,7 @@ body {
                     border-bottom: 1px solid $PRIMARY;
                     width: 100%;
                     text-align: center;
-                    background-color: #232731;
+
                     color: transparentize($PRIMARY, 0.25);
                     text-shadow: 1px 1px 1px $SECONDARY;
                     margin: 0;

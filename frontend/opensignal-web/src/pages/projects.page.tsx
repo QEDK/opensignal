@@ -181,13 +181,40 @@ const ProjectCard = ({
             </div>
             <div className="project-info">
                 <div className="project-header">
-                    <h3>{`${
-                        projectMetaLoading
-                            ? 'Loading'
-                            : projectMeta?.properties.name || 'Loading'
-                    } (${minimizeAddress(project.creator)})`}</h3>
-                    <p>{`Deployment: ${project.deployment}`}</p>
-                </div>{' '}
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <h3>
+                            {`${
+                                projectMetaLoading
+                                    ? 'Loading'
+                                    : projectMeta?.properties.name || 'Loading'
+                            }`}
+                        </h3>
+                        <a
+                            style={{padding: 8}}
+                            href={projectMeta?.properties.link}
+                            target="_blank"
+                        >
+                            <Icon name="external alternate" />
+                            Go to projects website
+                        </a>
+                    </div>
+                    <p style={{margin: 0}}>{`ID: ${project.id}`}</p>
+                    <p
+                        style={{margin: 0}}
+                    >{`Deployment: ${project.deployment}`}</p>
+                    <p style={{margin: 0}}>{`Creator: ${project.creator}`}</p>
+                </div>
+
+                <div style={{padding: 8, flex: 1}}>
+                    <p
+                        style={{
+                            display: 'inline-block',
+                            paddingRight: 12,
+                            margin: 0,
+                        }}
+                    >{`${projectMeta?.properties.description}`}</p>
+                </div>
+
                 <div className="project-subheader">
                     <div className="project-actions">
                         <Input
