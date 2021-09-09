@@ -39,6 +39,7 @@ const ProjectNewPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const imgRef = React.useRef(null);
     const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
+    const [error, seterror] = React.useState<string>('');
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
     const [newProject, setNewProject] = React.useState<Project>(initialState);
     const [opensignalMeta] = useGetMetadata(state.openSignalContract);
@@ -63,7 +64,8 @@ const ProjectNewPage = () => {
             return;
         }
         try {
-            if (newProject.selfStake > 0) {
+            seterror('');
+            if (newProject.selfStake > 2) {
                 if (notEnoughAllowance) {
                     setApproveLoading(true);
                     tokenContract.methods
@@ -75,9 +77,11 @@ const ProjectNewPage = () => {
                             from: state.wallets[0],
                         })
                         .then((res: any) => {
+                            setCreateLoading(false);
                             console.log(res);
                         })
                         .catch((err: any) => {
+                            seterror('Error');
                             setApproveLoading(false);
                             console.log(err);
                         });
@@ -85,6 +89,7 @@ const ProjectNewPage = () => {
                 }
             } else {
                 setApproveLoading(false);
+                seterror('Need atleast 2 tokens');
                 return;
             }
             const metadata = await saveOnIPFS(
@@ -112,10 +117,12 @@ const ProjectNewPage = () => {
                     console.log(res);
                 })
                 .catch((err: any) => {
+                    seterror('Error');
                     setCreateLoading(false);
                     console.log(err);
                 });
         } catch (err) {
+            seterror('Error');
             setApproveLoading(false);
         }
     };
@@ -297,7 +304,17 @@ const ProjectNewPage = () => {
                                     }
                                 />
                             </Form.Field>
-
+                            {error ? (
+                                <p
+                                    style={{
+                                        padding: 8,
+                                        color: 'crimson',
+                                        width: '100%',
+                                    }}
+                                >
+                                    {error}
+                                </p>
+                            ) : null}
                             <Button
                                 onClick={() => onNewProject()}
                                 className="btn"
