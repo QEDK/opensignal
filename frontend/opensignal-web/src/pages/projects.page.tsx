@@ -110,7 +110,12 @@ const ProjectCard = ({
             contract,
             isAddress(contract._address)
         );
-        if (!notEnoughAllowance && contract && isAddress(contract._address)) {
+        if (
+            !notEnoughAllowance &&
+            contract &&
+            isAddress(contract._address) &&
+            amount > 0
+        ) {
             setCreateLoading(true);
             contract.methods
                 .addSignal(project.id, Web3.utils.toWei(amount.toString()))
@@ -127,7 +132,12 @@ const ProjectCard = ({
         }
     };
     const OnDecreaseSignal = () => {
-        if (!notEnoughAllowance && contract && isAddress(contract._address)) {
+        if (
+            !notEnoughAllowance &&
+            contract &&
+            isAddress(contract._address) &&
+            amount > 0
+        ) {
             setCreateLoading(true);
             contract.methods
                 .removeSignal(
