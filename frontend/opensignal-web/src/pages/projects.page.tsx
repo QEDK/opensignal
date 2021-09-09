@@ -20,6 +20,7 @@ import {isAddress, minimizeAddress} from '../util/eth.util';
 import Web3 from 'web3';
 import {useGetAllowance} from '../hooks/Token.hook';
 const re = /^[0-9\b]+$/;
+const pat = /^((http|https):\/\/)/;
 const ProjectPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
@@ -105,11 +106,6 @@ const ProjectCard = ({
     );
 
     const OnIncreaseSignal = () => {
-        console.log(
-            !notEnoughAllowance,
-            contract,
-            isAddress(contract._address)
-        );
         if (
             !notEnoughAllowance &&
             contract &&
@@ -188,11 +184,14 @@ const ProjectCard = ({
     return (
         <div className="project">
             <div className="project-avatar">
-                {projectMeta?.properties?.avatar ? (
-                    <img src={projectMeta.properties.avatar} />
-                ) : (
-                    <img src={project.avatar} />
-                )}
+                <img
+                    object-fit="cover"
+                    src={
+                        projectMeta?.avatar
+                            ? projectMeta.avatar
+                            : project.avatar
+                    }
+                />
             </div>
             <div className="project-info">
                 <div className="project-header">
@@ -204,22 +203,38 @@ const ProjectCard = ({
                                     : projectMeta?.properties.name || 'Loading'
                             }`}
                         </h3>
-                        <a
-                            style={{padding: 8}}
-                            href={projectMeta?.properties.link}
-                            target="_blank"
-                        >
-                            <Icon name="external alternate" />
-                            website
-                        </a>{' '}
-                        <a
-                            style={{padding: 8}}
-                            href={projectMeta?.properties.twitter}
-                            target="_blank"
-                        >
-                            <Icon name="twitter" />
-                            twitter
-                        </a>
+                        {projectMeta?.properties.link ? (
+                            <a
+                                style={{padding: 8}}
+                                href={
+                                    pat.test(projectMeta?.properties.link)
+                                        ? projectMeta?.properties.link
+                                        : 'https://' +
+                                          projectMeta?.properties.link
+                                }
+                                target="_blank"
+                            >
+                                {' '}
+                                <Icon name="external alternate" />
+                                website
+                            </a>
+                        ) : null}
+
+                        {projectMeta?.properties.twitter ? (
+                            <a
+                                style={{padding: 8}}
+                                href={
+                                    pat.test(projectMeta?.properties.twitter)
+                                        ? projectMeta?.properties.twitter
+                                        : 'https://' +
+                                          projectMeta?.properties.twitter
+                                }
+                                target="_blank"
+                            >
+                                <Icon name="twitter" />
+                                twitter
+                            </a>
+                        ) : null}
                     </div>
                     <p style={{margin: 0}}>{`ID: ${project.id}`}</p>
                     <p

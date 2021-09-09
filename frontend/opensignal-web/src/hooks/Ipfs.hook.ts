@@ -7,15 +7,19 @@ const useGetMetadata = (cid: string, trigger = false) => {
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
         if (cid && cid.toString().startsWith(PREFIX)) {
-            console.log(
-                'cid',
-                'https://ipfs.io/ipfs/' + cid.substr(PREFIX.length)
-            );
             axios
-                .get('https://ipfs.io/ipfs/' + cid.substr(PREFIX.length))
+                .get(getIPFSlink(cid))
                 .then((result) => {
-                    console.log('result', result);
-                    setmetadata(result.data);
+                    try {
+                        setmetadata({
+                            ...result.data,
+                            avatar: getIPFSlink(result.data.image),
+                        });
+                    } catch (err) {
+                        setloading(false);
+                        seterr(err);
+                        setmetadata(null);
+                    }
                 })
                 .catch((err) => {
                     setloading(false);
@@ -28,3 +32,10 @@ const useGetMetadata = (cid: string, trigger = false) => {
 };
 
 export {useGetMetadata};
+
+const getIPFSlink = (cid: string) => {
+    if (cid && cid.toString().startsWith(PREFIX)) {
+        return 'https://ipfs.io/ipfs/' + cid.substr(PREFIX.length);
+    }
+    return '';
+};

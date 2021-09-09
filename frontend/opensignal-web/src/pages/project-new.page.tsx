@@ -62,55 +62,62 @@ const ProjectNewPage = () => {
         if (!opensignalMeta || !tokenMeta) {
             return;
         }
-        if (newProject.selfStake > 0) {
-            if (notEnoughAllowance) {
-                setApproveLoading(true);
-                tokenContract.methods
-                    .approve(
-                        opensignalMeta.properties.address,
-                        Web3.utils.toWei(newProject.selfStake.toString())
-                    )
-                    .send({
-                        from: state.wallets[0],
-                    })
-                    .then((res: any) => {
-                        setApproveLoading(false);
-                        console.log(res);
-                    })
-                    .catch((err: any) => {
-                        setApproveLoading(false);
-                        console.log(err);
-                    });
+        try {
+            if (newProject.selfStake > 0) {
+                if (notEnoughAllowance) {
+                    setApproveLoading(true);
+                    tokenContract.methods
+                        .approve(
+                            opensignalMeta.properties.address,
+                            Web3.utils.toWei(newProject.selfStake.toString())
+                        )
+                        .send({
+                            from: state.wallets[0],
+                        })
+                        .then((res: any) => {
+                            console.log(res);
+                        })
+                        .catch((err: any) => {
+                            setApproveLoading(false);
+                            console.log(err);
+                        });
+                    return;
+                }
+            } else {
+                setApproveLoading(false);
                 return;
             }
-        } else {
-            return;
-        }
-        const metadata = await saveOnIPFS({...newProject, avatar: ''}, avatar);
+            const metadata = await saveOnIPFS(
+                {...newProject, avatar: ''},
+                avatar
+            );
 
-        setNewProject({...newProject, link: metadata.url});
-        if (!openSignalContract) {
-            return console.log('contract not found');
-        }
+            setNewProject({...newProject, link: metadata.url});
+            if (!openSignalContract) {
+                return console.log('contract not found');
+            }
 
-        setCreateLoading(true);
-        openSignalContract.methods
-            .createProject(
-                newProject.name,
-                metadata.url,
-                Web3.utils.toWei(newProject.selfStake.toString())
-            )
-            .send({
-                from: state.wallets[0],
-            })
-            .then((res: any) => {
-                setCreateLoading(false);
-                console.log(res);
-            })
-            .catch((err: any) => {
-                setCreateLoading(false);
-                console.log(err);
-            });
+            setCreateLoading(true);
+            openSignalContract.methods
+                .createProject(
+                    newProject.name,
+                    metadata.url,
+                    Web3.utils.toWei(newProject.selfStake.toString())
+                )
+                .send({
+                    from: state.wallets[0],
+                })
+                .then((res: any) => {
+                    setCreateLoading(false);
+                    console.log(res);
+                })
+                .catch((err: any) => {
+                    setCreateLoading(false);
+                    console.log(err);
+                });
+        } catch (err) {
+            setApproveLoading(false);
+        }
     };
 
     const fileChange = (e: any) => {
@@ -158,6 +165,8 @@ const ProjectNewPage = () => {
                                     {newProject.avatar ? (
                                         <img
                                             style={{
+                                                maxHeight: '20rem',
+                                                objectFit: 'cover',
                                                 width: '100%',
                                                 border: '2px solid rgba(255,255,255,.5)',
                                             }}
@@ -232,14 +241,28 @@ const ProjectNewPage = () => {
                                     iconPosition="left"
                                     placeholder="Tags"
                                     value={newProject.tags.join(' ,')}
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                        let value = e.target.value;
+
+                                        if (
+                                            value.substr(-2) === '  ' &&
+                                            newProject.tags[
+                                                newProject.tags.length - 1
+                                            ].trim() != ''
+                                        ) {
+                                            value = value.trim() + ' ,';
+                                        }
+                                        if (value.includes('   ')) {
+                                            value = value.substr(
+                                                0,
+                                                value.length - 1
+                                            );
+                                        }
                                         setNewProject({
                                             ...newProject,
-                                            tags: e.target.value
-                                                .trim()
-                                                .split(' ,'),
-                                        })
-                                    }
+                                            tags: value.split(' ,'),
+                                        });
+                                    }}
                                 />
                                 <Form.TextArea
                                     icon="lock"
