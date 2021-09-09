@@ -15,10 +15,11 @@ import {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
 } from '../hooks/Contract.hook';
-import {NFTStorage, File, Blob} from 'nft.storage';
+
 import Web3 from 'web3';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {BigNumber} from 'ethers';
+import {saveOnIPFS} from '../network/ipfs';
 const initialState: Project = {
     id: '',
     creator: '',
@@ -85,7 +86,7 @@ const ProjectNewPage = () => {
         } else {
             return;
         }
-        const metadata = await saveOnIPFS();
+        const metadata = await saveOnIPFS({...newProject, avatar: ''}, avatar);
 
         setNewProject({...newProject, link: metadata.url});
         if (!openSignalContract) {
@@ -110,21 +111,6 @@ const ProjectNewPage = () => {
                 setCreateLoading(false);
                 console.log(err);
             });
-    };
-
-    const saveOnIPFS = async () => {
-        const apiKey =
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGFmRDg4MmY5YzlCZGE2QjMyOTVlZjIwZDFiM0VDNjA4NDJCREQxMTIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMDQ4NTQ2MDM0OSwibmFtZSI6Ik9wZW5TaWduYWwifQ.-Am4LeJJXbE6ONW6NfHdU2qIHGedHNuuIrfZPcpV0jU';
-        const client = new NFTStorage({token: apiKey});
-
-        const metadata = await client.store({
-            name: 'OpenSignalToken',
-            description: 'OpenSignalToken Contract Address',
-            image: avatar || new Blob(),
-            properties: newProject,
-        });
-
-        return metadata;
     };
 
     const fileChange = (e: any) => {
@@ -251,7 +237,7 @@ const ProjectNewPage = () => {
                                             ...newProject,
                                             tags: e.target.value
                                                 .trim()
-                                                .split(','),
+                                                .split(' ,'),
                                         })
                                     }
                                 />
@@ -267,22 +253,24 @@ const ProjectNewPage = () => {
                                     }
                                 />
                                 <Form.Input
-                                    type="number"
                                     fluid
-                                    icon="dollar"
+                                    icon="ethereum"
                                     iconPosition="left"
                                     placeholder="Initial Stake Amount"
-                                    value={newProject.selfStake}
+                                    value={+Number(newProject.selfStake)}
                                     onChange={(e) =>
-                                        e.target.value &&
-                                        re.test(e.target.value)
-                                            ? setNewProject({
-                                                  ...newProject,
-                                                  selfStake: Number(
-                                                      e.target.value
-                                                  ),
-                                              })
-                                            : null
+                                        setNewProject({
+                                            ...newProject,
+                                            selfStake:
+                                                e.target.value == '' ||
+                                                (re.test(e.target.value) &&
+                                                    Number(e.target.value) <
+                                                        1e15)
+                                                    ? Number(e.target.value)
+                                                    : Number(
+                                                          newProject.selfStake
+                                                      ),
+                                        })
                                     }
                                 />
                             </Form.Field>

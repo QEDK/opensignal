@@ -95,8 +95,8 @@ const ProjectCard = ({
 
     const [projectURI] = useGetProjectURI(project.id, contract);
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
-    console.log('projectURI', projectURI);
-    console.log('projectMeta', projectMeta);
+    // console.log('projectURI', projectURI);
+    // console.log('projectMeta', projectMeta);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
@@ -246,9 +246,13 @@ const ProjectCard = ({
                             value={amount || ''}
                             placeholder={'Enter Amount'}
                             onChange={(e) =>
-                                e.target.value && re.test(e.target.value)
-                                    ? setAmount(Number(e.target.value))
-                                    : null
+                                setAmount(
+                                    e.target.value == '' ||
+                                        (re.test(e.target.value) &&
+                                            Number(e.target.value) < 1e15)
+                                        ? Number(e.target.value)
+                                        : Number(amount)
+                                )
                             }
                         />
                         {amount != 0 && notEnoughAllowance ? (
