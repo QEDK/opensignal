@@ -5,6 +5,7 @@ import {
     Segment,
     Button,
     TextArea,
+    Placeholder,
 } from 'semantic-ui-react';
 import {useHistory} from 'react-router';
 import {useGetAllowance} from '../hooks/Token.hook';
@@ -25,6 +26,7 @@ const initialState: Project = {
     name: '',
     description: '',
     link: '',
+    twitter: '',
     avatar: '',
     selfStake: 0,
     signal: 0,
@@ -33,6 +35,7 @@ const initialState: Project = {
 };
 const ProjectNewPage = () => {
     const {state} = React.useContext(GitcoinContext);
+    const imgRef = React.useRef(null);
     const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
     const [newProject, setNewProject] = React.useState<Project>(initialState);
@@ -40,7 +43,7 @@ const ProjectNewPage = () => {
     const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
-
+    const [avatar, setavatar] = React.useState<File | null>(null);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
@@ -82,6 +85,7 @@ const ProjectNewPage = () => {
             return;
         }
         const metadata = await saveOnIPFS();
+
         setNewProject({...newProject, link: metadata.url});
         if (!openSignalContract) {
             return console.log('contract not found');
@@ -115,13 +119,24 @@ const ProjectNewPage = () => {
         const metadata = await client.store({
             name: 'OpenSignalToken',
             description: 'OpenSignalToken Contract Address',
-            image: new Blob(),
+            image: avatar || new Blob(),
             properties: newProject,
         });
 
         return metadata;
     };
 
+    const fileChange = (e: any) => {
+        setavatar(e.target.files[0]);
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+            setNewProject({
+                ...newProject,
+                avatar: e.target.result,
+            });
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
     const notEnoughAllowance =
         newProject.selfStake == 0 ||
         (!allowanceLoading &&
@@ -147,6 +162,45 @@ const ProjectNewPage = () => {
                     <Form>
                         <Container>
                             <Form.Field>
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        marginBottom: 4,
+                                    }}
+                                >
+                                    {newProject.avatar ? (
+                                        <img
+                                            style={{
+                                                width: '100%',
+                                                border: '2px solid rgba(255,255,255,.5)',
+                                            }}
+                                            src={newProject.avatar}
+                                            alt="project avatar"
+                                        />
+                                    ) : (
+                                        <Placeholder>
+                                            <Placeholder.Image square />
+                                        </Placeholder>
+                                    )}
+                                </div>
+                                <Button
+                                    style={{width: '100%'}}
+                                    content="Choose Photo"
+                                    labelPosition="left"
+                                    icon="file"
+                                    onClick={() =>
+                                        (imgRef?.current || ({} as any)).click()
+                                    }
+                                />
+                                <input
+                                    accept="image/png, image/jpeg"
+                                    ref={imgRef}
+                                    type="file"
+                                    hidden
+                                    onChange={fileChange}
+                                />
+                            </Form.Field>
+                            <Form.Field>
                                 <Form.Input
                                     icon="book"
                                     iconPosition="left"
@@ -159,7 +213,7 @@ const ProjectNewPage = () => {
                                         })
                                     }
                                 />
-                                {/* <Form.Input
+                                <Form.Input
                                     fluid
                                     icon="linkify"
                                     iconPosition="left"
@@ -171,7 +225,35 @@ const ProjectNewPage = () => {
                                             link: e.target.value,
                                         })
                                     }
-                                /> */}
+                                />
+                                <Form.Input
+                                    fluid
+                                    icon="twitter"
+                                    iconPosition="left"
+                                    placeholder="Twitter"
+                                    value={newProject.twitter}
+                                    onChange={(e) =>
+                                        setNewProject({
+                                            ...newProject,
+                                            twitter: e.target.value,
+                                        })
+                                    }
+                                />
+                                <Form.Input
+                                    fluid
+                                    icon="tag"
+                                    iconPosition="left"
+                                    placeholder="Tags"
+                                    value={newProject.tags.join(' ,')}
+                                    onChange={(e) =>
+                                        setNewProject({
+                                            ...newProject,
+                                            tags: e.target.value
+                                                .trim()
+                                                .split(','),
+                                        })
+                                    }
+                                />
                                 <Form.TextArea
                                     icon="lock"
                                     placeholder="Description"

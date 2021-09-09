@@ -177,7 +177,11 @@ const ProjectCard = ({
     return (
         <div className="project">
             <div className="project-avatar">
-                <img src={project.avatar} />
+                {projectMeta?.properties?.avatar ? (
+                    <img src={projectMeta.properties.avatar} />
+                ) : (
+                    <img src={project.avatar} />
+                )}
             </div>
             <div className="project-info">
                 <div className="project-header">
@@ -195,7 +199,15 @@ const ProjectCard = ({
                             target="_blank"
                         >
                             <Icon name="external alternate" />
-                            Go to projects website
+                            website
+                        </a>{' '}
+                        <a
+                            style={{padding: 8}}
+                            href={projectMeta?.properties.twitter}
+                            target="_blank"
+                        >
+                            <Icon name="external alternate" />
+                            twitter
                         </a>
                     </div>
                     <p style={{margin: 0}}>{`ID: ${project.id}`}</p>

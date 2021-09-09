@@ -10,6 +10,7 @@ interface Project {
     signal: number;
     project_id?: string;
     deployment: string;
+    twitter: string;
     creator: string;
     tags: string[];
 }
