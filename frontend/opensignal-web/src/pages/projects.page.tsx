@@ -19,6 +19,7 @@ import {BouncyBalls} from '../components/util.component';
 import {isAddress, minimizeAddress} from '../util/eth.util';
 import Web3 from 'web3';
 import {useGetAllowance} from '../hooks/Token.hook';
+const re = /^[0-9\b]+$/;
 const ProjectPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
@@ -206,7 +207,7 @@ const ProjectCard = ({
                             href={projectMeta?.properties.twitter}
                             target="_blank"
                         >
-                            <Icon name="external alternate" />
+                            <Icon name="twitter" />
                             twitter
                         </a>
                     </div>
@@ -230,15 +231,14 @@ const ProjectCard = ({
                 <div className="project-subheader">
                     <div className="project-actions">
                         <Input
+                            type="number"
                             className="signal-amount"
-                            value={amount || undefined}
+                            value={amount || ''}
                             placeholder={'Enter Amount'}
                             onChange={(e) =>
-                                setAmount(
-                                    Number(e.target.value) > 0
-                                        ? Number(e.target.value)
-                                        : 0
-                                )
+                                e.target.value && re.test(e.target.value)
+                                    ? setAmount(Number(e.target.value))
+                                    : null
                             }
                         />
                         {amount != 0 && notEnoughAllowance ? (

@@ -33,6 +33,7 @@ const initialState: Project = {
     project_id: '',
     tags: [],
 };
+const re = /^[0-9\b]+$/;
 const ProjectNewPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const imgRef = React.useRef(null);
@@ -273,13 +274,15 @@ const ProjectNewPage = () => {
                                     placeholder="Initial Stake Amount"
                                     value={newProject.selfStake}
                                     onChange={(e) =>
-                                        setNewProject({
-                                            ...newProject,
-                                            selfStake:
-                                                Number(e.target.value) > 0
-                                                    ? Number(e.target.value)
-                                                    : 0,
-                                        })
+                                        e.target.value &&
+                                        re.test(e.target.value)
+                                            ? setNewProject({
+                                                  ...newProject,
+                                                  selfStake: Number(
+                                                      e.target.value
+                                                  ),
+                                              })
+                                            : null
                                     }
                                 />
                             </Form.Field>
