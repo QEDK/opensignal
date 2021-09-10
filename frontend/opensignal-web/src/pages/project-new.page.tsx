@@ -8,7 +8,7 @@ import {
     Placeholder,
 } from 'semantic-ui-react';
 import {useHistory} from 'react-router';
-import {useGetAllowance} from '../hooks/Token.hook';
+import {useGetAllowance} from '../hooks/OpenSignalToken.hook';
 import {GitcoinContext} from '../store';
 import React from 'react';
 import {

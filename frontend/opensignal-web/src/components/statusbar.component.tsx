@@ -9,7 +9,7 @@ import {minimizeAddress, getNetworkName} from '../util/eth.util';
 import {NavLink} from 'react-router-dom';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {useGetOpenSignalTokenContract} from '../hooks/Contract.hook';
-import {useGetTokenBalance} from '../hooks/Token.hook';
+import {useGetTokenBalance} from '../hooks/OpenSignalToken.hook';
 import {ethers} from 'ethers';
 
 const StatusbarComponent = () => {
