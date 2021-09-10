@@ -135,7 +135,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         return projectIDs.values();
     }
 
-    function projectURI(bytes32 id) external view returns (string memory) {
-        return projectURIs[id];
+    function projectURI(uint256 idx) external view returns (string memory) {
+        return projectURIs[projectIDs.at(idx)];
     }
 }
