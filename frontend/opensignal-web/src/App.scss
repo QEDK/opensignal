@@ -258,7 +258,22 @@ a {
         }
     }
 }
-
+.my-icon {
+    width: 1rem;
+    height: 1rem;
+    align-self: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    img {
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+    }
+}
 .projects {
     display: flex;
     flex-direction: column;
@@ -380,8 +395,34 @@ a {
                 flex-wrap: nowrap;
                 justify-content: center;
                 align-items: center;
-                div {
+                border-top: 1px solid white;
+                .signal {
+                    display: flex;
+                    flex-direction: row;
+
+                    justify-content: center;
+                    align-items: center;
+
+                    text-align: center;
+                    color: transparentize($PRIMARY, 0.25);
+                    text-shadow: 1px 1px 1px $SECONDARY;
+                    margin: 0;
+                    padding: $PADDING;
                     flex: 1;
+
+                    .signal-info {
+                        margin: 0 0.5rem;
+                        position: relative;
+                        display: flex;
+                        flex-direction: row;
+                    }
+                    i {
+                        height: 100%;
+                    }
+                    p {
+                        display: inline-block;
+                        margin: 0 0.25rem;
+                    }
                 }
             }
             .project-header {
@@ -408,12 +449,15 @@ a {
             .project-subheader {
                 width: 100%;
 
-                p {
+                & > div {
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    align-items: center;
                     border: 1px solid white;
-                    border-bottom: 1px solid $PRIMARY;
                     width: 100%;
                     text-align: center;
-
                     color: transparentize($PRIMARY, 0.25);
                     text-shadow: 1px 1px 1px $SECONDARY;
                     margin: 0;

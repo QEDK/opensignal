@@ -1,9 +1,6 @@
 import {Container, Grid, Button, Icon, Input} from 'semantic-ui-react';
-import {Header, Image, Modal} from 'semantic-ui-react';
-
+import {Header, Loader, Modal} from 'semantic-ui-react';
 import {useHistory} from 'react-router';
-//@ts-ignore
-import makeBlockie from 'ethereum-blockies-base64';
 import {BigNumber} from 'ethers';
 import {
     useGetOpenSignalContract,
@@ -19,9 +16,11 @@ import {
 } from '../hooks/OpenSignal.hook';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {BouncyBalls} from '../components/util.component';
-import {isAddress, minimizeAddress} from '../util/eth.util';
+import {isAddress} from '../util/eth.util';
 import Web3 from 'web3';
 import {useGetAllowance} from '../hooks/OpenSignalToken.hook';
+import {useGetShareBalance} from '../hooks/OpenSignalShares';
+import OpenSignalTokenIcon from '../assets/icons/opensignal.png';
 const re = /^[0-9\b]+$/;
 const pat = /^((http|https):\/\/)/;
 const ProjectPage = () => {
@@ -132,9 +131,21 @@ const ProjectPage = () => {
             <div className="page-header">
                 <h3>Projects</h3>
 
-                <span className="btn" onClick={goToNewProject}>
+                <button
+                    style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        border: '1px solid #ddd',
+                        color: '#ddd ',
+                        backgroundColor: 'transparent',
+                        padding: ' 0.5rem 1rem',
+                        cursor: 'pointer',
+                    }}
+                    onClick={goToNewProject}
+                >
                     CREATE
-                </span>
+                </button>
             </div>
 
             <Grid
@@ -145,13 +156,16 @@ const ProjectPage = () => {
                 }}
             >
                 <div className="projects">
-                    {projectsLoading ? <BouncyBalls /> : null}
+                    {projectsLoading ? (
+                        <BouncyBalls style={{marginTop: '20%'}} />
+                    ) : null}
                     {projects.map((p: any, i: any) => (
                         <ProjectCard
                             project={p}
                             key={i}
                             onClick={() => setSelectedProject(p)}
                             contract={openSignalContract}
+                            shareContract={shareContract}
                             opensignalMeta={opensignalMeta}
                             tokenContract={tokenContract}
                             onChange={() => settrigger(!trigger)}
@@ -165,7 +179,12 @@ const ProjectPage = () => {
 
             <AddSignalModal
                 open={addSignalModal}
-                onVisibilityChange={setAddSignalModal}
+                onVisibilityChange={(i) => {
+                    setAddSignalModal(i);
+                    if (!i) {
+                        setSelectedProject(null);
+                    }
+                }}
                 allowance={allowance}
                 onApprove={onApprove}
                 approveLoading={approveLoading}
@@ -174,7 +193,12 @@ const ProjectPage = () => {
             />
             <RmoveSignalModal
                 open={removeSignalModal}
-                onVisibilityChange={setRemoveSignalModal}
+                onVisibilityChange={(i) => {
+                    setRemoveSignalModal(i);
+                    if (!i) {
+                        setSelectedProject(null);
+                    }
+                }}
                 OnDecreaseSignal={OnDecreaseSignal}
                 project={selectedProject}
             />
@@ -187,12 +211,15 @@ export {ProjectPage};
 const ProjectCard = ({
     project,
     contract,
+    shareContract,
     setAddSignalModal,
     setRemoveSignalModal,
     onClick,
 }: {
     project: Project;
+
     contract: any;
+    shareContract: any;
     opensignalMeta: any;
     tokenContract: any;
     onChange: () => void;
@@ -202,23 +229,38 @@ const ProjectCard = ({
     onClick: (p: Project) => void;
 }) => {
     const {state} = React.useContext(GitcoinContext);
-
+    const [projectShareContract, setProjectShareContract] =
+        React.useState<any>(null);
     const [projectURI] = useGetProjectURI(project.id, contract);
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
+    const [shareBalance, shareBalanceLoading] =
+        useGetShareBalance(projectShareContract);
+
     // console.log('projectURI', projectURI);
     // console.log('projectMeta', projectMeta);
-
+    React.useEffect(() => {
+        if (project.deployment) {
+            shareContract.options.address = project.deployment;
+            setProjectShareContract(shareContract);
+        } else {
+            shareContract.options.address = '';
+        }
+    }, [shareContract]);
     return (
         <div className="project" onClick={() => onClick(project)}>
             <div className="project-avatar">
-                <img
-                    object-fit="cover"
-                    src={
-                        projectMeta?.avatar
-                            ? projectMeta.avatar
-                            : project.avatar
-                    }
-                />
+                {projectMetaLoading ? (
+                    <Loader active inverted size="big" />
+                ) : (
+                    <img
+                        object-fit="cover"
+                        src={
+                            projectMeta?.avatar
+                                ? projectMeta.avatar
+                                : project.avatar
+                        }
+                    />
+                )}
                 <div className="project-avatar-sub">
                     <Button.Group size="large">
                         <Button onClick={() => setAddSignalModal(true)}>
@@ -233,13 +275,19 @@ const ProjectCard = ({
             </div>
             <div className="project-info">
                 <div className="project-header">
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                        <h3>
-                            {`${
-                                projectMetaLoading
-                                    ? 'Loading'
-                                    : projectMeta?.properties.name || 'Loading'
-                            }`}
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            height: '2.75rem',
+                        }}
+                    >
+                        <h3 style={{position: 'relative'}}>
+                            {projectMetaLoading ? (
+                                <Loader active inverted size="small" />
+                            ) : (
+                                `${projectMeta?.properties.name}`
+                            )}
                         </h3>
                         {projectMeta?.properties.link ? (
                             <a
@@ -279,7 +327,6 @@ const ProjectCard = ({
                     >{`Deployment: ${project.deployment}`}</p>
                     <p style={{margin: 0}}>{`Creator: ${project.creator}`}</p>
                 </div>
-
                 <div style={{padding: 8, flex: 1}}>
                     <p
                         style={{
@@ -289,26 +336,62 @@ const ProjectCard = ({
                         }}
                     >{`${projectMeta?.properties.description}`}</p>
                 </div>
+                <div className="project-signal">
+                    <div className="signal">
+                        <p> {`Your Stake: `}</p>
+                        {shareBalanceLoading ? (
+                            <div className="signal-info">
+                                <Loader active inverted size="mini" />
+                            </div>
+                        ) : (
+                            <div className="signal-info">
+                                <p>
+                                    {` ${Web3.utils.fromWei(
+                                        project.signal.toString()
+                                    )} `}
+                                </p>
 
-                <div className="project-subheader">
-                    <div className="project-actions"></div>
-                    <div className="project-signal">
+                                <i className="my-icon">
+                                    <img
+                                        src={OpenSignalTokenIcon}
+                                        alt="opensignal token"
+                                    />
+                                </i>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="project-signal">
+                    <div className="signal">
+                        <p> {`Signal: `}</p>
+
                         <p>
-                            {`Signal: `}
-                            <span>
-                                {`Ξ ${Web3.utils.fromWei(
-                                    project.signal.toString()
-                                )} `}
-                            </span>
+                            {` ${Web3.utils.fromWei(
+                                project.signal.toString()
+                            )} `}
                         </p>
+
+                        <i className="my-icon">
+                            <img
+                                src={OpenSignalTokenIcon}
+                                alt="opensignal token"
+                            />
+                        </i>
+                    </div>
+                    <div className="signal">
+                        <p> {`Self Stake: `}</p>
+
                         <p>
-                            {`Staked: `}
-                            <span>
-                                {`Ξ ${Web3.utils.fromWei(
-                                    project.selfStake.toString()
-                                )} `}
-                            </span>
+                            {` ${Web3.utils.fromWei(
+                                project.selfStake.toString()
+                            )} `}
                         </p>
+                        <i className="my-icon">
+                            <img
+                                src={OpenSignalTokenIcon}
+                                alt="opensignal token"
+                            />
+                        </i>
                     </div>
                 </div>
             </div>
@@ -348,7 +431,7 @@ const AddSignalModal = ({
             <Modal.Header>Add Signal</Modal.Header>
             <Modal.Content>
                 <Modal.Description>
-                    <Header>Select the amount</Header>
+                    <Header>Enter amount</Header>
                     <Input
                         style={{width: '100%'}}
                         type="number"
@@ -368,8 +451,8 @@ const AddSignalModal = ({
                 </Modal.Description>
             </Modal.Content>
             <Modal.Actions>
-                <Button color="black" onClick={() => onVisibilityChange(false)}>
-                    go back
+                <Button color="grey" onClick={() => onVisibilityChange(false)}>
+                    Back
                 </Button>
 
                 {amount != 0 && notEnoughAllowance ? (
@@ -384,7 +467,7 @@ const AddSignalModal = ({
                     </Button.Group>
                 ) : (
                     <Button
-                        content="Add Signal"
+                        content="Increase Signal"
                         labelPosition="right"
                         icon="checkmark"
                         onClick={() => OnIncreaseSignal(project, amount)}
@@ -417,8 +500,9 @@ const RmoveSignalModal = ({
             <Modal.Header>Remove Signal</Modal.Header>
             <Modal.Content>
                 <Modal.Description>
-                    <Header>Select the amount</Header>
+                    <Header>Enter amount</Header>
                     <Input
+                        style={{width: '100%'}}
                         type="number"
                         className="signal-amount"
                         value={amount || ''}
@@ -436,16 +520,16 @@ const RmoveSignalModal = ({
                 </Modal.Description>
             </Modal.Content>
             <Modal.Actions>
-                <Button color="black" onClick={() => onVisibilityChange(false)}>
-                    go back
+                <Button color="grey" onClick={() => onVisibilityChange(false)}>
+                    Back
                 </Button>
 
                 <Button
-                    content="Add Signal"
+                    content="Decrease Signal"
                     labelPosition="right"
-                    icon="checkmark"
+                    icon="close"
                     onClick={() => OnDecreaseSignal(project, amount)}
-                    positive
+                    negative
                 />
             </Modal.Actions>
         </Modal>

@@ -3,14 +3,20 @@ import {isAddress} from '../util/eth.util';
 
 const useGetShareBalance = (
     addr: string,
-    shareContract: any,
+    shareContract?: any,
     trigger = false
 ) => {
     const [balance, setbalance] = React.useState('');
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
-        if (addr && isAddress(addr) && isAddress(addr)) {
+        if (
+            shareContract &&
+            isAddress(shareContract._address) &&
+            addr &&
+            isAddress(addr) &&
+            isAddress(addr)
+        ) {
             setbalance('');
             setloading(true);
             seterr(null);
