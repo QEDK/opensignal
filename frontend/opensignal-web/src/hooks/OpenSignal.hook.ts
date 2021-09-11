@@ -21,7 +21,6 @@ const useGetProjectIds = (contract: any, trigger = false) => {
                             .allProjects()
                             .call()
                             .then((res: any) => {
-                                console.log('res', res);
                                 setprojects(res);
                                 setloading(false);
                                 seterr(null);

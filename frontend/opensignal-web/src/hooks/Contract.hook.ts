@@ -1,5 +1,4 @@
 import React from 'react';
-import {NFTStorage, File} from 'nft.storage';
 import Web3 from 'web3';
 import CONTRACTS from '../contracts/hardhat_contracts.json';
 const CONTRACT_DATA: any = CONTRACTS;
@@ -49,26 +48,9 @@ const useGetOpenSignalTokenContract = (metadata: any, trigger = false) => {
     }, [trigger, metadata]);
     return [contract, loading, err];
 };
-const useGetOpenSignalShareContract = () => {
-    const [contract, setcontract] = React.useState(null);
-    const [loading, setloading] = React.useState<boolean>(false);
-    const [err, seterr] = React.useState<any>(null);
-    React.useMemo(async () => {
-        try {
-            let myweb3: any = new Web3(window.ethereum);
 
-            setcontract(
-                new myweb3.eth.Contract(CONTRACT_DATA.OpenSignalShares.abi)
-            );
-            seterr(null);
-        } catch (err) {
-            seterr(err);
-        }
-    }, []);
-    return [contract, loading, err];
-};
 export {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
-    useGetOpenSignalShareContract,
+    CONTRACT_DATA as CONTRACTS,
 };

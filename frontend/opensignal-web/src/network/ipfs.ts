@@ -6,8 +6,8 @@ const saveOnIPFSwithNftStorage = async (properties: any, avatar?: any) => {
     const client = new NFTStorage({token: apiKey});
 
     const metadata = await client.store({
-        name: 'OpenSignalToken',
-        description: 'OpenSignalToken Contract Address',
+        name: 'OpenSignal',
+        description: 'OpenSignal Project Info',
         image: avatar || new Blob(),
         properties: properties,
     });

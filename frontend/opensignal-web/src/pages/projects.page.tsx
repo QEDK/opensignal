@@ -5,7 +5,6 @@ import {BigNumber} from 'ethers';
 import {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
-    useGetOpenSignalShareContract,
 } from '../hooks/Contract.hook';
 import {GitcoinContext} from '../store';
 import React from 'react';
@@ -27,6 +26,8 @@ const ProjectPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
+    const [selectedProjectShares, setSelectedProjectShares] =
+        React.useState<number>(-1);
     const [selectedProject, setSelectedProject] =
         React.useState<Project | null>(null);
     const [addSignalModal, setAddSignalModal] = React.useState<boolean>(false);
@@ -38,7 +39,6 @@ const ProjectPage = () => {
     const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
-    const [shareContract] = useGetOpenSignalShareContract();
     const [ids] = useGetProjectIds(openSignalContract, trigger);
     const [projects, projectsLoading, e] = useGetProjects(
         ids,
@@ -165,7 +165,6 @@ const ProjectPage = () => {
                             key={i}
                             onClick={() => setSelectedProject(p)}
                             contract={openSignalContract}
-                            shareContract={shareContract}
                             opensignalMeta={opensignalMeta}
                             tokenContract={tokenContract}
                             onChange={() => settrigger(!trigger)}
@@ -183,6 +182,7 @@ const ProjectPage = () => {
                     setAddSignalModal(i);
                     if (!i) {
                         setSelectedProject(null);
+                        setSelectedProjectShares(-1);
                     }
                 }}
                 allowance={allowance}
@@ -197,10 +197,12 @@ const ProjectPage = () => {
                     setRemoveSignalModal(i);
                     if (!i) {
                         setSelectedProject(null);
+                        setSelectedProjectShares(-1);
                     }
                 }}
                 OnDecreaseSignal={OnDecreaseSignal}
                 project={selectedProject}
+                wallet={state.wallets[0]}
             />
         </Container>
     );
@@ -211,15 +213,12 @@ export {ProjectPage};
 const ProjectCard = ({
     project,
     contract,
-    shareContract,
     setAddSignalModal,
     setRemoveSignalModal,
     onClick,
 }: {
     project: Project;
-
     contract: any;
-    shareContract: any;
     opensignalMeta: any;
     tokenContract: any;
     onChange: () => void;
@@ -229,23 +228,24 @@ const ProjectCard = ({
     onClick: (p: Project) => void;
 }) => {
     const {state} = React.useContext(GitcoinContext);
-    const [projectShareContract, setProjectShareContract] =
-        React.useState<any>(null);
+
     const [projectURI] = useGetProjectURI(project.id, contract);
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
-    const [shareBalance, shareBalanceLoading] =
-        useGetShareBalance(projectShareContract);
+    const [shareBalance, shareBalanceLoading] = useGetShareBalance(
+        project?.deployment,
+        state.wallets[0]
+    );
 
+    const onIncreaeSignal = () => {
+        setAddSignalModal(true);
+    };
+
+    const onDecreaseSignal = () => {
+        setRemoveSignalModal(true);
+    };
     // console.log('projectURI', projectURI);
     // console.log('projectMeta', projectMeta);
-    React.useEffect(() => {
-        if (project.deployment) {
-            shareContract.options.address = project.deployment;
-            setProjectShareContract(shareContract);
-        } else {
-            shareContract.options.address = '';
-        }
-    }, [shareContract]);
+
     return (
         <div className="project" onClick={() => onClick(project)}>
             <div className="project-avatar">
@@ -263,11 +263,11 @@ const ProjectCard = ({
                 )}
                 <div className="project-avatar-sub">
                     <Button.Group size="large">
-                        <Button onClick={() => setAddSignalModal(true)}>
+                        <Button onClick={() => onIncreaeSignal()}>
                             <Icon name="angle up" />
                         </Button>
 
-                        <Button onClick={() => setRemoveSignalModal(true)}>
+                        <Button onClick={() => onDecreaseSignal()}>
                             <Icon name="angle down" />
                         </Button>
                     </Button.Group>
@@ -345,11 +345,7 @@ const ProjectCard = ({
                             </div>
                         ) : (
                             <div className="signal-info">
-                                <p>
-                                    {` ${Web3.utils.fromWei(
-                                        project.signal.toString()
-                                    )} `}
-                                </p>
+                                <p>{` ${shareBalance} `}</p>
 
                                 <i className="my-icon">
                                     <img
@@ -416,6 +412,7 @@ const AddSignalModal = ({
     allowance: number;
     approveLoading: boolean;
 }) => {
+    const {state} = React.useContext(GitcoinContext);
     const [amount, setAmount] = React.useState(0);
 
     const notEnoughAllowance = BigNumber.from(allowance).lt(
@@ -447,6 +444,30 @@ const AddSignalModal = ({
                                     : Number(amount)
                             )
                         }
+                        label={
+                            <button
+                                className="limit-btn green"
+                                onClick={() =>
+                                    setAmount(
+                                        state.tokenBalance < 0
+                                            ? amount
+                                            : state.tokenBalance
+                                    )
+                                }
+                            >
+                                <p>MAX</p>
+                                <div>
+                                    {state.tokenBalance < 0 ? (
+                                        <Loader size="mini" active />
+                                    ) : (
+                                        `${Web3.utils.fromWei(
+                                            state.tokenBalance.toString() || ''
+                                        )}`
+                                    )}
+                                </div>
+                            </button>
+                        }
+                        labelPosition="right"
                     />
                 </Modal.Description>
             </Modal.Content>
@@ -483,27 +504,33 @@ const RmoveSignalModal = ({
     onVisibilityChange,
     OnDecreaseSignal,
     project,
+    wallet,
 }: {
     open: boolean;
     onVisibilityChange: (i: boolean) => void;
     OnDecreaseSignal: (project: Project | null, amount: number) => void;
     project: Project | null;
+    wallet: string;
 }) => {
     const [amount, setAmount] = React.useState(0);
-
+    const [shareBalance, shareBalanceLoading] = useGetShareBalance(
+        project?.deployment,
+        wallet
+    );
     return (
         <Modal
             onClose={() => onVisibilityChange(false)}
             onOpen={() => onVisibilityChange(true)}
             open={open}
         >
-            <Modal.Header>Remove Signal</Modal.Header>
+            <Modal.Header>Decrease Signal</Modal.Header>
             <Modal.Content>
                 <Modal.Description>
-                    <Header>Enter amount</Header>
+                    <Header>{`${project?.name}`}</Header>
+                    <Header>{`Your stake: ${shareBalance}`}</Header>
+
                     <Input
                         style={{width: '100%'}}
-                        type="number"
                         className="signal-amount"
                         value={amount || ''}
                         placeholder={'Enter Amount'}
@@ -516,6 +543,28 @@ const RmoveSignalModal = ({
                                     : Number(amount)
                             )
                         }
+                        label={
+                            <button
+                                className="limit-btn red"
+                                onClick={() =>
+                                    setAmount(
+                                        shareBalanceLoading
+                                            ? shareBalance
+                                            : amount
+                                    )
+                                }
+                            >
+                                <p>MAX</p>
+                                <div>
+                                    {shareBalanceLoading ? (
+                                        <Loader size="mini" active />
+                                    ) : (
+                                        `${shareBalance}`
+                                    )}
+                                </div>
+                            </button>
+                        }
+                        labelPosition="right"
                     />
                 </Modal.Description>
             </Modal.Content>

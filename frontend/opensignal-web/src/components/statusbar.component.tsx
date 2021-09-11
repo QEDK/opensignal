@@ -11,6 +11,7 @@ import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {useGetOpenSignalTokenContract} from '../hooks/Contract.hook';
 import {useGetTokenBalance} from '../hooks/OpenSignalToken.hook';
 import {ethers} from 'ethers';
+import {ACTIONS} from '../store/actions';
 
 const StatusbarComponent = () => {
     const {state, dispatch} = React.useContext(GitcoinContext);
@@ -35,10 +36,20 @@ const WalletComponent = () => {
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
     const balance = useGetBalance(state.wallets[0], state.provider);
-    const [tokenBalance, loading] = useGetTokenBalance(
+    const [tokenBalance, tokenBalanceLoading] = useGetTokenBalance(
         state.wallets[0],
         tokenContract
     );
+
+    React.useEffect(() => {
+        dispatch({
+            type: ACTIONS.SET_TOKEN_BALANCE,
+            payload:
+                tokenBalance != null && tokenBalance > 0
+                    ? Number(tokenBalance)
+                    : -1,
+        });
+    }, [tokenBalance, tokenBalanceLoading]);
     const onMetamaskConnect = async () => {
         const permissions = await window.ethereum.request({
             method: 'wallet_requestPermissions',
@@ -65,7 +76,7 @@ const WalletComponent = () => {
                 <div
                     style={{marginLeft: 8, textAlign: 'center'}}
                 >{`Token ${ethers.utils.formatEther(
-                    loading ? '0' : tokenBalance || '0'
+                    tokenBalanceLoading ? '0' : tokenBalance || '0'
                 )}`}</div>
                 <div
                     style={{marginLeft: 8, textAlign: 'center'}}
