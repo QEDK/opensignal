@@ -1,3 +1,4 @@
+import {ethers} from 'ethers';
 import React from 'react';
 import {isAddress} from '../util/eth.util';
 
@@ -59,7 +60,7 @@ const useGetTokenBalance = (
                 const balance = await tokenContract.methods
                     .balanceOf(addr)
                     .call();
-                setbalance(balance);
+                setbalance(ethers.utils.formatEther(balance));
                 setloading(false);
                 seterr(null);
             } catch (err) {

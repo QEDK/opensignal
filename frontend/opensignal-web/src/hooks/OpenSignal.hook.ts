@@ -31,6 +31,7 @@ const useGetProjectIds = (contract: any, trigger = false) => {
                                 seterr(err);
                             });
                     } catch (err) {
+                        console.log('err', err);
                         setprojects([]);
                         setloading(false);
                         seterr(err);
@@ -119,7 +120,7 @@ const useGetProjectURI = (id: string, contract: any, trigger = false) => {
                     seterr(null);
                     try {
                         contract.methods
-                            .projectURI(id)
+                            .projectURIs(id)
                             .call()
                             .then((res: any) => {
                                 setprojectURI(res);

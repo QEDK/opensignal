@@ -73,11 +73,9 @@ const WalletComponent = () => {
     return (
         <div className="wallet">
             <div style={{display: 'flex', flexDirection: 'column'}}>
-                <div
-                    style={{marginLeft: 8, textAlign: 'center'}}
-                >{`Token ${ethers.utils.formatEther(
-                    tokenBalanceLoading ? '0' : tokenBalance || '0'
-                )}`}</div>
+                <div style={{marginLeft: 8, textAlign: 'center'}}>{`Token ${
+                    tokenBalanceLoading ? '0' : tokenBalance
+                }`}</div>
                 <div
                     style={{marginLeft: 8, textAlign: 'center'}}
                 >{`三 ${balance}`}</div>

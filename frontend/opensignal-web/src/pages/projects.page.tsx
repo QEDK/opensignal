@@ -26,8 +26,7 @@ const ProjectPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
-    const [selectedProjectShares, setSelectedProjectShares] =
-        React.useState<number>(-1);
+
     const [selectedProject, setSelectedProject] =
         React.useState<Project | null>(null);
     const [addSignalModal, setAddSignalModal] = React.useState<boolean>(false);
@@ -75,7 +74,6 @@ const ProjectPage = () => {
     };
 
     const OnIncreaseSignal = (project: Project | null, amount: number) => {
-        console.log('project12', project);
         if (
             project &&
             openSignalContract &&
@@ -99,7 +97,6 @@ const ProjectPage = () => {
     };
 
     const OnDecreaseSignal = (project: Project | null, amount: number) => {
-        console.log('project1', project);
         if (
             project &&
             openSignalContract &&
@@ -182,7 +179,6 @@ const ProjectPage = () => {
                     setAddSignalModal(i);
                     if (!i) {
                         setSelectedProject(null);
-                        setSelectedProjectShares(-1);
                     }
                 }}
                 allowance={allowance}
@@ -197,7 +193,6 @@ const ProjectPage = () => {
                     setRemoveSignalModal(i);
                     if (!i) {
                         setSelectedProject(null);
-                        setSelectedProjectShares(-1);
                     }
                 }}
                 OnDecreaseSignal={OnDecreaseSignal}
@@ -229,7 +224,11 @@ const ProjectCard = ({
 }) => {
     const {state} = React.useContext(GitcoinContext);
 
-    const [projectURI] = useGetProjectURI(project.id, contract);
+    const [projectURI, projectURILoading, projectURIErr] = useGetProjectURI(
+        project.id,
+        contract
+    );
+
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
     const [shareBalance, shareBalanceLoading] = useGetShareBalance(
         project?.deployment,
@@ -457,12 +456,10 @@ const AddSignalModal = ({
                             >
                                 <p>MAX</p>
                                 <div>
-                                    {state.tokenBalance < 0 ? (
+                                    {Number(state.tokenBalance) < 0 ? (
                                         <Loader size="mini" active />
                                     ) : (
-                                        `${Web3.utils.fromWei(
-                                            state.tokenBalance.toString() || ''
-                                        )}`
+                                        `${state.tokenBalance}`
                                     )}
                                 </div>
                             </button>

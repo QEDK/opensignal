@@ -65,33 +65,31 @@ const ProjectNewPage = () => {
         }
         try {
             seterror('');
-            if (newProject.selfStake > 2) {
-                if (notEnoughAllowance) {
-                    setApproveLoading(true);
-                    tokenContract.methods
-                        .approve(
-                            opensignalMeta.properties.address,
-                            Web3.utils.toWei(newProject.selfStake.toString())
-                        )
-                        .send({
-                            from: state.wallets[0],
-                        })
-                        .then((res: any) => {
-                            setCreateLoading(false);
-                            console.log(res);
-                        })
-                        .catch((err: any) => {
-                            seterror('Error');
-                            setApproveLoading(false);
-                            console.log(err);
-                        });
-                    return;
-                }
+            if (!notEnoughAllowance && newProject.selfStake > 2) {
+                setApproveLoading(true);
+                tokenContract.methods
+                    .approve(
+                        opensignalMeta.properties.address,
+                        Web3.utils.toWei(newProject.selfStake.toString())
+                    )
+                    .send({
+                        from: state.wallets[0],
+                    })
+                    .then((res: any) => {
+                        setCreateLoading(false);
+                        console.log(res);
+                    })
+                    .catch((err: any) => {
+                        seterror('Error');
+                        setApproveLoading(false);
+                        console.log(err);
+                    });
             } else {
                 setApproveLoading(false);
                 seterror('Need atleast 2 tokens');
                 return;
             }
+
             const metadata = await saveOnIPFS(
                 {...newProject, avatar: ''},
                 avatar
