@@ -18,7 +18,8 @@ contract RewardsDistribution is Ownable {
 
     struct DistributionData {
         address destination;
-        uint amount;
+        uint currentStake;
+        uint minimumStake;
     }
 
     /**
@@ -44,9 +45,21 @@ contract RewardsDistribution is Ownable {
     /**
      * @notice An array of addresses and amounts to send
      */
-    DistributionData[] public distributions;
+    DistributionData[] public currentEpochStaking;
+
+    DistributionData[] public rewardEpochStaking;
+
+    uint256 public epochBegin;
+
+    uint256 public epochEnd;
+
+    uint256 public epocLength;
 
     mapping(address => uint256) public userIndex;
+
+    uint256 public totalTokensStaked;
+
+    uint256 public TotalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
     /**
      * @dev _authority maybe the underlying synthetix contract.
@@ -56,12 +69,16 @@ contract RewardsDistribution is Ownable {
         address _owner,
         address _authority,
         address _openSignalProxy,
-        address _rewardEscrow
+        address _rewardEscrow,
+        uint32 _epochLength
         // address _feePoolProxy
     ) public {
         authority = _authority;
         openSignalProxy = _openSignalProxy;
         rewardEscrow = _rewardEscrow;
+        epocLength = _epochLength;
+        epochBegin = now;
+        epochEnd = now + _epochLength;
         // feePoolProxy = _feePoolProxy;
     }
 
@@ -87,18 +104,43 @@ contract RewardsDistribution is Ownable {
         authority = _authority;
     }
 
+
+    function epochHasEnded() internal returns (bool) {
+        if (currentEpochStaking.length != 0) {
+            distributeRewards(TotalRewardsToDistribute, totalTokensStaked);
+        }
+        
+        for (uint256 i=0; i<currentEpochStaking.length; i++) { //ensure that the two arrays are always equal length
+            
+            currentEpochStaking = rewardEpochStaking;
+            rewardEpochStaking[i].minimumStake = rewardEpochStaking[i].currentStake;
+        }
+        epochEnd = epochEnd.plus(epocLength);
+        return true;
+    }
+
     // ========== EXTERNAL FUNCTIONS ==========
 
     function tokenStaked(address destination, uint256 amount, bool _tokenRedeemed) external onlyOwner returns (bool) {
       require(destination != address(0), "Cant add a zero address");
       require(amount != 0, "Cant add a zero amount");
 
+      if (now >= epochEnd) {
+          epochHasEnded();
+      }
+
       if (userIndex[destination] == 0) {
         addRewardDistribution(destination, amount);
-        userIndex[destination] = distributions.length - 1;
+        userIndex[destination] = rewardEpochStaking.length - 1;
       } else {
         uint256 index = userIndex[destination];
         editRewardDistribution(index, amount, _tokenRedeemed);
+      }
+
+      if (_tokenRedeemed) {
+        totalTokensStaked = totalTokensStaked.sub(amount);
+      } else {
+          totalTokensStaked = totalTokensStaked.plus(amount);
       }
     }
 
@@ -115,9 +157,9 @@ contract RewardsDistribution is Ownable {
         require(amount != 0, "Cant add a zero amount");
 
         DistributionData memory rewardsDistribution = DistributionData(destination, amount);
-        distributions.push(rewardsDistribution);
+        rewardEpochStaking.push(rewardsDistribution);
 
-        emit RewardDistributionAdded(distributions.length - 1, destination, amount);
+        emit RewardDistributionAdded(rewardEpochStaking.length - 1, destination, amount);
         return true;
     }
 
@@ -127,13 +169,13 @@ contract RewardsDistribution is Ownable {
      * @param index The index of the DistributionData to delete
      */
     function removeRewardDistribution(uint index) external onlyOwner {
-        require(index <= distributions.length - 1, "index out of bounds");
+        require(index <= rewardEpochStaking.length - 1, "index out of bounds");
 
-        // shift distributions indexes across
-        for (uint i = index; i < distributions.length - 1; i++) {
-            distributions[i] = distributions[i + 1];
+        // shift rewardEpochStaking indexes across
+        for (uint i = index; i < rewardEpochStaking.length - 1; i++) {
+            rewardEpochStaking[i] = rewardEpochStaking[i + 1];
         }
-        distributions.length--;
+        rewardEpochStaking.length--;
 
         // Since this function must shift all later entries down to fill the
         // gap from the one it removed, it could in principle consume an
@@ -154,12 +196,12 @@ contract RewardsDistribution is Ownable {
     ) public onlyOwner returns (bool) {
         require(index <= distributions.length - 1, "index out of bounds");
         if (tokenRedeemed) { //unstaked tokens
-            distributions[index].amount =  distributions[index].amount.sub(amount);
-            if (distributions[index].amount == 0) { // they no longer have any staked tokens so remove them from the rewards array
+            rewardEpochStaking[index].amount =  rewardEpochStaking[index].amount.sub(amount);
+            if (rewardEpochStaking[index].amount == 0) { // they no longer have any staked tokens so remove them from the rewards array
                 removeRewardDistribution(index);
             }
         }
-        distributions[index].amount =  distributions[index].amount.plus(amount);
+        rewardEpochStaking[index].amount =  rewardEpochStaking[index].amount.plus(amount);
         return true;
     }
 
@@ -181,12 +223,12 @@ contract RewardsDistribution is Ownable {
         uint remainder = amount;
 
         // Iterate the array of distributions sending the configured amounts
-        for (uint i = 0; i < distributions.length; i++) {
-            if (distributions[i].destination != address(0) || distributions[i].amount != 0) {
-                remainder = remainder.sub(distributions[i].amount);
+        for (uint i = 0; i < rewardEpochStaking.length; i++) {
+            if (rewardEpochStaking[i].destination != address(0) || rewardEpochStaking[i].amount != 0) {
+                remainder = remainder.sub(rewardEpochStaking[i].amount);
 
                 // Transfer the OS Tokens
-                IERC20(openSignalProxy).transfer(distributions[i].destination, distributions[i].amount * amount / totalTokensStaked);
+                IERC20(openSignalProxy).transfer(rewardEpochStaking[i].destination, rewardEpochStaking[i].amount * amount / totalTokensStaked);
             }
         }
 
@@ -206,7 +248,7 @@ contract RewardsDistribution is Ownable {
      * @notice Retrieve the length of the distributions array
      */
     function distributionsLength() external view returns (uint) {
-        return distributions.length;
+        return rewardEpochStaking.length;
     }
 
     /* ========== Events ========== */
