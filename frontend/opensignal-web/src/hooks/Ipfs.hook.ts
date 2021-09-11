@@ -7,6 +7,7 @@ const useGetMetadata = (cid: string, trigger = false) => {
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
         if (cid && cid.toString().startsWith(PREFIX)) {
+            setloading(true);
             axios
                 .get(getIPFSlink(cid))
                 .then((result) => {
@@ -15,6 +16,7 @@ const useGetMetadata = (cid: string, trigger = false) => {
                             ...result.data,
                             avatar: getIPFSlink(result.data.image),
                         });
+                        setloading(false);
                     } catch (err) {
                         setloading(false);
                         seterr(err);

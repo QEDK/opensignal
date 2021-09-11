@@ -33,12 +33,11 @@ const useGetShareBalance = (
                     .balanceOf(addr)
                     .call();
 
-                setbalance(
-                    ethers.utils.formatEther(parseInt(balance)).toString()
-                );
+                setbalance(ethers.utils.formatEther(balance).toString());
                 setloading(false);
                 seterr(null);
             } catch (err) {
+                console.log('err', err);
                 setbalance('');
                 setloading(false);
                 seterr(err);
@@ -52,4 +51,58 @@ const useGetShareBalance = (
     return [balance, loading, err];
 };
 
-export {useGetShareBalance};
+const useGetShareAllowance = (
+    opensignalContractAddress?: string,
+    shareContractAddress?: string,
+    addr?: string,
+    trigger = false
+) => {
+    const [allowance, setallowance] = React.useState<string>('');
+    const [loading, setloading] = React.useState<boolean>(false);
+    const [err, seterr] = React.useState<any>(null);
+    React.useMemo(async () => {
+        if (
+            shareContractAddress &&
+            isAddress(shareContractAddress) &&
+            opensignalContractAddress &&
+            isAddress(opensignalContractAddress) &&
+            addr &&
+            isAddress(addr) &&
+            isAddress(addr)
+        ) {
+            setallowance('');
+            setloading(true);
+            seterr(null);
+            try {
+                const shareContract = getShareContract(shareContractAddress);
+
+                const allowance = await shareContract.methods
+                    .allowance(addr, opensignalContractAddress)
+                    .call();
+                console.log('allowance', allowance);
+                setallowance(allowance);
+                setloading(false);
+                seterr(null);
+            } catch (err) {
+                console.log('err123123', err);
+                setallowance('');
+                setloading(false);
+                seterr(err);
+            }
+        } else {
+            setallowance('');
+            setloading(false);
+            seterr(null);
+        }
+    }, [addr, opensignalContractAddress, shareContractAddress, trigger]);
+    return [allowance, loading, err];
+};
+
+const getShareContract = (deploymentAddr: string) => {
+    let myweb3: any = new Web3(window.ethereum);
+    return new myweb3.eth.Contract(
+        CONTRACTS.OpenSignalShares.abi,
+        deploymentAddr
+    );
+};
+export {useGetShareBalance, useGetShareAllowance, getShareContract};

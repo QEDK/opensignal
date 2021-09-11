@@ -38,7 +38,8 @@ const WalletComponent = () => {
     const balance = useGetBalance(state.wallets[0], state.provider);
     const [tokenBalance, tokenBalanceLoading] = useGetTokenBalance(
         state.wallets[0],
-        tokenContract
+        tokenContract,
+        state.tokenBalanceTrigger
     );
 
     React.useEffect(() => {

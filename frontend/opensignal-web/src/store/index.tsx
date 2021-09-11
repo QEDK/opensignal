@@ -13,6 +13,7 @@ type State = {
     openSignalContract: any;
     openSignalTokenContract: any;
     tokenBalance: number;
+    tokenBalanceTrigger: boolean;
 };
 type GitcoinProviderProps = {children: React.ReactNode};
 let myweb3: any = new Web3(window.ethereum);
@@ -33,6 +34,7 @@ const initialState: State = {
     openSignalContract: openSignalContract,
     openSignalTokenContract: openSignalTokenContract,
     tokenBalance: -1,
+    tokenBalanceTrigger: false,
 };
 
 const GitcoinContext = React.createContext<{state: State; dispatch: Dispatch}>(
@@ -88,6 +90,12 @@ const gitcoinReducer = (state: State, action: Action): State => {
             return {
                 ...state,
                 tokenBalance: action.payload,
+            };
+        }
+        case ACTIONS.TOKEN_BALANCE_TRIGGER: {
+            return {
+                ...state,
+                tokenBalanceTrigger: !state.tokenBalanceTrigger,
             };
         }
         default: {
