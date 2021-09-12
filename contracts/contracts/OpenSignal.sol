@@ -55,7 +55,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         minStake = 2 ether;
         reserveRatio = 500000;
         minLockinTimeInEpochs = 3;
-        RewardsDistribution rewardsDistribution = RewardsDistribution(_rewardsDistribution);
+        RewardsDistribution rewardsDistribution = RewardsDistribution(governor, address(nativeToken), epoch);
     }
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
