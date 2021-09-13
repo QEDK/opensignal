@@ -73,14 +73,12 @@ const gitcoinReducer = (state: State, action: Action): State => {
             };
         }
         case ACTIONS.SET_OPENSIGNAL_URL: {
-            localStorage.setItem(OPENSIGNAL_LABEL, action.payload);
             return {
                 ...state,
                 openSignalContract: action.payload,
             };
         }
         case ACTIONS.SET_OPENSIGNALTOKEN_URL: {
-            localStorage.setItem(TOKEN_LABEL, action.payload);
             return {
                 ...state,
                 openSignalTokenContract: action.payload,

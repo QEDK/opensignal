@@ -18,6 +18,7 @@ const useGetMetadata = (cid: string, trigger = false) => {
                         });
                         setloading(false);
                     } catch (err) {
+                        console.log('err', err);
                         setloading(false);
                         seterr(err);
                         setmetadata(null);

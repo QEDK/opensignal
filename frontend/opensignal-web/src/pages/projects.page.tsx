@@ -1,7 +1,7 @@
 import {Container, Grid, Button, Icon, Input} from 'semantic-ui-react';
 import {Header, Loader, Modal} from 'semantic-ui-react';
 import {useHistory} from 'react-router';
-import {BigNumber} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
@@ -12,6 +12,8 @@ import {
     useGetProjectIds,
     useGetProjects,
     useGetProjectURI,
+    useGetreserveRatio,
+    useGetSaleReturn,
 } from '../hooks/OpenSignal.hook';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {BouncyBalls} from '../components/util.component';
@@ -22,6 +24,7 @@ import {
     getShareContract,
     useGetShareAllowance,
     useGetShareBalance,
+    useGetTotalSupply,
 } from '../hooks/OpenSignalShares';
 import OpenSignalTokenIcon from '../assets/icons/opensignal.png';
 const re = /^[0-9\b]+$/;
@@ -30,7 +33,6 @@ const ProjectPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
-
     const [selectedProjectMeta, setSelectedProjectMeta] =
         React.useState<Project | null>(null);
     const [selectedProject, setSelectedProject] =
@@ -42,11 +44,13 @@ const ProjectPage = () => {
     const [removeSignalModal, setRemoveSignalModal] =
         React.useState<boolean>(false);
     const history = useHistory();
+
     const [opensignalMeta] = useGetMetadata(state.openSignalContract);
     const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
+    const [reserveRatio] = useGetreserveRatio(openSignalContract);
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
-    const [ids] = useGetProjectIds(openSignalContract, trigger);
+    const [ids, _, err] = useGetProjectIds(openSignalContract, trigger);
     const [projects, projectsLoading, e] = useGetProjects(
         ids,
         openSignalContract
@@ -57,6 +61,7 @@ const ProjectPage = () => {
         opensignalMeta,
         approveLoading
     );
+
     const goToNewProject = () => {
         history.push('/projects/new');
     };
@@ -85,7 +90,6 @@ const ProjectPage = () => {
         shareContractAddress: any,
         amount: number
     ) => {
-        console.log('amount', amount);
         setApproveProjectShareLoading(true);
         try {
             const shareContract = getShareContract(shareContractAddress);
@@ -133,7 +137,11 @@ const ProjectPage = () => {
         }
     };
 
-    const OnDecreaseSignal = (project: Project | null, amount: number) => {
+    const OnDecreaseSignal = (
+        project: Project | null,
+        amount: number,
+        minAmount: number
+    ) => {
         if (
             project &&
             openSignalContract &&
@@ -145,7 +153,7 @@ const ProjectPage = () => {
                 .removeSignal(
                     project.id,
                     Web3.utils.toWei(amount.toString()),
-                    Web3.utils.toWei((amount * 0.25).toString())
+                    Web3.utils.toWei((minAmount * 0.975).toString())
                 )
                 .send({
                     from: state.wallets[0],
@@ -231,6 +239,7 @@ const ProjectPage = () => {
                 projectMeta={selectedProjectMeta}
             />
             <RmoveSignalModal
+                reserveRatio={reserveRatio}
                 open={removeSignalModal}
                 createLoading={createLoading}
                 onVisibilityChange={(i) => {
@@ -279,10 +288,8 @@ const ProjectCard = ({
     );
 
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
-    const [shareBalance, shareBalanceLoading, err] = useGetShareBalance(
-        project?.deployment,
-        state.wallets[0]
-    );
+    const [shareBalance, shareBalanceLoading, shareBalanceErr] =
+        useGetShareBalance(project?.deployment, state.wallets[0]);
 
     const onIncreaeSignal = () => {
         setAddSignalModal(true);
@@ -553,6 +560,7 @@ const AddSignalModal = ({
     );
 };
 const RmoveSignalModal = ({
+    reserveRatio,
     open,
     onVisibilityChange,
     createLoading,
@@ -564,12 +572,17 @@ const RmoveSignalModal = ({
     wallet,
     contract,
 }: {
+    reserveRatio: string;
     open: boolean;
     onVisibilityChange: (i: boolean) => void;
     createLoading: boolean;
     approveLoading: boolean;
     onApprove: (address: string, i: number) => void;
-    OnDecreaseSignal: (project: Project | null, amount: number) => void;
+    OnDecreaseSignal: (
+        project: Project | null,
+        amount: number,
+        minAmount: number
+    ) => void;
     project: Project | null;
     projectMeta: Project | null;
     wallet: string;
@@ -590,8 +603,20 @@ const RmoveSignalModal = ({
         approveLoading
     );
 
-    const notEnoughAllowance = BigNumber.from(shareAllowance || 0).lt(
-        BigNumber.from(amount).mul(BigNumber.from(10).pow(18))
+    const [totalSupply, totalSupplyLoading, totalSupplyErr] = useGetTotalSupply(
+        project?.deployment
+    );
+
+    const [saleReturn, saleReturnLoading] = useGetSaleReturn(
+        'TODO',
+        project?.signal.toString() || '',
+        totalSupply,
+        reserveRatio,
+        amount.toString()
+    );
+
+    const notEnoughAllowance = BigNumber.from(shareAllowance || '0').lt(
+        ethers.utils.parseEther((amount || '0').toString())
     );
 
     return (
@@ -604,7 +629,13 @@ const RmoveSignalModal = ({
             <Modal.Content>
                 <Modal.Description>
                     <Header>{`${projectMeta?.name}`}</Header>
-                    <Header>{`Your stake: ${shareBalance}`}</Header>
+                    <Header>
+                        {shareBalanceLoading ? (
+                            <Loader size="mini" active />
+                        ) : (
+                            `Your stake: ${shareBalance}`
+                        )}
+                    </Header>
 
                     <Input
                         style={{width: '100%'}}
@@ -623,13 +654,18 @@ const RmoveSignalModal = ({
                         label={
                             <button
                                 className="limit-btn red"
-                                onClick={() =>
+                                onClick={() => {
+                                    console.log(
+                                        'shareBalance',
+                                        shareBalanceLoading,
+                                        shareBalance
+                                    );
                                     setAmount(
                                         shareBalanceLoading
-                                            ? shareBalance
-                                            : amount
-                                    )
-                                }
+                                            ? amount
+                                            : shareBalance
+                                    );
+                                }}
                             >
                                 <p>MAX</p>
                                 <div>
@@ -643,6 +679,11 @@ const RmoveSignalModal = ({
                         }
                         labelPosition="right"
                     />
+                    {!saleReturnLoading &&
+                    Number(saleReturn) > 0 &&
+                    Number(amount) > 0 ? (
+                        <Header>{`Sale Return: ${saleReturn}`}</Header>
+                    ) : null}
                 </Modal.Description>
             </Modal.Content>
             <Modal.Actions>
@@ -655,7 +696,7 @@ const RmoveSignalModal = ({
                         color="violet"
                         labelPosition="right"
                         icon="checkmark"
-                        loading={approveLoading}
+                        loading={approveLoading || shareAllowanceLoading}
                         content="APPROVE"
                         onClick={() =>
                             onApprove(project?.deployment || '', amount)
@@ -665,10 +706,16 @@ const RmoveSignalModal = ({
                 ) : (
                     <Button
                         content={'Decrease Signal'}
-                        loading={createLoading}
+                        loading={
+                            createLoading ||
+                            totalSupplyLoading ||
+                            saleReturnLoading
+                        }
                         labelPosition="right"
                         icon="angle down"
-                        onClick={() => OnDecreaseSignal(project, amount)}
+                        onClick={() =>
+                            OnDecreaseSignal(project, amount, saleReturn)
+                        }
                         negative
                     />
                 )}

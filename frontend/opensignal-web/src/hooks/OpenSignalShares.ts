@@ -105,4 +105,47 @@ const getShareContract = (deploymentAddr: string) => {
         deploymentAddr
     );
 };
-export {useGetShareBalance, useGetShareAllowance, getShareContract};
+
+const useGetTotalSupply = (
+    shareContractAddress?: string,
+    trigger: boolean = false
+) => {
+    const [totalSupply, settotalSupply] = React.useState<string>('');
+    const [loading, setloading] = React.useState<boolean>(false);
+    const [err, seterr] = React.useState<any>(null);
+    React.useMemo(async () => {
+        if (shareContractAddress && isAddress(shareContractAddress)) {
+            settotalSupply('');
+            setloading(true);
+            seterr(null);
+            try {
+                const shareContract = getShareContract(shareContractAddress);
+
+                const totalSupply = await shareContract.methods
+                    .totalSupply()
+                    .call();
+                console.log('totalSupply', totalSupply);
+                settotalSupply(totalSupply);
+                setloading(false);
+                seterr(null);
+            } catch (err) {
+                console.log('err123123', err);
+                settotalSupply('');
+                setloading(false);
+                seterr(err);
+            }
+        } else {
+            settotalSupply('');
+            setloading(false);
+            seterr(null);
+        }
+    }, [shareContractAddress, trigger]);
+    return [totalSupply, loading, err];
+};
+
+export {
+    useGetShareBalance,
+    useGetShareAllowance,
+    getShareContract,
+    useGetTotalSupply,
+};

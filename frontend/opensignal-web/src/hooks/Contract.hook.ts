@@ -7,9 +7,11 @@ const useGetOpenSignalContract = (metadata: any, trigger = false) => {
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
+        console.log('contract', metadata);
         if (metadata) {
             try {
                 let myweb3: any = new Web3(window.ethereum);
+
                 setcontract(
                     new myweb3.eth.Contract(
                         CONTRACT_DATA.OpenSignal.abi,
@@ -18,6 +20,7 @@ const useGetOpenSignalContract = (metadata: any, trigger = false) => {
                 );
                 seterr(null);
             } catch (err) {
+                console.log('err', err);
                 seterr(err);
             }
         }
