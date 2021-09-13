@@ -70,7 +70,7 @@ const ProjectNewPage = () => {
         }
         try {
             seterror('');
-            if (!notEnoughAllowance) {
+            if (notEnoughAllowance) {
                 setApproveLoading(true);
                 tokenContract.methods
                     .approve(
@@ -89,6 +89,7 @@ const ProjectNewPage = () => {
                         setApproveLoading(false);
                         console.log(err);
                     });
+                return;
             } else {
                 setApproveLoading(false);
             }
