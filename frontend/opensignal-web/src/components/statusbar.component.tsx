@@ -113,7 +113,7 @@ const WalletComponent = () => {
                 <div onClick={onMetamaskConnect} className={'wallet-btn'}>
                     <img alt="wallet" src={MetamaskIcon} />
                 </div>
-                {getNetworkName(state.chain_id) == 'Rinkeby' ? (
+                {getNetworkName(state.chain_id) != 'Rinkeby' ? (
                     <div>WRONG NETWORK PLEASE SWITCH TO RINKEBY </div>
                 ) : null}
             </div>
