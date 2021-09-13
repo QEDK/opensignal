@@ -51,6 +51,16 @@ const WalletComponent = () => {
                     : -1,
         });
     }, [tokenBalance, tokenBalanceLoading]);
+
+    React.useEffect(() => {
+        requestSwitchNetwork();
+    }, []);
+    const requestSwitchNetwork = async () => {
+        await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{chainId: '0x4'}],
+        });
+    };
     const onMetamaskConnect = async () => {
         const permissions = await window.ethereum.request({
             method: 'wallet_requestPermissions',
@@ -90,13 +100,22 @@ const WalletComponent = () => {
                     <h3>{`Connect`}</h3>
                 </button>
             )}
-            <div style={{display: 'flex', flexDirection: 'column'}}>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                }}
+            >
                 <div>
                     <span>{getNetworkName(state.chain_id)}</span>
                 </div>
                 <div onClick={onMetamaskConnect} className={'wallet-btn'}>
                     <img alt="wallet" src={MetamaskIcon} />
                 </div>
+                {getNetworkName(state.chain_id) == 'Rinkeby' ? (
+                    <div>WRONG NETWORK PLEASE SWITCH TO RINKEBY </div>
+                ) : null}
             </div>
         </div>
     );

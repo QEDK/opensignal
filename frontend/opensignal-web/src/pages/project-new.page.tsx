@@ -61,11 +61,16 @@ const ProjectNewPage = () => {
 
     const onNewProject = async () => {
         if (!opensignalMeta || !tokenMeta) {
+            seterror('Contracts Not found');
+            return;
+        }
+        if (newProject.selfStake < 2) {
+            seterror('Need atleast 2 tokens');
             return;
         }
         try {
             seterror('');
-            if (!notEnoughAllowance && newProject.selfStake > 2) {
+            if (!notEnoughAllowance) {
                 setApproveLoading(true);
                 tokenContract.methods
                     .approve(
@@ -86,8 +91,6 @@ const ProjectNewPage = () => {
                     });
             } else {
                 setApproveLoading(false);
-                seterror('Need atleast 2 tokens');
-                return;
             }
 
             const metadata = await saveOnIPFS(
@@ -121,6 +124,7 @@ const ProjectNewPage = () => {
                 });
         } catch (err) {
             seterror('Error');
+            setCreateLoading(false);
             setApproveLoading(false);
         }
     };
