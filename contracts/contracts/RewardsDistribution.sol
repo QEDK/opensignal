@@ -4,10 +4,14 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./libraries/SafeDecimalMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract RewardsDistribution is Ownable {
+
+contract RewardsDistribution is Ownable, Initializable {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
+    using SafeERC20 for IERC20;
 
     struct DistributionData {
         address destination;
@@ -21,9 +25,9 @@ contract RewardsDistribution is Ownable {
     address public owner;
 
     /**
-     * @notice Address of the Open Signal ERC20
+     * @notice Open Signal ERC20 contract
      */
-    address public openSignalProxy;
+    IERC20 public openSignalProxy;
 
     /**
      * @notice An array of addresses and amounts to send
@@ -39,14 +43,13 @@ contract RewardsDistribution is Ownable {
     uint256 public totalTokensStaked;
     uint256 public TotalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
-
-    constructor(
+    function initialize(
         address _owner,
-        address _openSignalProxy,
-        uint32 _epochLength
-    ) public {
+        IERC20 _nativeToken,
+        uint32 _epochLengt
+    ) initializer public {
         owner = _owner;
-        openSignalProxy = _openSignalProxy;
+        openSignalProxy = _nativeToken;
         epocLength = _epochLength;
         epochBegin = now;
         epochEnd = now + _epochLength;
@@ -54,7 +57,7 @@ contract RewardsDistribution is Ownable {
 
     // ========== EXTERNAL SETTERS ==========
 
-    function setOpenSignalProxy(address _openSignalProxy) external onlyOwner {
+    function setOpenSignalProxy(IERC20 _openSignalProxy) external onlyOwner {
         openSignalProxy = _openSignalProxy;
     }
 
@@ -195,7 +198,7 @@ contract RewardsDistribution is Ownable {
                 remainder = remainder.sub(userAlocation);
 
                 // Transfer the OS Tokens
-                IERC20(openSignalProxy).transfer(rewardEpochStaking[i].destination, userAllocation);
+                IERC20(openSignalProxy).safeTransferFrom(rewardEpochStaking[i].destination, userAllocation);
             }
         }
 
