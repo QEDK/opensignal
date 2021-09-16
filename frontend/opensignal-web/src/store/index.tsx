@@ -1,5 +1,6 @@
 import React from 'react';
 import Web3 from 'web3';
+import {ACTIONS} from './actions';
 
 declare const window: any;
 type Action = {type: string; payload?: any};
@@ -11,14 +12,20 @@ type State = {
     pendingTransactions: any[];
     openSignalContract: any;
     openSignalTokenContract: any;
+    tokenBalance: number;
+    tokenBalanceTrigger: boolean;
 };
 type GitcoinProviderProps = {children: React.ReactNode};
 let myweb3: any = new Web3(window.ethereum);
 
+const OPENSIGNAL_LABEL = 'OpenSignal';
+const TOKEN_LABEL = 'OpenSignalToken';
 const openSignalContract =
-    'ipfs://bafyreih4m7d7l5fbkh3kqnzmefowi45vfjetc6hqn3vsl2jpadpqz6jmyu/metadata.json';
+    localStorage.getItem(OPENSIGNAL_LABEL) ||
+    'ipfs://bafyreibraij4zlc7wt52duyr5enkmglpooh4iimanh4ftxs2gar55z24re/metadata.json';
 const openSignalTokenContract =
-    'ipfs://bafyreid2o6wajtzdztxklgdym22h2nbm6zjh2npctainhykbsbotn6a554/metadata.json';
+    localStorage.getItem(TOKEN_LABEL) ||
+    'ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json';
 const initialState: State = {
     chain_id: '42',
     provider: myweb3.currentProvider,
@@ -26,6 +33,8 @@ const initialState: State = {
     pendingTransactions: [],
     openSignalContract: openSignalContract,
     openSignalTokenContract: openSignalTokenContract,
+    tokenBalance: -1,
+    tokenBalanceTrigger: false,
 };
 
 const GitcoinContext = React.createContext<{state: State; dispatch: Dispatch}>(
@@ -36,31 +45,55 @@ const gitcoinReducer = (state: State, action: Action): State => {
     // console.log(action);
 
     switch (action.type) {
-        case 'SET_PROVIDER': {
+        case ACTIONS.SET_PROVIDER: {
             return {
                 ...state,
                 provider: action.payload,
             };
         }
 
-        case 'SET_WALLETS': {
+        case ACTIONS.SET_WALLETS: {
             return {
                 ...state,
                 wallets: [...action.payload],
             };
         }
-        case 'SET_PENDINGTX': {
+        case ACTIONS.SET_PENDINGTX: {
             return {
                 ...state,
                 pendingTransactions: [...action.payload],
             };
         }
 
-        case 'SET_CHAIN_ID': {
+        case ACTIONS.SET_CHAIN_ID: {
             return {
                 ...state,
                 chain_id: action.payload,
                 provider: myweb3.currentProvider,
+            };
+        }
+        case ACTIONS.SET_OPENSIGNAL_URL: {
+            return {
+                ...state,
+                openSignalContract: action.payload,
+            };
+        }
+        case ACTIONS.SET_OPENSIGNALTOKEN_URL: {
+            return {
+                ...state,
+                openSignalTokenContract: action.payload,
+            };
+        }
+        case ACTIONS.SET_TOKEN_BALANCE: {
+            return {
+                ...state,
+                tokenBalance: action.payload,
+            };
+        }
+        case ACTIONS.TOKEN_BALANCE_TRIGGER: {
+            return {
+                ...state,
+                tokenBalanceTrigger: !state.tokenBalanceTrigger,
             };
         }
         default: {
