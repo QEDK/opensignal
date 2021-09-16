@@ -7,10 +7,11 @@ import {
     TextArea,
     Placeholder,
 } from 'semantic-ui-react';
+import toast, { Toaster } from 'react-hot-toast';
 import {useHistory} from 'react-router';
 import {useGetAllowance} from '../hooks/OpenSignalToken.hook';
 import {GitcoinContext} from '../store';
-import React from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
@@ -19,7 +20,7 @@ import {
 import Web3 from 'web3';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {BigNumber} from 'ethers';
-import {saveOnIPFS} from '../network/ipfs';
+import {saveOnIPFSwithNftStorage} from '../network/ipfs';
 const initialState: Project = {
     id: '',
     creator: '',
@@ -36,17 +37,17 @@ const initialState: Project = {
 };
 const re = /^[0-9\b]+$/;
 const ProjectNewPage = () => {
-    const {state} = React.useContext(GitcoinContext);
-    const imgRef = React.useRef(null);
-    const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
-    const [error, seterror] = React.useState<string>('');
-    const [createLoading, setCreateLoading] = React.useState<boolean>(false);
-    const [newProject, setNewProject] = React.useState<Project>(initialState);
+    const {state} = useContext(GitcoinContext);
+    const imgRef = useRef(null);
+    const [approveLoading, setApproveLoading] = useState<boolean>(false);
+    const [projectCreated, setProjectCreated] = useState<boolean>(false);
+    const [createLoading, setCreateLoading] = useState<boolean>(false);
+    const [newProject, setNewProject] = useState<Project>(initialState);
     const [opensignalMeta] = useGetMetadata(state.openSignalContract);
     const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
-    const [avatar, setavatar] = React.useState<File | null>(null);
+    const [avatar, setAvatar] = useState<File | null>(null);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
@@ -59,53 +60,68 @@ const ProjectNewPage = () => {
         history.push('/');
     };
 
+    const errorToastOpts = {
+        duration: 4000,
+        icon: '❌',
+      };
+
+    const successToastOpts = (icon: string) => ({
+        duration: 4000,
+        style: {
+            background: 'chartreuse'
+        },
+        icon,
+      })
     const onNewProject = async () => {
         if (!opensignalMeta || !tokenMeta) {
-            seterror('Contracts Not found');
+            toast('Contracts Not found', errorToastOpts);
             return;
         }
         if (newProject.selfStake < 2) {
-            seterror('Need atleast 2 tokens');
+            toast('Need atleast 2 tokens', errorToastOpts);
             return;
         }
         try {
-            seterror('');
-            if (notEnoughAllowance) {
-                setApproveLoading(true);
-                tokenContract.methods
-                    .approve(
-                        opensignalMeta.properties.address,
-                        Web3.utils.toWei(newProject.selfStake.toString())
-                    )
-                    .send({
-                        from: state.wallets[0],
-                    })
-                    .then((res: any) => {
-                        setCreateLoading(false);
-                        console.log(res);
-                    })
-                    .catch((err: any) => {
-                        seterror('Error');
+            if (isNotApproved) {
+                setApproveLoading(true)
+                try {
+                    const approval = await tokenContract.methods
+                        .approve(
+                            opensignalMeta.properties.address,
+                            Web3.utils.toWei(newProject.selfStake.toString())
+                        )
+                    const sentApproval = await approval.send({
+                            from: state.wallets[0],
+                        })
+                        console.log({sentApproval, approval});
                         setApproveLoading(false);
-                        console.log(err);
-                    });
+                        toast('Approved ', successToastOpts('✔️'));
+                    console.log({ approval })
+                } catch (error) {
+                    toast(`Error`, errorToastOpts)
+                    setApproveLoading(false);
+                }
                 return;
             } else {
                 setApproveLoading(false);
             }
 
-            const metadata = await saveOnIPFS(
+            setCreateLoading(true);
+
+            const metadata = await saveOnIPFSwithNftStorage(
                 {...newProject, avatar: ''},
                 avatar
             );
 
+            console.log({ metadata })
             setNewProject({...newProject, link: metadata.url});
             if (!openSignalContract) {
-                return console.log('contract not found');
+                console.log('contract not found');
+                toast('Contract not found', errorToastOpts);
+                return;
             }
 
-            setCreateLoading(true);
-            openSignalContract.methods
+            await openSignalContract.methods
                 .createProject(
                     newProject.name,
                     metadata.url,
@@ -114,24 +130,20 @@ const ProjectNewPage = () => {
                 .send({
                     from: state.wallets[0],
                 })
-                .then((res: any) => {
-                    setCreateLoading(false);
-                    console.log(res);
-                })
-                .catch((err: any) => {
-                    seterror('Error');
-                    setCreateLoading(false);
-                    console.log(err);
-                });
+            setCreateLoading(false);
+            setProjectCreated(true);
+            toast('Project created ', successToastOpts('🎉'));
+            await new Promise(r => setTimeout(r, 3000));
+            return goToProject();
         } catch (err) {
-            seterror('Error');
+            toast('Error', errorToastOpts);
             setCreateLoading(false);
             setApproveLoading(false);
         }
     };
 
     const fileChange = (e: any) => {
-        setavatar(e.target.files[0]);
+        setAvatar(e.target.files[0]);
         const reader = new FileReader();
         reader.onload = (e: any) => {
             setNewProject({
@@ -140,8 +152,9 @@ const ProjectNewPage = () => {
             });
         };
         reader.readAsDataURL(e.target.files[0]);
+        toast('File loaded', successToastOpts('📁✔️'))
     };
-    const notEnoughAllowance =
+    const isNotApproved =
         newProject.selfStake == 0 ||
         (!allowanceLoading &&
             BigNumber.from(allowance).lt(
@@ -154,6 +167,7 @@ const ProjectNewPage = () => {
             <div className="page-header">
                 <h3>NEW PROJECT</h3>
             </div>
+            <Toaster />
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column
                     style={{
@@ -307,29 +321,19 @@ const ProjectNewPage = () => {
                                     }
                                 />
                             </Form.Field>
-                            {error ? (
-                                <p
-                                    style={{
-                                        padding: 8,
-                                        color: 'crimson',
-                                        width: '100%',
-                                    }}
-                                >
-                                    {error}
-                                </p>
-                            ) : null}
                             <Button
-                                onClick={() => onNewProject()}
+                                onClick={onNewProject}
                                 className="btn"
-                                color={notEnoughAllowance ? 'pink' : 'purple'}
+                                color={isNotApproved ? 'pink' : 'purple'}
                                 fluid
                                 size="large"
-                                disabled={newProject.selfStake == 0}
+                                disabled={projectCreated || newProject.selfStake == 0}
                                 loading={approveLoading || createLoading}
                             >
-                                {notEnoughAllowance
+                                {isNotApproved
                                     ? 'APPROVE TOKEN'
-                                    : 'CREATE'}
+                                    : projectCreated
+                                        ? '✔️CREATED' : 'CREATE'}
                             </Button>
                         </Container>
                     </Form>

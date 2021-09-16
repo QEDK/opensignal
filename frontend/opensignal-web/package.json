@@ -17,6 +17,7 @@
     "nft.storage": "^3.2.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-hot-toast": "^2.1.1",
     "react-router-dom": "^5.2.1",
     "react-scripts": "4.0.3",
     "sass": "^1.38.2",
@@ -31,7 +32,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +54,12 @@
     ]
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.1.8"
+    "@types/react-router-dom": "^5.1.8",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.4.1"
   }
 }
