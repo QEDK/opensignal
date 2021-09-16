@@ -7,7 +7,7 @@ import {
     useGetOpenSignalTokenContract,
 } from '../hooks/Contract.hook';
 import {GitcoinContext} from '../store';
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import {
     useGetProjectIds,
     useGetProjects,
@@ -30,19 +30,19 @@ import OpenSignalTokenIcon from '../assets/icons/opensignal.png';
 const re = /^[0-9\b]+$/;
 const pat = /^((http|https):\/\/)/;
 const ProjectPage = () => {
-    const {state} = React.useContext(GitcoinContext);
-    const [trigger, settrigger] = React.useState<boolean>(false);
-    const [createLoading, setCreateLoading] = React.useState<boolean>(false);
+    const {state} = useContext(GitcoinContext);
+    const [trigger, settrigger] = useState<boolean>(false);
+    const [createLoading, setCreateLoading] = useState<boolean>(false);
     const [selectedProjectMeta, setSelectedProjectMeta] =
-        React.useState<Project | null>(null);
+        useState<Project | null>(null);
     const [selectedProject, setSelectedProject] =
-        React.useState<Project | null>(null);
-    const [addSignalModal, setAddSignalModal] = React.useState<boolean>(false);
-    const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
+        useState<Project | null>(null);
+    const [addSignalModal, setAddSignalModal] = useState<boolean>(false);
+    const [approveLoading, setApproveLoading] = useState<boolean>(false);
     const [approveProjectShareLoading, setApproveProjectShareLoading] =
-        React.useState<boolean>(false);
+        useState<boolean>(false);
     const [removeSignalModal, setRemoveSignalModal] =
-        React.useState<boolean>(false);
+        useState<boolean>(false);
     const history = useHistory();
 
     const [opensignalMeta] = useGetMetadata(state.openSignalContract);
@@ -280,7 +280,7 @@ const ProjectCard = ({
     setRemoveSignalModal: (i: boolean) => void;
     onProjectChange: (p: Project, meta: Project) => void;
 }) => {
-    const {state} = React.useContext(GitcoinContext);
+    const {state} = useContext(GitcoinContext);
 
     const [projectURI, projectURILoading, projectURIErr] = useGetProjectURI(
         project.id,
@@ -343,17 +343,17 @@ const ProjectCard = ({
                             {projectMetaLoading ? (
                                 <Loader active inverted size="small" />
                             ) : (
-                                `${projectMeta?.properties.name}`
+                                `${projectMeta?.properties?.name}`
                             )}
                         </h3>
-                        {projectMeta?.properties.link ? (
+                        {projectMeta?.properties?.link ? (
                             <a
                                 style={{padding: 8}}
                                 href={
-                                    pat.test(projectMeta?.properties.link)
-                                        ? projectMeta?.properties.link
+                                    pat.test(projectMeta?.properties?.link)
+                                        ? projectMeta?.properties?.link
                                         : 'https://' +
-                                          projectMeta?.properties.link
+                                          projectMeta?.properties?.link
                                 }
                                 target="_blank"
                             >
@@ -362,14 +362,14 @@ const ProjectCard = ({
                             </a>
                         ) : null}
 
-                        {projectMeta?.properties.twitter ? (
+                        {projectMeta?.properties?.twitter ? (
                             <a
                                 style={{padding: 8}}
                                 href={
-                                    pat.test(projectMeta?.properties.twitter)
-                                        ? projectMeta?.properties.twitter
+                                    pat.test(projectMeta?.properties?.twitter)
+                                        ? projectMeta?.properties?.twitter
                                         : 'https://' +
-                                          projectMeta?.properties.twitter
+                                          projectMeta?.properties?.twitter
                                 }
                                 target="_blank"
                             >
@@ -391,7 +391,7 @@ const ProjectCard = ({
                             paddingRight: 12,
                             margin: 0,
                         }}
-                    >{`${projectMeta?.properties.description}`}</p>
+                    >{`${projectMeta?.properties?.description}`}</p>
                 </div>
                 <div className="project-signal">
                     <div className="signal">
@@ -473,8 +473,8 @@ const AddSignalModal = ({
     allowance: number;
     approveLoading: boolean;
 }) => {
-    const {state} = React.useContext(GitcoinContext);
-    const [amount, setAmount] = React.useState(0);
+    const {state} = useContext(GitcoinContext);
+    const [amount, setAmount] = useState(0);
 
     const notEnoughAllowance = BigNumber.from(allowance || 0).lt(
         BigNumber.from(amount).mul(BigNumber.from(10).pow(18))
@@ -588,7 +588,7 @@ const RmoveSignalModal = ({
     wallet: string;
     contract: any;
 }) => {
-    const [amount, setAmount] = React.useState(0);
+    const [amount, setAmount] = useState(0);
 
     const [shareBalance, shareBalanceLoading, err] = useGetShareBalance(
         project?.deployment,

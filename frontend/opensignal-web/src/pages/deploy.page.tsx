@@ -76,11 +76,11 @@ const DeployPage = () => {
                                     ])
                                 }
                                 className="btn"
-                                color={'pink'}
+                                color="pink"
                                 fluid
                                 size="large"
                             >
-                                {'DEPLOY'}
+                                DEPLOY
                             </Button>
                         </Container>
                         <Container style={{marginTop: '2rem'}}>
@@ -99,11 +99,11 @@ const DeployPage = () => {
                                     onDeployOpenSignal('OpenSignalToken')
                                 }
                                 className="btn"
-                                color={'pink'}
+                                color="pink"
                                 fluid
                                 size="large"
                             >
-                                {'DEPLOY'}
+                                DEPLOY
                             </Button>
                         </Container>
                     </Form>

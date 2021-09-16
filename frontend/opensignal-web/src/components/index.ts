@@ -1,2 +1,2 @@
-import {StatusbarComponent} from './statusbar.component';
-export {StatusbarComponent};
+import { StatusbarComponent } from "./statusbar.component";
+export { StatusbarComponent };
