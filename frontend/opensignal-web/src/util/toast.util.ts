@@ -1,5 +1,5 @@
 export const successToastOpts = (icon?: string) => ({
-  duration: 4000,
+  duration: 5000,
   style: {
     background: "chartreuse",
   },
@@ -7,6 +7,6 @@ export const successToastOpts = (icon?: string) => ({
 });
 
 export const errorToastOpts = {
-  duration: 4000,
+  duration: 5000,
   icon: "❌",
 };
