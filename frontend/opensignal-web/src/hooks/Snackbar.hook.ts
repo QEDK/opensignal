@@ -13,9 +13,7 @@ const useSnackbar = (
         dispatch({ type: "SET_ERROR" });
       }, 4000);
       try {
-        const errReason = err
-          ? err["message"] || err["reason"] || err["msg"] || err
-          : err;
+        const errReason = err ? err["message"] || err["reason"] || err["msg"] || err : err;
         // snackbar.showMessage(err);
       } catch (error) {
         // snackbar.showMessage(state.err);

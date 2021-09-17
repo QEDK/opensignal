@@ -45,9 +45,7 @@ const deployContract = (
         console.log(
           `gas limit ${
             BigNumber.from(contract.deployTransaction.gasLimit).toNumber() / 1e9
-          } at gas price ${
-            BigNumber.from(contract.deployTransaction.gasPrice).toNumber() / 1e9
-          }`,
+          } at gas price ${BigNumber.from(contract.deployTransaction.gasPrice).toNumber() / 1e9}`,
         );
       }
 
