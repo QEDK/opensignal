@@ -13,10 +13,7 @@ const useGetOpenSignalContract = (metadata: any, trigger = false) => {
         const myweb3: any = new Web3(window.ethereum);
 
         setcontract(
-          new myweb3.eth.Contract(
-            CONTRACT_DATA.OpenSignal.abi,
-            metadata.properties.address,
-          ),
+          new myweb3.eth.Contract(CONTRACT_DATA.OpenSignal.abi, metadata.properties.address),
         );
         seterr(null);
       } catch (err) {
@@ -38,10 +35,7 @@ const useGetOpenSignalTokenContract = (metadata: any, trigger = false) => {
         const myweb3: any = new Web3(window.ethereum);
 
         setcontract(
-          new myweb3.eth.Contract(
-            CONTRACT_DATA.OpenSignalToken.abi,
-            metadata.properties.address,
-          ),
+          new myweb3.eth.Contract(CONTRACT_DATA.OpenSignalToken.abi, metadata.properties.address),
         );
         seterr(null);
       } catch (err) {
@@ -52,8 +46,4 @@ const useGetOpenSignalTokenContract = (metadata: any, trigger = false) => {
   return [contract, loading, err];
 };
 
-export {
-  useGetOpenSignalContract,
-  useGetOpenSignalTokenContract,
-  CONTRACT_DATA as CONTRACTS,
-};
+export { useGetOpenSignalContract, useGetOpenSignalTokenContract, CONTRACT_DATA as CONTRACTS };

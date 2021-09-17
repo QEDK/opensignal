@@ -4,21 +4,12 @@ import { CONTRACTS } from "./Contract.hook";
 import Web3 from "web3";
 import { ethers } from "ethers";
 
-const useGetShareBalance = (
-  deploymentAddr?: string,
-  addr?: string,
-  trigger = false,
-) => {
+const useGetShareBalance = (deploymentAddr?: string, addr?: string, trigger = false) => {
   const [balance, setbalance] = React.useState<string>("");
   const [loading, setloading] = React.useState<boolean>(false);
   const [err, seterr] = React.useState<any>(null);
   React.useMemo(async () => {
-    if (
-      isAddress(deploymentAddr) &&
-      addr &&
-      isAddress(addr) &&
-      isAddress(addr)
-    ) {
+    if (isAddress(deploymentAddr) && addr && isAddress(addr) && isAddress(addr)) {
       setbalance("");
       setloading(true);
       seterr(null);
@@ -98,10 +89,7 @@ const useGetShareAllowance = (
 
 const getShareContract = (deploymentAddr: string) => {
   const myweb3: any = new Web3(window.ethereum);
-  return new myweb3.eth.Contract(
-    CONTRACTS.OpenSignalShares.abi,
-    deploymentAddr,
-  );
+  return new myweb3.eth.Contract(CONTRACTS.OpenSignalShares.abi, deploymentAddr);
 };
 
 const useGetTotalSupply = (shareContractAddress?: string, trigger = false) => {
@@ -136,9 +124,4 @@ const useGetTotalSupply = (shareContractAddress?: string, trigger = false) => {
   return [totalSupply, loading, err];
 };
 
-export {
-  useGetShareBalance,
-  useGetShareAllowance,
-  getShareContract,
-  useGetTotalSupply,
-};
+export { useGetShareBalance, useGetShareAllowance, getShareContract, useGetTotalSupply };

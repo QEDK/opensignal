@@ -83,16 +83,11 @@ const getProviderName = () => {
 
   if (typeof window.__CIPHER__ !== "undefined") return "cipher";
 
-  if (window.web3.currentProvider.constructor.name === "EthereumProvider")
-    return "mist";
+  if (window.web3.currentProvider.constructor.name === "EthereumProvider") return "mist";
 
-  if (window.web3.currentProvider.constructor.name === "Web3FrameProvider")
-    return "parity";
+  if (window.web3.currentProvider.constructor.name === "Web3FrameProvider") return "parity";
 
-  if (
-    window.web3.currentProvider.host &&
-    window.web3.currentProvider.host.indexOf("infura") !== -1
-  )
+  if (window.web3.currentProvider.host && window.web3.currentProvider.host.indexOf("infura") !== -1)
     return "infura";
 
   if (
@@ -104,10 +99,4 @@ const getProviderName = () => {
   return "unknown";
 };
 
-export {
-  getNetworkName,
-  getNetworks,
-  getNetworksOptions,
-  isAddress,
-  minimizeAddress,
-};
+export { getNetworkName, getNetworks, getNetworksOptions, isAddress, minimizeAddress };

@@ -3,11 +3,7 @@ import React from "react";
 import { HttpProviderBase } from "web3-core-helpers";
 import { isAddress } from "../util/eth.util";
 
-const useGetBalance = (
-  addr: string,
-  provider: HttpProviderBase,
-  trigger = false,
-) => {
+const useGetBalance = (addr: string, provider: HttpProviderBase, trigger = false) => {
   const [balance, setbalance] = React.useState("");
   React.useMemo(async () => {
     if (provider && addr && isAddress(addr)) {
