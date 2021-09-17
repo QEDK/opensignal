@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "yarn lint && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix && prettier --write ."

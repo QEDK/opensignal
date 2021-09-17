@@ -13,13 +13,13 @@ import {
   useGetProjects,
   useGetProjectURI,
   useGetreserveRatio,
-  useGetSaleReturn
+  useGetSaleReturn,
 } from "../hooks/OpenSignal.hook";
 import {
   getShareContract,
   useGetShareAllowance,
   useGetShareBalance,
-  useGetTotalSupply
+  useGetTotalSupply,
 } from "../hooks/OpenSignalShares";
 import { useGetAllowance } from "../hooks/OpenSignalToken.hook";
 import { GitcoinContext } from "../store";
