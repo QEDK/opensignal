@@ -43,11 +43,7 @@ const useGetAllowance = (
   }, [addr, tokenContract, opensignalMeta, trigger]);
   return [allowance, loading, err];
 };
-const useGetTokenBalance = (
-  addr: string,
-  tokenContract: any,
-  trigger = false,
-) => {
+const useGetTokenBalance = (addr: string, tokenContract: any, trigger = false) => {
   const [balance, setbalance] = React.useState("");
   const [loading, setloading] = React.useState<boolean>(false);
   const [err, seterr] = React.useState<any>(null);

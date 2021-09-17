@@ -220,9 +220,7 @@ const useGetSaleReturn = (
       setloading(true);
       seterr(null);
       try {
-        const contract = getbancorContract(
-          "0x11D6990f1aB66354189fe2477e547Deb86df16de",
-        );
+        const contract = getbancorContract("0x11D6990f1aB66354189fe2477e547Deb86df16de");
 
         const saleReturn = await contract.methods
           .calculateSaleReturn(
@@ -256,10 +254,4 @@ const getbancorContract = (deploymentAddr: string) => {
   return new myweb3.eth.Contract(CONTRACTS.BancorFormula.abi, deploymentAddr);
 };
 
-export {
-  useGetProjectIds,
-  useGetProjects,
-  useGetProjectURI,
-  useGetSaleReturn,
-  useGetreserveRatio,
-};
+export { useGetProjectIds, useGetProjects, useGetProjectURI, useGetSaleReturn, useGetreserveRatio };

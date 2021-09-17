@@ -8,559 +8,559 @@ $PADDING_BIG: 0.75rem;
 $FONT_SMALL: calc(0.25rem + 1vmin);
 
 @font-face {
-    font-family: 'Roboto';
-    src: url('./assets/fonts/Roboto-Medium.ttf');
-    font-style: normal;
+  font-family: "Roboto";
+  src: url("./assets/fonts/Roboto-Medium.ttf");
+  font-style: normal;
 }
 @font-face {
-    font-family: 'Roboto';
-    src: url('./assets/fonts/Roboto-Italic.ttf');
-    font-style: italic;
+  font-family: "Roboto";
+  src: url("./assets/fonts/Roboto-Italic.ttf");
+  font-style: italic;
 }
 @font-face {
-    font-family: 'Roboto';
-    src: url('./assets/fonts/Roboto-Thin.ttf');
-    font-weight: 300;
+  font-family: "Roboto";
+  src: url("./assets/fonts/Roboto-Thin.ttf");
+  font-weight: 300;
 }
 @font-face {
-    font-family: 'Roboto';
-    src: url('./assets/fonts/Roboto-Bold.ttf');
-    font-weight: 700;
+  font-family: "Roboto";
+  src: url("./assets/fonts/Roboto-Bold.ttf");
+  font-weight: 700;
 }
 
 html,
 body {
-    font-family: Roboto;
-    height: 100vh;
-    color: $TEXT_PRIMARY;
-    font-size: calc(0.375rem + 1vmin);
-    font-family: Roboto;
+  font-family: Roboto;
+  height: 100vh;
+  color: $TEXT_PRIMARY;
+  font-size: calc(0.375rem + 1vmin);
+  font-family: Roboto;
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 a {
-    cursor: pointer;
-    color: aqua;
+  cursor: pointer;
+  color: aqua;
 }
 .root {
-    height: 100vh;
-    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 100vh;
+  background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 .btn {
-    cursor: pointer;
+  cursor: pointer;
 
-    &:hover {
-        position: relative;
-        top: 1px;
-    }
+  &:hover {
+    position: relative;
+    top: 1px;
+  }
 }
 
 .boucny-balls {
-    position: absolute;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+
+  .loading {
+    position: relative;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 4rem;
+    font-style: italic;
+  }
+  .boucny-balls-wrapper {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
-
-    .loading {
-        position: relative;
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 4rem;
-        font-style: italic;
+    height: 2rem;
+    div {
+      position: relative;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: #aa2464;
+      margin: 0 0.5rem;
+      animation-name: bounce;
+      animation-duration: 0.6s;
+      animation-timing-function: linear;
+      animation-delay: 0s;
+      animation-iteration-count: infinite;
+      &:nth-child(2) {
+        animation-delay: 0.4s;
+        background-color: #0066aa;
+      }
+      &:nth-child(3) {
+        animation-delay: 0.8s;
+        background-color: #118a55;
+      }
+      &:nth-child(4) {
+        animation-delay: 1.2s;
+        background-color: #e7be2b;
+      }
+      &:nth-child(5) {
+        animation-delay: 1.6s;
+        background-color: #ff5500;
+      }
     }
-    .boucny-balls-wrapper {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        height: 2rem;
-        div {
-            position: relative;
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            background-color: #aa2464;
-            margin: 0 0.5rem;
-            animation-name: bounce;
-            animation-duration: 0.6s;
-            animation-timing-function: linear;
-            animation-delay: 0s;
-            animation-iteration-count: infinite;
-            &:nth-child(2) {
-                animation-delay: 0.4s;
-                background-color: #0066aa;
-            }
-            &:nth-child(3) {
-                animation-delay: 0.8s;
-                background-color: #118a55;
-            }
-            &:nth-child(4) {
-                animation-delay: 1.2s;
-                background-color: #e7be2b;
-            }
-            &:nth-child(5) {
-                animation-delay: 1.6s;
-                background-color: #ff5500;
-            }
-        }
-    }
+  }
 }
 
 @keyframes bounce {
-    0% {
-        top: 0;
-    }
+  0% {
+    top: 0;
+  }
 
-    25% {
-        top: 1rem;
-    }
+  25% {
+    top: 1rem;
+  }
 
-    50% {
-        top: 0;
-    }
+  50% {
+    top: 0;
+  }
 
-    75% {
-        top: -1rem;
-    }
+  75% {
+    top: -1rem;
+  }
 
-    100% {
-        top: 0;
-    }
+  100% {
+    top: 0;
+  }
 }
 
 .nav-bar {
-    width: 100%;
-    border-bottom: 1px solid $PRIMARY;
+  width: 100%;
+  border-bottom: 1px solid $PRIMARY;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  padding: $PADDING_BIG;
+  .nav {
+    flex: 1;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    .nav-item {
+      a {
+        @extend .btn;
+        margin: 0;
+        padding: 0 $PADDING_BIG;
+        color: $TEXT_PRIMARY;
+        font-weight: bold;
+        font-size: calc(1rem + 1vmin);
+        text-shadow: 1px 2px 3px $SECONDARY;
+        &:hover {
+          text-shadow: 2px 4px 5px $SECONDARY;
+        }
+      }
+    }
+  }
+
+  .wallet {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    padding: $PADDING_BIG;
-    .nav {
-        flex: 1;
 
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        align-items: stretch;
-        .nav-item {
-            a {
-                @extend .btn;
-                margin: 0;
-                padding: 0 $PADDING_BIG;
-                color: $TEXT_PRIMARY;
-                font-weight: bold;
-                font-size: calc(1rem + 1vmin);
-                text-shadow: 1px 2px 3px $SECONDARY;
-                &:hover {
-                    text-shadow: 2px 4px 5px $SECONDARY;
-                }
-            }
-        }
+    .address {
+      @extend .btn;
+      margin: 0 0.5rem;
+      border: 1px solid $PRIMARY;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: stretch;
+      background-color: transparent;
+      padding: 0;
+      color: $TEXT_PRIMARY;
+
+      h3 {
+        display: inline-flex;
+        align-items: center;
+        margin: 0;
+        padding: $PADDING $PADDING_BIG;
+      }
+      span {
+        border: 1px solid $PRIMARY;
+        font-size: $FONT_SMALL;
+
+        background-color: $PRIMARY;
+        color: $TEXT_SECONDARY;
+        padding: $PADDING;
+        align-self: stretch;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      &:hover {
+        box-shadow: 1px 2px 8px 2px $SECONDARY;
+      }
     }
+    .wallet-btn {
+      width: 3rem;
+      height: 3rem;
+      padding: $PADDING;
+      position: relative;
 
-    .wallet {
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+}
+
+.page-container {
+  height: 100vh;
+  overflow: auto;
+  overflow-x: hidden;
+  padding-bottom: 5rem;
+}
+.page-header {
+  margin-top: 2rem;
+  width: 100%;
+  position: relative;
+
+  h3 {
+    width: 100%;
+    font-size: calc(1rem + 2vmin);
+
+    text-shadow: 1px 2px 3px $SECONDARY;
+    text-align: center;
+    text-decoration: underline;
+  }
+  span {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    &.btn {
+      position: absolute;
+      &:hover {
+        top: 1px;
+        text-decoration: underline;
+        text-shadow: 1px 2px 3px $SECONDARY;
+      }
+    }
+  }
+}
+.my-icon {
+  width: 1rem;
+  height: 1rem;
+  align-self: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  img {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+  }
+}
+.projects {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  .project {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: stretch;
+    border: 1px solid white;
+    width: 100%;
+
+    margin: 0 1rem;
+
+    .project-avatar {
+      width: 20rem;
+      height: 20rem;
+      border: 1px solid $SECONDARY;
+      position: relative;
+      background-color: $PRIMARY;
+      img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+      }
+      .project-avatar-sub {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+
+        .buttons {
+          display: flex;
+          flex-direction: row;
+          border-top: 1px solid $PRIMARY;
+          box-shadow: 0 -1px 5px 0 $SECONDARY;
+          .button {
+            flex: 1;
+            border-radius: 0;
+            &:nth-child(2) {
+              background-color: #aa0066;
+            }
+            &:nth-child(1) {
+              background-color: #00af44;
+            }
+          }
+        }
+      }
+    }
+    .project-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: stretch;
+
+      .project-actions {
+        width: 100%;
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: center;
-        align-items: center;
-
-        .address {
-            @extend .btn;
-            margin: 0 0.5rem;
-            border: 1px solid $PRIMARY;
+        align-items: stretch;
+        .signal-amount {
+          flex: 1;
+          input {
+            color: white;
+            border-radius: 0;
+            border: 1px solid white;
+            background-color: transparent;
+          }
+        }
+        .buttons {
+          display: flex;
+          flex-direction: row;
+          width: 16rem;
+          .button {
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
             justify-content: center;
             align-items: stretch;
-            background-color: transparent;
+            flex: 1;
+            border-radius: 0;
+            font-size: 2rem;
             padding: 0;
-            color: $TEXT_PRIMARY;
-
-            h3 {
-                display: inline-flex;
-                align-items: center;
-                margin: 0;
-                padding: $PADDING $PADDING_BIG;
-            }
-            span {
-                border: 1px solid $PRIMARY;
-                font-size: $FONT_SMALL;
-
-                background-color: $PRIMARY;
-                color: $TEXT_SECONDARY;
-                padding: $PADDING;
-                align-self: stretch;
-                font-weight: bold;
-                display: inline-flex;
-                align-items: center;
-            }
-
+            transition: 0.3s all;
+            line-height: 3rem;
+            color: white;
             &:hover {
-                box-shadow: 1px 2px 8px 2px $SECONDARY;
+              font-size: 2.3rem;
             }
-        }
-        .wallet-btn {
-            width: 3rem;
-            height: 3rem;
-            padding: $PADDING;
-            position: relative;
-
-            img {
-                width: 100%;
-                height: 100%;
+            &:nth-child(2) {
+              background-color: #aa0066;
             }
-        }
-    }
-}
-
-.page-container {
-    height: 100vh;
-    overflow: auto;
-    overflow-x: hidden;
-    padding-bottom: 5rem;
-}
-.page-header {
-    margin-top: 2rem;
-    width: 100%;
-    position: relative;
-
-    h3 {
-        width: 100%;
-        font-size: calc(1rem + 2vmin);
-
-        text-shadow: 1px 2px 3px $SECONDARY;
-        text-align: center;
-        text-decoration: underline;
-    }
-    span {
-        position: absolute;
-        top: 0;
-        right: 0;
-
-        &.btn {
-            position: absolute;
-            &:hover {
-                top: 1px;
-                text-decoration: underline;
-                text-shadow: 1px 2px 3px $SECONDARY;
+            &:nth-child(1) {
+              background-color: #00af44;
             }
+            i {
+              height: 100%;
+              width: 100%;
+              margin: auto;
+            }
+            &.signal-approve {
+              @extend .btn;
+              font-size: 1.5rem;
+              background-color: palevioletred;
+              color: white;
+            }
+          }
         }
-    }
-}
-.my-icon {
-    width: 1rem;
-    height: 1rem;
-    align-self: center;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    img {
-        object-fit: contain;
-        width: 100%;
-        height: 100%;
-    }
-}
-.projects {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    .project {
+      }
+
+      .project-signal {
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: center;
-        align-items: stretch;
-        border: 1px solid white;
+        align-items: center;
+        border-top: 1px solid white;
+        .signal {
+          display: flex;
+          flex-direction: row;
+
+          justify-content: center;
+          align-items: center;
+
+          text-align: center;
+          color: transparentize($PRIMARY, 0.25);
+          text-shadow: 1px 1px 1px $SECONDARY;
+          margin: 0;
+          padding: $PADDING;
+          flex: 1;
+
+          .signal-info {
+            margin: 0 0.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: row;
+          }
+          i {
+            height: 100%;
+          }
+          p {
+            display: inline-block;
+            margin: 0 0.25rem;
+          }
+        }
+      }
+      .project-header {
+        width: 100%;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
+
+        h3 {
+          flex: 1;
+          padding: $PADDING;
+          width: 100%;
+          text-align: left;
+          color: transparentize($PRIMARY, 0.15);
+          text-shadow: 1px 1px 1px $SECONDARY;
+          margin: 0;
+        }
+
+        p {
+          padding: $PADDING;
+          color: #cacaca;
+        }
+      }
+      .project-subheader {
         width: 100%;
 
-        margin: 0 1rem;
-
-        .project-avatar {
-            width: 20rem;
-            height: 20rem;
-            border: 1px solid $SECONDARY;
-            position: relative;
-            background-color: $PRIMARY;
-            img {
-                object-fit: cover;
-                width: 100%;
-                height: 100%;
-            }
-            .project-avatar-sub {
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-
-                .buttons {
-                    display: flex;
-                    flex-direction: row;
-                    border-top: 1px solid $PRIMARY;
-                    box-shadow: 0 -1px 5px 0 $SECONDARY;
-                    .button {
-                        flex: 1;
-                        border-radius: 0;
-                        &:nth-child(2) {
-                            background-color: #aa0066;
-                        }
-                        &:nth-child(1) {
-                            background-color: #00af44;
-                        }
-                    }
-                }
-            }
+        & > div {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          border: 1px solid white;
+          width: 100%;
+          text-align: center;
+          color: transparentize($PRIMARY, 0.25);
+          text-shadow: 1px 1px 1px $SECONDARY;
+          margin: 0;
+          padding: $PADDING;
         }
-        .project-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: flex-start;
-            align-items: stretch;
-
-            .project-actions {
-                width: 100%;
-                display: flex;
-                flex-direction: row;
-                flex-wrap: nowrap;
-                justify-content: center;
-                align-items: stretch;
-                .signal-amount {
-                    flex: 1;
-                    input {
-                        color: white;
-                        border-radius: 0;
-                        border: 1px solid white;
-                        background-color: transparent;
-                    }
-                }
-                .buttons {
-                    display: flex;
-                    flex-direction: row;
-                    width: 16rem;
-                    .button {
-                        display: flex;
-                        flex-direction: row;
-                        flex-wrap: nowrap;
-                        justify-content: center;
-                        align-items: stretch;
-                        flex: 1;
-                        border-radius: 0;
-                        font-size: 2rem;
-                        padding: 0;
-                        transition: 0.3s all;
-                        line-height: 3rem;
-                        color: white;
-                        &:hover {
-                            font-size: 2.3rem;
-                        }
-                        &:nth-child(2) {
-                            background-color: #aa0066;
-                        }
-                        &:nth-child(1) {
-                            background-color: #00af44;
-                        }
-                        i {
-                            height: 100%;
-                            width: 100%;
-                            margin: auto;
-                        }
-                        &.signal-approve {
-                            @extend .btn;
-                            font-size: 1.5rem;
-                            background-color: palevioletred;
-                            color: white;
-                        }
-                    }
-                }
-            }
-
-            .project-signal {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: nowrap;
-                justify-content: center;
-                align-items: center;
-                border-top: 1px solid white;
-                .signal {
-                    display: flex;
-                    flex-direction: row;
-
-                    justify-content: center;
-                    align-items: center;
-
-                    text-align: center;
-                    color: transparentize($PRIMARY, 0.25);
-                    text-shadow: 1px 1px 1px $SECONDARY;
-                    margin: 0;
-                    padding: $PADDING;
-                    flex: 1;
-
-                    .signal-info {
-                        margin: 0 0.5rem;
-                        position: relative;
-                        display: flex;
-                        flex-direction: row;
-                    }
-                    i {
-                        height: 100%;
-                    }
-                    p {
-                        display: inline-block;
-                        margin: 0 0.25rem;
-                    }
-                }
-            }
-            .project-header {
-                width: 100%;
-                flex-direction: column;
-                flex-wrap: nowrap;
-                justify-content: center;
-
-                h3 {
-                    flex: 1;
-                    padding: $PADDING;
-                    width: 100%;
-                    text-align: left;
-                    color: transparentize($PRIMARY, 0.15);
-                    text-shadow: 1px 1px 1px $SECONDARY;
-                    margin: 0;
-                }
-
-                p {
-                    padding: $PADDING;
-                    color: #cacaca;
-                }
-            }
-            .project-subheader {
-                width: 100%;
-
-                & > div {
-                    display: flex;
-                    flex-direction: row;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                    align-items: center;
-                    border: 1px solid white;
-                    width: 100%;
-                    text-align: center;
-                    color: transparentize($PRIMARY, 0.25);
-                    text-shadow: 1px 1px 1px $SECONDARY;
-                    margin: 0;
-                    padding: $PADDING;
-                }
-            }
-        }
+      }
     }
+  }
 }
 
 .staking-projects {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+
+  .project {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
 
-    .project {
-        display: flex;
-        flex-direction: column;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-
-        border: 3px solid $PRIMARY;
-        border-radius: 5px;
-        width: 20rem;
-        box-shadow: 2px 4px 16px 3px black;
-        transition: 0.3s all;
-        margin: 0 1rem;
-        &:hover {
-            transform: scale(1.01);
-        }
-        h3 {
-            width: 100%;
-            padding: $PADDING_BIG;
-            margin: 0;
-            text-align: center;
-            border-bottom: 1px solid $SECONDARY;
-            box-shadow: 0 2px 5px 1px $SECONDARY;
-            z-index: 10;
-        }
-        .project-avatar {
-            height: 15rem;
-            background-color: $PRIMARY;
-            width: 100%;
-            border-bottom: 1px solid $SECONDARY;
-
-            img {
-                width: 100%;
-                height: 100%;
-            }
-        }
-
-        .project-subheader {
-            width: 100%;
-
-            p {
-                border-bottom: 1px solid $PRIMARY;
-                width: 100%;
-                text-align: center;
-                background-color: #232731;
-                color: transparentize($PRIMARY, 0.25);
-                text-shadow: 1px 1px 1px $SECONDARY;
-                margin: 0;
-                padding: $PADDING;
-            }
-        }
+    border: 3px solid $PRIMARY;
+    border-radius: 5px;
+    width: 20rem;
+    box-shadow: 2px 4px 16px 3px black;
+    transition: 0.3s all;
+    margin: 0 1rem;
+    &:hover {
+      transform: scale(1.01);
     }
+    h3 {
+      width: 100%;
+      padding: $PADDING_BIG;
+      margin: 0;
+      text-align: center;
+      border-bottom: 1px solid $SECONDARY;
+      box-shadow: 0 2px 5px 1px $SECONDARY;
+      z-index: 10;
+    }
+    .project-avatar {
+      height: 15rem;
+      background-color: $PRIMARY;
+      width: 100%;
+      border-bottom: 1px solid $SECONDARY;
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .project-subheader {
+      width: 100%;
+
+      p {
+        border-bottom: 1px solid $PRIMARY;
+        width: 100%;
+        text-align: center;
+        background-color: #232731;
+        color: transparentize($PRIMARY, 0.25);
+        text-shadow: 1px 1px 1px $SECONDARY;
+        margin: 0;
+        padding: $PADDING;
+      }
+    }
+  }
 }
 
 .limit-btn {
-    background-color: $DI;
-    color: $PRIMARY;
-    border: none;
-    position: relative;
-    padding: 0 0.75rem;
-    font-size: 0.9rem;
-    min-width: 5rem;
+  background-color: $DI;
+  color: $PRIMARY;
+  border: none;
+  position: relative;
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  min-width: 5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  cursor: pointer;
+  p {
+    margin: 0;
+  }
+
+  div {
+    flex: 1;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: stretch;
-    cursor: pointer;
-    p {
-        margin: 0;
-    }
+    align-items: center;
 
-    div {
-        flex: 1;
-        display: flex;
-        align-items: center;
+    padding: 0 $PADDING;
+    text-align: center;
+  }
 
-        padding: 0 $PADDING;
-        text-align: center;
-    }
-
-    &.red {
-        background-color: hotpink;
-    }
-    &.green {
-        background-color: lightseagreen;
-    }
+  &.red {
+    background-color: hotpink;
+  }
+  &.green {
+    background-color: lightseagreen;
+  }
 }
