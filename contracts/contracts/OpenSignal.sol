@@ -98,7 +98,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         nativeToken.safeTransferFrom(address(this), _msgSender(), project.selfStake);
     }
 
-    function addSignal(bytes32 id, uint256 amount) external {
+    function addSignal(bytes32 id, uint256 amount, uint256 minShares) external {
         Project memory project = projects[id];
         require(project.creator != address(0), "NON_EXISTENT_PROJECT");
         nativeToken.safeTransferFrom(_msgSender(), address(this), amount);
@@ -109,6 +109,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
             reserveRatio,
             amount
         );
+        require(sharesAmt >= minShares, "SLIPPAGE_PROTECTION");
         projects[id].signal += amount;
         _deployment.mint(_msgSender(), sharesAmt);
         emit IncreaseSignal(id, amount);
