@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import React, { useContext, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { FiExternalLink } from "react-icons/fi";
 import { useHistory } from "react-router";
 import { Button, Container, Grid, Header, Icon, Input, Loader, Modal } from "semantic-ui-react";
 import Web3 from "web3";
@@ -111,7 +112,23 @@ const ProjectPage = () => {
         })
         .then((res: any) => {
           setCreateLoading(false);
-          toast(`Signal increased of ${amount} successfully.`, successToastOpts("🎉"));
+          toast(
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              {`Signal increased of ${amount} successfully!`}
+              <FiExternalLink
+                style={{
+                  marginLeft: "5px",
+                }}
+              />
+            </div>,
+            successToastOpts("🎉"),
+          );
           setSuccessfulTx(res.transactionHash);
           setAddSignalModal(false);
         })
@@ -137,7 +154,23 @@ const ProjectPage = () => {
         })
         .then((res: any) => {
           setCreateLoading(false);
-          toast(`Signal decreased of ${amount} successfully!`, successToastOpts());
+          toast(
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              {`Signal decreased of ${amount} successfully!`}
+              <FiExternalLink
+                style={{
+                  marginLeft: "5px",
+                }}
+              />
+            </div>,
+            successToastOpts(),
+          );
           setSuccessfulTx(res.transactionHash);
           setRemoveSignalModal(false);
         })

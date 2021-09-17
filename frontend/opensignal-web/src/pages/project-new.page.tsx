@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers";
 import React, { useContext, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { FiExternalLink } from "react-icons/fi";
 import { useHistory } from "react-router";
 import { Button, Container, Form, Grid, Placeholder } from "semantic-ui-react";
 import Web3 from "web3";
@@ -106,8 +107,24 @@ const ProjectNewPage = () => {
         });
       setCreateLoading(false);
       setProjectCreatedTx(createProjectTx);
-      toast("Project created ", successToastOpts("🎉"));
-      await new Promise((r) => setTimeout(r, 3000));
+      toast(
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
+          Project created
+          <FiExternalLink
+            style={{
+              marginLeft: "5px",
+            }}
+          />
+        </div>,
+        successToastOpts("🎉"),
+      );
+      await new Promise((r) => setTimeout(r, 4500));
       return goToProject();
     } catch (err) {
       toast("Error", errorToastOpts);
