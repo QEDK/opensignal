@@ -41,13 +41,13 @@ contract RewardsDistribution is Ownable, Initializable {
     uint256 public epocLength;
 
     uint256 public totalTokensStaked;
-    uint256 public TotalRewardsToDistribute = 100; //distribute 100 tokens per epoch
+    uint256 public totalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
     function initialize(
         address _owner,
         IERC20 _nativeToken,
         uint32 _epochLength
-    ) initializer public {
+    ) public initializer {
         owner = _owner;
         openSignalProxy = _nativeToken;
         epocLength = _epochLength;
@@ -72,11 +72,11 @@ contract RewardsDistribution is Ownable, Initializable {
 
     function epochHasEnded() internal returns (bool) {
         if (currentEpochStaking.length != 0) {
-            distributeRewards(TotalRewardsToDistribute, totalTokensStaked);
+            distributeRewards(totalRewardsToDistribute, totalTokensStaked);
         }
         
-        for (uint256 i=0; i<currentEpochStaking.length; i++) { //ensure that the two arrays are always equal length
-            
+        for (uint256 i = 0; i < currentEpochStaking.length; i++) { //ensure that the two arrays are always equal length
+        
             currentEpochStaking = rewardEpochStaking;
             rewardEpochStaking[i].minimumStake = rewardEpochStaking[i].currentStake;
         }
@@ -122,7 +122,9 @@ contract RewardsDistribution is Ownable, Initializable {
         require(destination != address(0), "Cant add a zero address");
         require(amount != 0, "Cant add a zero amount");
 
-        DistributionData memory rewardsDistribution = DistributionData({destination, currentStake: amount, minimumStake: 0 });
+        DistributionData memory rewardsDistribution = DistributionData(
+            {destination: destination, currentStake: amount, minimumStake: 0 }
+        );
         rewardEpochStaking.push(rewardsDistribution);
 
         emit RewardDistributionAdded(rewardEpochStaking.length - 1, destination, amount);
@@ -164,7 +166,7 @@ contract RewardsDistribution is Ownable, Initializable {
     ) public onlyOwner returns (bool) {
         require(index <= distributions.length - 1, "index out of bounds");
         if (tokenUnstaked) { //unstaked tokens
-            rewardEpochStaking[index].currentStake =  rewardEpochStaking[index].currentStake.sub(amount);
+            rewardEpochStaking[index].currentStake = rewardEpochStaking[index].currentStake.sub(amount);
 
             if (rewardEpochStaking[index].currentStake == 0) { // they no longer have any staked tokens so remove them from the rewards array
                 removeRewardDistribution(index, sender);
@@ -172,7 +174,7 @@ contract RewardsDistribution is Ownable, Initializable {
                 rewardEpochStaking[index].minimumStake = rewardEpochStaking[index].currentStake;
             }
         }
-        rewardEpochStaking[index].amount =  rewardEpochStaking[index].currentStake.plus(amount);
+        rewardEpochStaking[index].amount = rewardEpochStaking[index].currentStake.plus(amount);
         return true;
     }
 
@@ -187,7 +189,7 @@ contract RewardsDistribution is Ownable, Initializable {
         require(OpenSignalProxy != address(0), "OpenSignalProxy is not set");
         require(
             IERC20(OpenSignalProxy).balanceOf(address(this)) >= amount,
-            "RewardsDistribution contract does not have enough tokens to distribute"
+            "insufficient tokens available"
         );
 
         uint256 memory remainder = amount;
