@@ -46,7 +46,7 @@ contract RewardsDistribution is Ownable, Initializable {
     function initialize(
         address _owner,
         IERC20 _nativeToken,
-        uint32 _epochLengt
+        uint32 _epochLength
     ) initializer public {
         owner = _owner;
         openSignalProxy = _nativeToken;
