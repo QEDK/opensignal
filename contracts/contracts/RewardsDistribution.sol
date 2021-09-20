@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./libraries/SafeDecimalMath.sol";
+import "./libraries/safeDecimalMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract RewardsDistribution is Ownable, Initializable {
     using SafeMath for uint;
+    using SafeMath for uint256;
     using SafeDecimalMath for uint;
     using SafeERC20 for IERC20;
 
@@ -18,11 +19,6 @@ contract RewardsDistribution is Ownable, Initializable {
         uint currentStake;
         uint minimumStake;
     }
-
-    /**
-     * @notice Authorised address able to call distributeRewards
-     */
-    address public owner;
 
     /**
      * @notice Open Signal ERC20 contract
@@ -40,19 +36,17 @@ contract RewardsDistribution is Ownable, Initializable {
     uint256 public epochEnd;
     uint256 public epocLength;
 
-    uint256 public totalTokensStaked;
+    uint256 public totalTokensStaked = 0;
     uint256 public totalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
     function initialize(
-        address _owner,
         IERC20 _nativeToken,
         uint32 _epochLength
     ) public initializer {
-        owner = _owner;
         openSignalProxy = _nativeToken;
         epocLength = _epochLength;
-        epochBegin = now;
-        epochEnd = now + _epochLength;
+        epochBegin = block.timestamp;
+        epochEnd = block.timestamp + _epochLength;
     }
 
     // ========== EXTERNAL SETTERS ==========
@@ -61,29 +55,6 @@ contract RewardsDistribution is Ownable, Initializable {
         openSignalProxy = _openSignalProxy;
     }
 
-    /**
-     * @notice Set the address of the contract authorised to call distributeRewards()
-     * @param _authority Address of the authorised calling contract.
-     */
-    function setAuthority(address _authority) external onlyOwner {
-        authority = _authority;
-    }
-
-
-    function epochHasEnded() internal returns (bool) {
-        if (currentEpochStaking.length != 0) {
-            distributeRewards(totalRewardsToDistribute, totalTokensStaked);
-        }
-        
-        for (uint256 i = 0; i < currentEpochStaking.length; i++) { //ensure that the two arrays are always equal length
-        
-            currentEpochStaking = rewardEpochStaking;
-            rewardEpochStaking[i].minimumStake = rewardEpochStaking[i].currentStake;
-        }
-
-        epochEnd = epochEnd.plus(epocLength);
-        return true;
-    }
 
     // ========== EXTERNAL FUNCTIONS ==========
 
@@ -91,7 +62,7 @@ contract RewardsDistribution is Ownable, Initializable {
         require(destination != address(0), "Cant add a zero address");
         require(amount != 0, "Cant add a zero amount");
 
-        if (now >= epochEnd) {
+        if (block.timestamp >= epochEnd) {
             epochHasEnded();
         }
 
@@ -108,6 +79,20 @@ contract RewardsDistribution is Ownable, Initializable {
         } else {
             totalTokensStaked = totalTokensStaked.plus(amount);
         }
+    }
+
+    function getCurrentRewardEstimate(address destination) public returns (uint256) {
+        uint256 index = userIndex(destination);
+        require(index != 0, "You are not eligible");
+        if (rewardEpochStaking[index].minimumStake == 0) {
+            return 0;
+        }
+        return rewardEpochStaking[index].minimumStake.mul(totalRewardsToDistribute.div(totalTokensStaked));
+    }
+
+    function changeEpochLength(uint256 _seconds) public returns (bool) {
+        epocLength = _seconds;
+        return true;
     }
 
     /**
@@ -136,7 +121,7 @@ contract RewardsDistribution is Ownable, Initializable {
      * so it will no longer be included in the call to distributeRewards()
      * @param index The index of the DistributionData to delete
      */
-    function removeRewardDistribution(uint index, address sender) external onlyOwner {
+    function removeRewardDistribution(uint index, address sender) internal onlyOwner {
         require(index <= rewardEpochStaking.length - 1, "index out of bounds");
 
         // shift rewardEpochStaking indexes across
@@ -164,7 +149,7 @@ contract RewardsDistribution is Ownable, Initializable {
         bool tokenUnstaked,
         address sender
     ) public onlyOwner returns (bool) {
-        require(index <= distributions.length - 1, "index out of bounds");
+        require(index <= rewardEpochStaking.length - 1, "index out of bounds");
         if (tokenUnstaked) { //unstaked tokens
             rewardEpochStaking[index].currentStake = rewardEpochStaking[index].currentStake.sub(amount);
 
@@ -182,22 +167,21 @@ contract RewardsDistribution is Ownable, Initializable {
         * @notice Edits a RewardDistribution in the distributions array.
         * @param amount this is the total amount of tokens that will be distributed. Each participant will get their proportion of amount based on their total tokens staked
      */
-    function distributeRewards(uint amount, uint256 totalTokensStaked) external returns (bool) {
+    function distributeRewards(uint amount, uint256 totalTokensStaked) internal returns (bool) {
         require(amount > 0, "Nothing to distribute");
         require(msg.sender == owner, "Caller is not authorised");
-        require(rewardEscrow != address(0), "RewardEscrow is not set");
-        require(OpenSignalProxy != address(0), "OpenSignalProxy is not set");
+        require(openSignalProxy != address(0), "OpenSignalProxy is not set");
         require(
-            IERC20(OpenSignalProxy).balanceOf(address(this)) >= amount,
+            IERC20(openSignalProxy).balanceOf(address(this)) >= amount,
             "insufficient tokens available"
         );
 
-        uint256 memory remainder = amount;
+        uint256 remainder = amount;
 
         for (uint i = 0; i < rewardEpochStaking.length; i++) {
             if (rewardEpochStaking[i].destination != address(0) && rewardEpochStaking[i].minimumStake != 0) {
-                uint256 memory userAllocation = rewardEpochStaking[i].minimumStake.mul(amount.div(totalTokensStaked));
-                remainder = remainder.sub(userAlocation);
+                uint256 userAllocation = rewardEpochStaking[i].minimumStake.mul(amount.div(totalTokensStaked));
+                remainder = remainder.sub(userAllocation);
 
                 // Transfer the OS Tokens
                 IERC20(openSignalProxy).safeTransferFrom(rewardEpochStaking[i].destination, userAllocation);
@@ -205,6 +189,21 @@ contract RewardsDistribution is Ownable, Initializable {
         }
 
         emit RewardsDistributed(amount);
+        return true;
+    }
+
+    function epochHasEnded() internal returns (bool) {
+        if (currentEpochStaking.length != 0) {
+            distributeRewards(totalRewardsToDistribute, totalTokensStaked);
+        }
+        
+        for (uint256 i = 0; i < currentEpochStaking.length; i++) { //ensure that the two arrays are always equal length
+        
+            currentEpochStaking = rewardEpochStaking;
+            rewardEpochStaking[i].minimumStake = rewardEpochStaking[i].currentStake;
+        }
+
+        epochEnd = epochEnd.plus(epocLength);
         return true;
     }
 
