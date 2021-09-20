@@ -10,6 +10,7 @@ import { useGetMetadata } from "../hooks/Ipfs.hook";
 import { useGetAllowance } from "../hooks/OpenSignalToken.hook";
 import { saveOnIPFSwithNftStorage } from "../network/ipfs";
 import { GitcoinContext } from "../store";
+import { getNetworkName } from "../util/eth.util";
 import { errorToastOpts, successToastOpts } from "../util/toast.util";
 
 const initialState: Project = {
@@ -157,8 +158,8 @@ const ProjectNewPage = () => {
         <h3>NEW PROJECT</h3>
       </div>
       {projectCreatedTx ? (
-        // TODO: explorer link based on the current network
-        <a href={`https://rinkeby.etherscan.io/tx/${projectCreatedTx}`}>
+
+        <a href={`https://${getNetworkName(state.chain_id).toLocaleLowerCase()}.etherscan.io/tx/${projectCreatedTx}`}>
           <Toaster />
         </a>
       ) : (
