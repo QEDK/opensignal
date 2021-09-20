@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./BancorFormula.sol";
 import "./OpenSignalShares.sol";
-import "./RewardsDistribution";
+import "./RewardsDistribution.sol";
 
 contract OpenSignal is ERC2771Context, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -32,6 +32,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
     uint256 public minStake;
     uint32 public reserveRatio;
     uint8 public minLockinTimeInEpochs;
+    RewardsDistribution public rewardsDistribution;
 
     mapping(bytes32 => Project) public projects;
     mapping(bytes32 => string) public projectURIs;

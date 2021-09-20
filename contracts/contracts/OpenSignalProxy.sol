@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract OpenSignalProxy is ERC1967Proxy, Ownable {
 
-  constructor(address _owner, address _logic) public Ownable(_owner) ERC1967Proxy(_logic) {
+  constructor(address _logic) public ERC1967Proxy(_logic, "") {
 
   }
 
