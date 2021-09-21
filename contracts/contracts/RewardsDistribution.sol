@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./libraries/safeDecimalMath.sol";
+import "./libraries/Owned.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
-contract RewardsDistribution is Ownable, Initializable {
+contract RewardsDistribution is Initializable, OwnableUpgradeable {
     using SafeMath for uint;
     using SafeMath for uint256;
     using SafeDecimalMath for uint;
@@ -20,9 +21,7 @@ contract RewardsDistribution is Ownable, Initializable {
         uint minimumStake;
     }
 
-    /**
-     * @notice Open Signal ERC20 contract
-     */
+
     IERC20 public openSignalProxy;
 
     /**
@@ -41,8 +40,10 @@ contract RewardsDistribution is Ownable, Initializable {
 
     function initialize(
         IERC20 _nativeToken,
-        uint32 _epochLength
+        uint32 _epochLength,
+        address _owner
     ) public initializer {
+        __Ownable_init();
         openSignalProxy = _nativeToken;
         epocLength = _epochLength;
         epochBegin = block.timestamp;
@@ -56,7 +57,7 @@ contract RewardsDistribution is Ownable, Initializable {
     }
 
     modifier onlyOpenSignal() {
-        require(msg.sender == openSignalProxy, "only OpenSignal can call");
+        require(msg.sender == address(openSignalProxy), "only OpenSignal can call");
         _;
     }
 

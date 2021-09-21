@@ -6,6 +6,8 @@ require('@nomiclabs/hardhat-etherscan')
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
+const defaultNetwork = 'rinkeby';
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -19,6 +21,7 @@ module.exports = {
       }
     }
   },
+  defaultNetwork,
   networks: {
     rinkeby: {
       url: process.env.RINKEBY_RPC_URL || 'https://rinkeby-light.eth.linkpool.io',
