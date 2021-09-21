@@ -15,8 +15,6 @@ function App() {
 export default App;
 declare global {
     interface Window {
-        ethereum?: any;
-        web3?: any;
         __CIPHER__?: any;
     }
 }

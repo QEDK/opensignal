@@ -102,4 +102,11 @@ const getProviderName = () => {
     return "unknown";
 };
 
-export { getNetworkName, getNetworks, getNetworksOptions, isAddress, minimizeAddress };
+export {
+    getNetworkName,
+    getNetworks,
+    getProviderName,
+    getNetworksOptions,
+    isAddress,
+    minimizeAddress,
+};

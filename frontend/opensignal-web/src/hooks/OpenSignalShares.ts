@@ -9,7 +9,7 @@ const useGetShareBalance = (deploymentAddr?: string, addr?: string, trigger = fa
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
-        if (isAddress(deploymentAddr) && addr && isAddress(addr) && isAddress(addr)) {
+        if (deploymentAddr && isAddress(deploymentAddr) && addr && isAddress(addr)) {
             setbalance("");
             setloading(true);
             seterr(null);

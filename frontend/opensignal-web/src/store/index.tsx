@@ -1,5 +1,6 @@
 import React from "react";
 import Web3 from "web3";
+import { getChainId } from "web3modal";
 import { ACTIONS } from "./actions";
 
 declare const window: any;
@@ -21,13 +22,11 @@ const myweb3: any = new Web3(window.ethereum);
 const OPENSIGNAL_LABEL = "OpenSignal";
 const TOKEN_LABEL = "OpenSignalToken";
 const openSignalContract =
-    localStorage.getItem(OPENSIGNAL_LABEL) ||
-    "ipfs://bafyreibraij4zlc7wt52duyr5enkmglpooh4iimanh4ftxs2gar55z24re/metadata.json";
+    process.env.REACT_APP_OPEN_SIGNAL_CONTRACT_URL || localStorage.getItem(OPENSIGNAL_LABEL) || "";
 const openSignalTokenContract =
-    localStorage.getItem(TOKEN_LABEL) ||
-    "ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json";
+    process.env.REACT_APP_OPEN_SIGNAL_TOKEN_CONTRACT_URL || localStorage.getItem(TOKEN_LABEL) || "";
 const initialState: State = {
-    chain_id: "42",
+    chain_id: getChainId(process.env.REACT_APP_NETWORK || "kovan").toString(),
     provider: myweb3.currentProvider,
     wallets: [],
     pendingTransactions: [],

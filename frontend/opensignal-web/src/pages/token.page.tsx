@@ -1,5 +1,4 @@
 import { Container, Grid } from "semantic-ui-react";
-import { BigNumber } from "ethers";
 import { useGetOpenSignalTokenContract } from "../hooks/Contract.hook";
 import React from "react";
 import { GitcoinContext } from "../store";
