@@ -25,10 +25,7 @@ const DeployPage = () => {
         }
     };
     const SaveOnIfps = async (name: string, address: string) => {
-        const apiKey =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGFmRDg4MmY5YzlCZGE2QjMyOTVlZjIwZDFiM0VDNjA4NDJCREQxMTIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMDQ4NTQ2MDM0OSwibmFtZSI6Ik9wZW5TaWduYWwifQ.-Am4LeJJXbE6ONW6NfHdU2qIHGedHNuuIrfZPcpV0jU";
-        const client = new NFTStorage({ token: apiKey });
-
+        const client = new NFTStorage({ token: process.env.REACT_APP_NFT_STORAGE_TOKEN || "" });
         const metadata = await client.store({
             name: name,
             description: `${name} Contract Address`,
