@@ -8,7 +8,8 @@ const deployContract = (
         | 'OpenSignal'
         | 'OpenSignalShares'
         | 'OpenSignalToken'
-        | 'OpenSignalGoverner',
+        | 'OpenSignalGoverner'
+        | 'OpenSignalProxy',
     args?: any[]
 ): Promise<string> => {
     console.log(`redeploying contracts on ${chainId}`);

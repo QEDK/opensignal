@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.7;
 
-import "./libraries/safeDecimalMath.sol";
-import "./libraries/Owned.sol";
+import "./libraries/SafeDecimalMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -40,8 +39,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
 
     function initialize(
         IERC20 _nativeToken,
-        uint32 _epochLength,
-        address _owner
+        uint32 _epochLength
     ) public initializer {
         __Ownable_init();
         openSignalProxy = _nativeToken;

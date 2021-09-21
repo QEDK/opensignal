@@ -8,7 +8,7 @@ contract Owned {
 
     constructor(address _owner) {
         require(_owner != address(0), "Owner address cannot be 0");
-        owner = _owner;
+        owner = msg.sender;
         emit OwnerChanged(address(0), _owner);
     }
 

@@ -50,13 +50,15 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         _;
     }
 
-    constructor(address _trustedForwarder, IERC20 _nativeToken, address _rewardsDistribution ) ERC2771Context(_trustedForwarder) {
+    constructor(address _trustedForwarder, IERC20 _nativeToken) ERC2771Context(_trustedForwarder) {
         governor = msg.sender;
         nativeToken = _nativeToken;
         minStake = 2 ether;
         reserveRatio = 500000;
         minLockinTimeInEpochs = 3;
-        rewardsDistribution = RewardsDistribution(_rewardsDistribution);
+        rewardsDistribution = new RewardsDistribution();
+        rewardsDistribution.initialize(_nativeToken, epoch);
+
     }
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
