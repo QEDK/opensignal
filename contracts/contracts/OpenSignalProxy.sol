@@ -3,11 +3,11 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./libraries/Owned.sol";
 
-contract OpenSignalProxy is ERC1967Proxy, Ownable {
+contract OpenSignalProxy is ERC1967Proxy, Owned {
 
-  constructor(address _logic) public ERC1967Proxy(_logic, "") {
+  constructor(address _owner, address _logic) ERC1967Proxy(_logic, "") Owned(_owner) {
 
   }
 

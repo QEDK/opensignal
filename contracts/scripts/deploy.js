@@ -1,16 +1,22 @@
 const hre = require('hardhat')
 
 async function main () {
+
+  const RewardsDistribution = await hre.ethers.getContractFactory('RewardsDistribution')
+  const rewardsDistributionContract = await RewardsDistribution.deploy()
+  await rewardsDistributionContract.deployed()
+  console.log('RewardsDistribution deployed to:', rewardsDistributionContract.address);
+
+
   const OpenSignalToken = await hre.ethers.getContractFactory('OpenSignalToken')
   const openSignalTokenContract = await OpenSignalToken.deploy()
   await openSignalTokenContract.deployed()
   console.log('OpenSignalToken deployed to:', openSignalTokenContract.address);
 
-
-  const RewardsDistribution = await hre.ethers.getContractFactory('RewardsDistribution')
-  const RewardsDistributionContract = await RewardsDistribution.deploy()
-  await RewardsDistributionContract.deployed()
-  console.log('RewardsDistribution deployed to:', RewardsDistributionContract.address);
+  const OpenSignalShares = await hre.ethers.getContractFactory('OpenSignalShares')
+  const openSignalSharesContract = await OpenSignalShares.deploy()
+  await openSignalSharesContract.deployed()
+  console.log('OpenSignalShares deployed to:', openSignalSharesContract.address);
 
 
   const OpenSignal = await hre.ethers.getContractFactory('OpenSignal')
@@ -20,6 +26,15 @@ async function main () {
   )
   await openSignalContract.deployed()
   console.log('OpenSignal deployed to:', openSignalContract.address);
+
+  const OpenSignalProxy = await hre.ethers.getContractFactory('OpenSignalProxy')
+  const openSignalProxyContract = await OpenSignalProxy.deploy(
+    '0x16e9b2B8A2C92e98faBd8f9B08210f674F570059', OpenSignal.address
+  )
+  await openSignalProxyContract.deployed()
+  console.log('OpenSignalProxy deployed to:', openSignalProxyContract.address);
+
+
 
 
 }
