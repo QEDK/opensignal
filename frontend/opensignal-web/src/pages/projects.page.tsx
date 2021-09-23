@@ -303,7 +303,7 @@ const ProjectCard = ({
     // console.log('projectURI', projectURI);
     // console.log('projectMeta', projectMeta);
     // console.log('projectMetaLoading', shareBalance, shareBalanceLoading, err);
-    return (
+    return projectMeta && projectMeta.properties ?  (
         <div className="project">
             <div className="project-avatar">
                 {projectMetaLoading ? (
@@ -346,14 +346,14 @@ const ProjectCard = ({
                                 `${projectMeta?.properties.name}`
                             )}
                         </h3>
-                        {projectMeta?.properties.link ? (
+                        {projectMeta?.properties?.link ? (
                             <a
                                 style={{padding: 8}}
                                 href={
-                                    pat.test(projectMeta?.properties.link)
-                                        ? projectMeta?.properties.link
+                                    pat.test(projectMeta?.properties?.link)
+                                        ? projectMeta?.properties?.link
                                         : 'https://' +
-                                          projectMeta?.properties.link
+                                          projectMeta?.properties?.link
                                 }
                                 target="_blank"
                             >
@@ -362,14 +362,14 @@ const ProjectCard = ({
                             </a>
                         ) : null}
 
-                        {projectMeta?.properties.twitter ? (
+                        {projectMeta?.properties?.twitter ? (
                             <a
                                 style={{padding: 8}}
                                 href={
-                                    pat.test(projectMeta?.properties.twitter)
-                                        ? projectMeta?.properties.twitter
+                                    pat.test(projectMeta?.properties?.twitter)
+                                        ? projectMeta?.properties?.twitter
                                         : 'https://' +
-                                          projectMeta?.properties.twitter
+                                          projectMeta?.properties?.twitter
                                 }
                                 target="_blank"
                             >
@@ -391,7 +391,7 @@ const ProjectCard = ({
                             paddingRight: 12,
                             margin: 0,
                         }}
-                    >{`${projectMeta?.properties.description}`}</p>
+                    >{`${projectMeta?.properties?.description}`}</p>
                 </div>
                 <div className="project-signal">
                     <div className="signal">
@@ -449,7 +449,7 @@ const ProjectCard = ({
                 </div>
             </div>
         </div>
-    );
+    ) : <p>loading</p>;
 };
 
 const AddSignalModal = ({

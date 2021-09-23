@@ -1,3 +1,13 @@
+Put the current contract addresses in frontend/opensignal-web in an .env file like so:
+
+OPEN_SIGNAL_TOKEN_CONTRACT=0x44e8aE0d8FA2E8Cd89Ff3Cf4A7774Ce16b8e6247
+OPEN_SIGNAL_SHARES_CONTRACT=0x6F0DA4d97b19C64040311F330953603B115E9A25
+OPEN_SIGNAL_CONTRACT=0x5184AbfB1D536101Ff4BA601874CeDC16154fb1f
+OPEN_SIGNAL_PROXY_CONTRACT=0x647E7265f245A6788B6f34744fe8633f60e64953
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
