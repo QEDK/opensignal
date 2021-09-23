@@ -12,6 +12,8 @@ type State = {
     pendingTransactions: any[];
     openSignalContract: any;
     openSignalTokenContract: any;
+    openSignalProxyContract: any,
+    openSignalSharesContract: any,
     tokenBalance: number;
     tokenBalanceTrigger: boolean;
 };
@@ -21,11 +23,13 @@ let myweb3: any = new Web3(window.ethereum);
 const OPENSIGNAL_LABEL = 'OpenSignal';
 const TOKEN_LABEL = 'OpenSignalToken';
 const openSignalContract =
-    localStorage.getItem(OPENSIGNAL_LABEL) ||
+    process.env.OPEN_SIGNAL_CONTRACT ||
     'ipfs://bafyreibraij4zlc7wt52duyr5enkmglpooh4iimanh4ftxs2gar55z24re/metadata.json';
 const openSignalTokenContract =
-    localStorage.getItem(TOKEN_LABEL) ||
+    process.env.OPEN_SIGNAL_TOKEN_CONTRACT ||
     'ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json';
+const openSignalProxyContract = process.env.OPEN_SIGNAL_PROXY_CONTRACT;
+const openSignalSharesContract = process.env.OPEN_SIGNAL_SHARES_CONTRACT;
 const initialState: State = {
     chain_id: '42',
     provider: myweb3.currentProvider,
@@ -33,6 +37,8 @@ const initialState: State = {
     pendingTransactions: [],
     openSignalContract: openSignalContract,
     openSignalTokenContract: openSignalTokenContract,
+    openSignalProxyContract,
+    openSignalSharesContract,
     tokenBalance: -1,
     tokenBalanceTrigger: false,
 };

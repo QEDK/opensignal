@@ -303,7 +303,7 @@ const ProjectCard = ({
     // console.log('projectURI', projectURI);
     // console.log('projectMeta', projectMeta);
     // console.log('projectMetaLoading', shareBalance, shareBalanceLoading, err);
-    return (
+    return projectMeta && projectMeta.properties ? (
         <div className="project">
             <div className="project-avatar">
                 {projectMetaLoading ? (
@@ -449,7 +449,7 @@ const ProjectCard = ({
                 </div>
             </div>
         </div>
-    );
+    ) : <p>loading</p>;
 };
 
 const AddSignalModal = ({
