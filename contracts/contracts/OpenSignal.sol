@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./BancorFormula.sol";
 import "./OpenSignalShares.sol";
+import "./RewardsDistribution";
 
 contract OpenSignal is ERC2771Context, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -48,12 +49,13 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         _;
     }
 
-    constructor(address _trustedForwarder, IERC20 _nativeToken) ERC2771Context(_trustedForwarder) {
+    constructor(address _trustedForwarder, IERC20 _nativeToken, address _rewardsDistribution ) ERC2771Context(_trustedForwarder) {
         governor = msg.sender;
         nativeToken = _nativeToken;
         minStake = 2 ether;
         reserveRatio = 500000;
         minLockinTimeInEpochs = 3;
+        rewardsDistribution = RewardsDistribution(_rewardsDistribution);
     }
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
@@ -83,6 +85,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         Create2.deploy(0, id, type(OpenSignalShares).creationCode);
         OpenSignalShares deployment = OpenSignalShares(_deployment);
         deployment.mint(_msgSender(), amount); // 1-to-1 worth of shares
+        rewardsDistribution.tokenStaked(_msgSender(), amount, false);
         emit IncreaseSignal(id, amount);
         emit NewProject(id, URI);
         return id;
@@ -95,10 +98,11 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         delete projects[id];
         delete projectURIs[id];
         projectIDs.remove(id);
+        rewardsDistribution.tokenStaked(_msgSender(), project.selfStake, true);
         nativeToken.safeTransferFrom(address(this), _msgSender(), project.selfStake);
     }
 
-    function addSignal(bytes32 id, uint256 amount) external {
+    function addSignal(bytes32 id, uint256 amount, uint256 minShares) external {
         Project memory project = projects[id];
         require(project.creator != address(0), "NON_EXISTENT_PROJECT");
         nativeToken.safeTransferFrom(_msgSender(), address(this), amount);
@@ -109,8 +113,10 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
             reserveRatio,
             amount
         );
+        require(sharesAmt >= minShares, "SLIPPAGE_PROTECTION");
         projects[id].signal += amount;
         _deployment.mint(_msgSender(), sharesAmt);
+        rewardsDistribution.tokenStaked(_msgSender(), amount, false);
         emit IncreaseSignal(id, amount);
     }
 
@@ -119,6 +125,9 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         require(project.deployment != address(0), "NON_EXISTENT_PROJECT");
         OpenSignalShares _deployment = OpenSignalShares(project.deployment);
         require(_deployment.balanceOf(_msgSender()) >=  sharesAmt, "NOT_ENOUGH_BALANCE");
+        if (_msgSender() == project.creator) {
+            require((_deployment.balanceOf(_msgSender()) - sharesAmt) >= project.selfStake, "STAKE_LOCKED");
+        }
         uint256 amount = BF.calculateSaleReturn(
             project.signal,
             _deployment.totalSupply(),
@@ -127,6 +136,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         );
         require(amount >= minAmount, "SLIPPAGE_PROTECTION");
         projects[id].signal -= amount;
+        rewardsDistribution.tokenStaked(_msgSender(), amount, true);
         _deployment.burn(_msgSender(), sharesAmt);
         emit DecreaseSignal(id, amount);
     }

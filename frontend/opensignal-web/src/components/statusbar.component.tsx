@@ -1,10 +1,19 @@
 import React from "react";
+<<<<<<< HEAD
 import { RiSignalTowerFill } from "react-icons/ri";
 import { useGetBalance } from "../hooks/Balance.hook";
 import { GitcoinContext } from "../store";
 
 import MetamaskIcon from "../assets/icons/metamask.png";
 
+=======
+
+import { useGetBalance } from "../hooks/Balance.hook";
+import { GitcoinContext } from "../store";
+
+import MetamaskIcon from "../assets/icons/metamask.png";
+
+>>>>>>> 0a5e19cf3a2925db3747f1a233cec42b51771c00
 import { minimizeAddress, getNetworkName } from "../util/eth.util";
 import { NavLink } from "react-router-dom";
 import { useGetMetadata } from "../hooks/Ipfs.hook";
