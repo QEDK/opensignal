@@ -12,6 +12,7 @@ import { saveOnIPFSwithNftStorage } from "../network/ipfs";
 import { GitcoinContext } from "../store";
 import { getNetworkName } from "../util/eth.util";
 import { errorToastOpts, successToastOpts } from "../util/toast.util";
+import { Box, Flex, Heading } from "@chakra-ui/layout";
 
 const initialState: Project = {
     id: "",
@@ -154,9 +155,13 @@ const ProjectNewPage = () => {
             ));
     return (
         <Container>
-            <div className="page-header">
-                <h3>NEW PROJECT</h3>
-            </div>
+            <Flex justifyContent="center">
+                <Box p="2">
+                    <Heading size="2xl" color="purple.100">
+                        Let's create your Open Signal Project !
+                    </Heading>
+                </Box>
+            </Flex>
             {projectCreatedTx ? (
                 <a
                     href={`https://${getNetworkName(
@@ -168,7 +173,6 @@ const ProjectNewPage = () => {
             ) : (
                 <Toaster />
             )}
-
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column
                     style={{

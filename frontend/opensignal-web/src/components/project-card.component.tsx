@@ -125,8 +125,12 @@ export const ProjectCard = ({
                             display: "inline-block",
                             paddingRight: 12,
                             margin: 0,
+                            color: "white",
                         }}
-                    >{`${projectMeta?.properties?.description}`}</p>
+                    >
+                        {projectMeta?.properties?.description &&
+                            `Description: ${projectMeta?.properties?.description}`}
+                    </p>
                 </div>
                 <div className="project-signal">
                     <div className="signal">

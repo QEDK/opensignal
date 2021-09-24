@@ -1,8 +1,13 @@
+import { Box, Flex, Heading } from "@chakra-ui/layout";
+import { Button as CButton } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { FiExternalLink } from "react-icons/fi";
 import { useHistory } from "react-router";
 import { Container, Grid } from "semantic-ui-react";
+import { MdAdd } from "react-icons/md";
+import { GiPiggyBank } from "react-icons/gi";
+
 import Web3 from "web3";
 import { ProjectCard } from "../components/project-card.component";
 import { BouncyBalls } from "../components/util.component";
@@ -185,25 +190,50 @@ const ProjectPage = () => {
             ) : (
                 <Toaster />
             )}
-            <div className="page-header">
-                <h3>Projects</h3>
 
-                <button
-                    style={{
-                        position: "absolute",
-                        right: 0,
-                        top: 0,
-                        border: "1px solid #ddd",
-                        color: "#ddd ",
-                        backgroundColor: "transparent",
-                        padding: " 0.5rem 1rem",
-                        cursor: "pointer",
-                    }}
-                    onClick={goToNewProject}
-                >
-                    CREATE
-                </button>
-            </div>
+            <Flex justifyContent="center">
+                <Box p="2" mb="10">
+                    <Heading size="2xl" color="purple.100">
+                        Open Signal Projects
+                    </Heading>
+                </Box>
+            </Flex>
+            <Flex justifyContent="end">
+                <Box>
+                    <CButton
+                        leftIcon={<GiPiggyBank />}
+                        variant="solid"
+                        background="#6F3FF5"
+                        textColor="#ffcc00"
+                        _hover={{
+                            background: "#ffcc00",
+                            color: "#6F3FF5",
+                            fontWeight: "bold",
+                        }}
+                        borderRadius="full"
+                        onClick={() => history.push("/staking")}
+                    >
+                        STAKE
+                    </CButton>
+                </Box>
+                <Box ml="5">
+                    <CButton
+                        leftIcon={<MdAdd />}
+                        variant="solid"
+                        background="#6F3FF5"
+                        textColor="#ffcc00"
+                        _hover={{
+                            background: "#ffcc00",
+                            color: "#6F3FF5",
+                            fontWeight: "bold",
+                        }}
+                        borderRadius="full"
+                        onClick={() => history.push("/projects/new")}
+                    >
+                        CREATE PROJECT
+                    </CButton>
+                </Box>
+            </Flex>
 
             <Grid
                 textAlign="center"
