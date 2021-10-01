@@ -64,8 +64,10 @@ const ProjectPage = () => {
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
+        state.openSignalContractAddress,
         approveLoading
     );
+    console.log(allowance)
 
 
     const goToNewProject = () => {

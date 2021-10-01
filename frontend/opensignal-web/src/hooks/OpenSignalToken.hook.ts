@@ -5,6 +5,7 @@ import {isAddress} from '../util/eth.util';
 const useGetAllowance = (
     addr: string,
     tokenContract: any,
+    openSignalContractAddress: any,
     trigger = false
 ) => {
     const [allowance, setallowance] = React.useState(0);
@@ -24,7 +25,7 @@ const useGetAllowance = (
             seterr(null);
             try {
                 const allowance = await tokenContract.methods
-                    .allowance(addr, tokenContract._address)
+                    .allowance(addr, openSignalContractAddress)
                     .call();
                 console.log(allowance,'allowance')
                 setallowance(allowance);
