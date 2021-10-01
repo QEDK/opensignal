@@ -14,6 +14,7 @@ import {ProjectNewPage} from './project-new.page';
 import {ProjectPage} from './projects.page';
 import {GuidePage} from './guide';
 import {StakingPage} from './staking.page';
+import {RewardsPage} from './rewards.page';
 
 import {GitcoinContext} from '../store';
 import {StatusbarComponent} from '../components';
@@ -116,6 +117,11 @@ const Pages = () => {
                                     path={'/deploy'}
                                     exact={true}
                                     component={DeployPage}
+                                />
+                                <Route
+                                    path={'/rewards'}
+                                    exact={true}
+                                    component={RewardsPage}
                                 />
                             </Switch>
                         </Container>

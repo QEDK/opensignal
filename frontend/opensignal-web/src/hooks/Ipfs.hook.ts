@@ -14,7 +14,7 @@ const useGetMetadata = (cid: string, trigger = false) => {
                     try {
                         setmetadata({
                             ...result.data,
-                            avatar: getIPFSlink(result.data.image),
+                            avatar: getIPFSImage(cid),
                         });
                         setloading(false);
                     } catch (err) {
@@ -40,5 +40,9 @@ const getIPFSlink = (cid: string) => {
     if (cid && cid.toString().startsWith(PREFIX)) {
         return 'https://ipfs.io/ipfs/' + cid.substr(PREFIX.length);
     }
-    return '';
+    return cid + `ipfs.dweb.link/metadata.json`;
 };
+
+const getIPFSImage = (cid: string) => {
+    return cid + `image.jpeg`;
+}

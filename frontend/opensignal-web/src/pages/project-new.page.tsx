@@ -13,13 +13,15 @@ import {GitcoinContext} from '../store';
 import React from 'react';
 import {
     useGetOpenSignalContract,
+    useGetOpenSignalProxyContract,
     useGetOpenSignalTokenContract,
+    useGetRewardsDistributionContract,
 } from '../hooks/Contract.hook';
 
 import Web3 from 'web3';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {BigNumber} from 'ethers';
-import {saveOnIPFS} from '../network/ipfs';
+import {saveOnIPFS, saveOnIPFSWithWeb3Storage} from '../network/ipfs';
 const initialState: Project = {
     id: '',
     creator: '',
@@ -42,25 +44,32 @@ const ProjectNewPage = () => {
     const [error, seterror] = React.useState<string>('');
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
     const [newProject, setNewProject] = React.useState<Project>(initialState);
-    const [opensignalMeta] = useGetMetadata(state.openSignalContract);
-    const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
+    // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
+    const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
-    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
+    const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
+    const [rewardsContract] = useGetRewardsDistributionContract(state.rewardDistributionContractAddress);
     const [avatar, setavatar] = React.useState<File | null>(null);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
-        opensignalMeta,
         approveLoading
     );
+    console.log(allowance,'allow');
 
     const history = useHistory();
     const goToProject = () => {
         history.push('/');
     };
 
+    const whoIsOpenSignal = async () => {
+        console.log(rewardsContract,'rewards')
+        const dick = await rewardsContract.methods.getOpenSignalProxy().send({from: state.wallets[0]});
+        console.log(dick,'dick')
+    }
+
     const onNewProject = async () => {
-        if (!opensignalMeta || !tokenMeta) {
+        if (!tokenMeta) {
             seterror('Contracts Not found');
             return;
         }
@@ -74,7 +83,7 @@ const ProjectNewPage = () => {
                 setApproveLoading(true);
                 tokenContract.methods
                     .approve(
-                        opensignalMeta.properties.address,
+                        state.openSignalContractAddress,
                         Web3.utils.toWei(newProject.selfStake.toString())
                     )
                     .send({
@@ -82,9 +91,11 @@ const ProjectNewPage = () => {
                     })
                     .then((res: any) => {
                         setCreateLoading(false);
+                        setApproveLoading(false);
                         console.log(res);
                     })
                     .catch((err: any) => {
+                        console.log(err,'err')
                         seterror('Error');
                         setApproveLoading(false);
                         console.log(err);
@@ -94,21 +105,32 @@ const ProjectNewPage = () => {
                 setApproveLoading(false);
             }
 
-            const metadata = await saveOnIPFS(
+            const {imageURL, metadataURL} = await saveOnIPFSWithWeb3Storage(
                 {...newProject, avatar: ''},
                 avatar
             );
 
-            setNewProject({...newProject, link: metadata.url});
+            setNewProject({...newProject, link: metadataURL});
             if (!openSignalContract) {
                 return console.log('contract not found');
             }
 
             setCreateLoading(true);
+            console.log(newProject.selfStake.toString(), 'selfStake');
+            console.log(openSignalContract._address, 'address of openSignalContract');
+            tokenContract.methods.allowance(state.wallets[0], state.openSignalTokenContractAddress).call().then(rez => console.log(rez, 'resultallowance'))
+            await tokenContract.methods
+                    .approve(
+                        state.openSignalContractAddress,
+                        Web3.utils.toWei(newProject.selfStake.toString())
+                    )
+                    .send({
+                        from: state.wallets[0],
+                    })
             openSignalContract.methods
                 .createProject(
                     newProject.name,
-                    metadata.url,
+                    imageURL,
                     Web3.utils.toWei(newProject.selfStake.toString())
                 )
                 .send({
@@ -124,6 +146,7 @@ const ProjectNewPage = () => {
                     console.log(err);
                 });
         } catch (err) {
+            console.log(err)
             seterror('Error');
             setCreateLoading(false);
             setApproveLoading(false);
@@ -141,6 +164,7 @@ const ProjectNewPage = () => {
         };
         reader.readAsDataURL(e.target.files[0]);
     };
+
     const notEnoughAllowance =
         newProject.selfStake == 0 ||
         (!allowanceLoading &&
@@ -153,6 +177,7 @@ const ProjectNewPage = () => {
         <Container>
             <div className="page-header">
                 <h3>NEW PROJECT</h3>
+                <button onClick={whoIsOpenSignal}>Who is open signal</button>
             </div>
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column

@@ -72,6 +72,7 @@ const useGetProjects = (ids: string[], contract: any, trigger = false) => {
                             )
                         )
                             .then((res: any) => {
+                                console.log(res,'projects')
                                 setprojects(
                                     res.map((r: any, i: number) => ({
                                         ...r,

@@ -16,9 +16,9 @@ const StakingPage = () => {
     const {state} = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
     const history = useHistory();
-    const [opensignalMeta] = useGetMetadata(state.openSignalContract);
-    const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
+    const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
+    const [tokenMeta] = useGetMetadata(state.openSignalTokenContractAddress);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
     const [ids] = useGetProjectIds(openSignalContract, trigger);
     const [projects, projectsLoading, e] = useGetProjects(
@@ -53,7 +53,7 @@ export {StakingPage};
 const ProjectCard = ({project}: {project: Project}) => {
     const {state} = React.useContext(GitcoinContext);
     const [openSignalContract] = useGetOpenSignalContract(
-        state.openSignalContract
+        state.openSignalContractAddress
     );
     const OnIncreaseSignal = () => {
         openSignalContract.methods

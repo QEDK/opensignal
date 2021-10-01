@@ -5,6 +5,8 @@ import {BigNumber, ethers} from 'ethers';
 import {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
+    useGetRewardsDistributionContract,
+    useGetOpenSignalProxyContract,
 } from '../hooks/Contract.hook';
 import {GitcoinContext} from '../store';
 import React from 'react';
@@ -15,6 +17,9 @@ import {
     useGetreserveRatio,
     useGetSaleReturn,
 } from '../hooks/OpenSignal.hook';
+import {
+    useGetCurrentRewardEstimate,
+} from '../hooks/rewardsDistribution.hook';
 import {useGetMetadata} from '../hooks/Ipfs.hook';
 import {BouncyBalls} from '../components/util.component';
 import {isAddress} from '../util/eth.util';
@@ -45,11 +50,12 @@ const ProjectPage = () => {
         React.useState<boolean>(false);
     const history = useHistory();
 
-    const [opensignalMeta] = useGetMetadata(state.openSignalContract);
-    const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
+    // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
+    const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
     const [reserveRatio] = useGetreserveRatio(openSignalContract);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
-    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
+    const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
+    const [openSignalProxyContract] = useGetOpenSignalProxyContract(state.openSignalProxyContractAddress);
+    const [rewardsDistibutionContract] = useGetRewardsDistributionContract(state.rewardDistributionContractAddress);
     const [ids, _, err] = useGetProjectIds(openSignalContract, trigger);
     const [projects, projectsLoading, e] = useGetProjects(
         ids,
@@ -58,9 +64,9 @@ const ProjectPage = () => {
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
-        opensignalMeta,
         approveLoading
     );
+
 
     const goToNewProject = () => {
         history.push('/projects/new');
@@ -70,7 +76,7 @@ const ProjectPage = () => {
         setApproveLoading(true);
         tokenContract.methods
             .approve(
-                opensignalMeta.properties.address,
+                state.openSignalContractAddress,
                 Web3.utils.toWei(amount.toString())
             )
             .send({
@@ -95,7 +101,7 @@ const ProjectPage = () => {
             const shareContract = getShareContract(shareContractAddress);
             shareContract.methods
                 .approve(
-                    opensignalMeta.properties.address,
+                    state.openSignalContractAddress,
                     Web3.utils.toWei(amount.toString())
                 )
                 .send({
@@ -168,10 +174,31 @@ const ProjectPage = () => {
         }
     };
 
+    const getRewardContract = () => {
+        console.log(rewardsDistibutionContract.methods);
+        rewardsDistibutionContract['getCurrentRewardEstimate(address)'](state.wallets[0])
+            // .getCurrentRewardEstimate(state.wallets[0])
+            // .call()
+            .then(console.log)
+            .catch(console.log)
+
+    }
+
+    const getCurrentImplementationAddress = () => {
+        console.log(openSignalProxyContract,'lol')
+        openSignalProxyContract.methods.rewardsDistribution
+        .then(console.log).catch(console.log)
+
+        // openSignalProxyContract.methods.
+    }
+
     return (
         <Container>
             <div className="page-header">
                 <h3>Projects</h3>
+                <button onClick={getRewardContract}>GET CURRENT REWARD ESTIMATE</button>
+
+                <button onClick={getCurrentImplementationAddress}>GET IMPLEMENTATION</button>
 
                 <button
                     style={{
@@ -210,7 +237,6 @@ const ProjectPage = () => {
                                 setSelectedProjectMeta(m);
                             }}
                             contract={openSignalContract}
-                            opensignalMeta={opensignalMeta}
                             tokenContract={tokenContract}
                             onChange={() => settrigger(!trigger)}
                             setApproveLoading={setApproveLoading}
@@ -272,7 +298,6 @@ const ProjectCard = ({
 }: {
     project: Project;
     contract: any;
-    opensignalMeta: any;
     tokenContract: any;
     onChange: () => void;
     setApproveLoading: (i: boolean) => void;
@@ -300,9 +325,7 @@ const ProjectCard = ({
         setRemoveSignalModal(true);
         onProjectChange(project, projectMeta);
     };
-    // console.log('projectURI', projectURI);
-    // console.log('projectMeta', projectMeta);
-    // console.log('projectMetaLoading', shareBalance, shareBalanceLoading, err);
+    
     return projectMeta && projectMeta.properties ? (
         <div className="project">
             <div className="project-avatar">

@@ -12,24 +12,29 @@ type State = {
     pendingTransactions: any[];
     openSignalContract: any;
     openSignalTokenContract: any;
-    openSignalProxyContract: any,
-    openSignalSharesContract: any,
+    openSignalProxyContractAddress: any,
+    openSignalSharesContractAddress: any,
     tokenBalance: number;
     tokenBalanceTrigger: boolean;
+    openSignalTokenContractAddress: string;
+    openSignalContractAddress: string;
+    rewardDistributionContractAddress: string;
 };
 type GitcoinProviderProps = {children: React.ReactNode};
 let myweb3: any = new Web3(window.ethereum);
-
+console.log(process.env,'env')
 const OPENSIGNAL_LABEL = 'OpenSignal';
 const TOKEN_LABEL = 'OpenSignalToken';
 const openSignalContract =
     process.env.OPEN_SIGNAL_CONTRACT ||
-    'ipfs://bafyreibraij4zlc7wt52duyr5enkmglpooh4iimanh4ftxs2gar55z24re/metadata.json';
-const openSignalTokenContract =
-    process.env.OPEN_SIGNAL_TOKEN_CONTRACT ||
+    'ipfs://bafybeidpfndsm2znzdrh4s6wtauus45tfecg2376pyu73rmfajlxx2vlri/metadata.json';
+const openSignalTokenContractAddress = '0x4BeD939d328c4A9B5dEcfF9668B534f44497e601';
+const openSignalContractAddress = '0x3E48b1dA222561F3d6225950F482674B414C053e';
+const rewardDistributionContractAddress = '0x2dd4407772b880eb02f6dd0b357e4db0a196d24e';
+const openSignalTokenContract = process.env.OPEN_SIGNAL_TOKEN_CONTRACT ||
     'ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json';
-const openSignalProxyContract = process.env.OPEN_SIGNAL_PROXY_CONTRACT;
-const openSignalSharesContract = process.env.OPEN_SIGNAL_SHARES_CONTRACT;
+const openSignalProxyContractAddress = '0x647E7265f245A6788B6f34744fe8633f60e64953';
+const openSignalSharesContractAddress = '0xc268F33Bd35B28FA02De4d0C7FB5e02e3CBcE924';
 const initialState: State = {
     chain_id: '42',
     provider: myweb3.currentProvider,
@@ -37,8 +42,11 @@ const initialState: State = {
     pendingTransactions: [],
     openSignalContract: openSignalContract,
     openSignalTokenContract: openSignalTokenContract,
-    openSignalProxyContract,
-    openSignalSharesContract,
+    openSignalTokenContractAddress,
+    openSignalContractAddress,
+    openSignalProxyContractAddress,
+    openSignalSharesContractAddress,
+    rewardDistributionContractAddress,
     tokenBalance: -1,
     tokenBalanceTrigger: false,
 };

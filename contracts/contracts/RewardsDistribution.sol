@@ -21,12 +21,12 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
     }
 
 
-    IERC20 public openSignalProxy;
+    address public openSignalProxy;
 
     /**
      * @notice An array of addresses and amounts to send
      */
-    DistributionData[] public currentEpochStaking;
+    DistributionData[] public lastEpochStaking;
     DistributionData[] public rewardEpochStaking;
     mapping(address => uint256) public userIndex;
 
@@ -38,11 +38,11 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
     uint256 public totalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
     function initialize(
-        IERC20 _nativeToken,
+        address openSignalContract,
         uint32 _epochLength
     ) public initializer {
         __Ownable_init();
-        openSignalProxy = _nativeToken;
+        openSignalProxy = openSignalContract;
         epocLength = _epochLength;
         epochBegin = block.timestamp;
         epochEnd = block.timestamp + _epochLength;
@@ -50,13 +50,17 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
 
     // ========== EXTERNAL SETTERS ==========
 
-    function setOpenSignalProxy(IERC20 _openSignalProxy) external onlyOwner {
+    function setOpenSignalProxy(address _openSignalProxy) external onlyOwner {
         openSignalProxy = _openSignalProxy;
     }
 
     modifier onlyOpenSignal() {
-        require(msg.sender == address(openSignalProxy), "only OpenSignal can call");
+        require(msg.sender == openSignalProxy, "only OpenSignal can call");
         _;
+    }
+
+    function getOpenSignalProxy() public view returns (address openSignalProxy) {
+        return openSignalProxy;
     }
 
 
@@ -92,6 +96,22 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
             return 0;
         }
         return rewardEpochStaking[index].minimumStake.mul(totalRewardsToDistribute.div(totalTokensStaked));
+    }
+
+    function getCurrentStakingAmount() public returns (uint256) {
+        uint256 index = userIndex[msg.sender];
+        if (index == 0) {
+            return 0;
+        }
+        return rewardEpochStaking[index].currentStake;
+    }
+
+    function getTokensEligibleForRewards() public returns (uint256) {
+        uint256 index = userIndex[msg.sender];
+        if (index == 0) {
+            return 0;
+        }
+        return rewardEpochStaking[index].minimumStake;
     }
 
     function changeEpochLength(uint256 _seconds) public returns (bool) {
@@ -196,13 +216,13 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
     }
 
     function epochHasEnded() internal returns (bool) {
-        if (currentEpochStaking.length != 0) {
+        if (lastEpochStaking.length != 0) {
             distributeRewards(totalRewardsToDistribute, totalTokensStaked);
         }
         
-        for (uint256 i = 0; i < currentEpochStaking.length; i++) { //ensure that the two arrays are always equal length
+        for (uint256 i = 0; i < lastEpochStaking.length; i++) { //ensure that the two arrays are always equal length
         
-            currentEpochStaking = rewardEpochStaking;
+            lastEpochStaking = rewardEpochStaking;
             rewardEpochStaking[i].minimumStake = rewardEpochStaking[i].currentStake;
         }
 

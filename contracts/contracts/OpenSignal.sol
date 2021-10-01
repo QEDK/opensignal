@@ -57,9 +57,10 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         reserveRatio = 500000;
         minLockinTimeInEpochs = 3;
         rewardsDistribution = new RewardsDistribution();
-        rewardsDistribution.initialize(_nativeToken, epoch);
+        rewardsDistribution.initialize(address(this), epoch);
 
     }
+
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
         require(newLockinTime > 0, "INVALID_DURATION");

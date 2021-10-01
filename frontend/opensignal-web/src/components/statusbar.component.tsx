@@ -33,8 +33,7 @@ export {StatusbarComponent};
 
 const WalletComponent = () => {
     const {state, dispatch} = React.useContext(GitcoinContext);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
-    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
+    const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
     const balance = useGetBalance(state.wallets[0], state.provider);
     const [tokenBalance, tokenBalanceLoading] = useGetTokenBalance(
         state.wallets[0],
