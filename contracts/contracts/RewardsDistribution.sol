@@ -16,8 +16,8 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
 
     struct DistributionData {
         address destination;
-        uint currentStake;
-        uint minimumStake;
+        uint256 currentStake;
+        uint256 minimumStake;
     }
 
 
@@ -38,11 +38,11 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
     uint256 public totalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
     function initialize(
-        address openSignalContract,
+        address _openSignalContract,
         uint32 _epochLength
     ) public initializer {
         __Ownable_init();
-        openSignalProxy = openSignalContract;
+        openSignalProxy = _openSignalContract;
         epocLength = _epochLength;
         epochBegin = block.timestamp;
         epochEnd = block.timestamp + _epochLength;
@@ -59,7 +59,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         _;
     }
 
-    function getOpenSignalProxy() public view returns (address openSignalProxy) {
+    function getOpenSignalProxy() public view returns (address) {
         return openSignalProxy;
     }
 

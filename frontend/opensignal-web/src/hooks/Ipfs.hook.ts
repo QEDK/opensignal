@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React from 'react';
-const PREFIX = 'ipfs://';
-const useGetMetadata = (cid: string, trigger = false) => {
+const PREFIX = 'https://';
+const useGetMetadata = (cid: string, trigger = true) => {
     const [metadata, setmetadata] = React.useState<any>(null);
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
@@ -14,7 +14,7 @@ const useGetMetadata = (cid: string, trigger = false) => {
                     try {
                         setmetadata({
                             ...result.data,
-                            avatar: getIPFSImage(cid),
+                            avatar: result.data.avatar,
                         });
                         setloading(false);
                     } catch (err) {
@@ -38,9 +38,9 @@ export {useGetMetadata};
 
 const getIPFSlink = (cid: string) => {
     if (cid && cid.toString().startsWith(PREFIX)) {
-        return 'https://ipfs.io/ipfs/' + cid.substr(PREFIX.length);
+        return cid;
     }
-    return cid + `ipfs.dweb.link/metadata.json`;
+    
 };
 
 const getIPFSImage = (cid: string) => {

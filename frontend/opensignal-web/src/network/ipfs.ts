@@ -34,7 +34,7 @@ const saveOnIPFSWithWeb3Storage = async (properties: any, avatar?: any) => {
     const obj = {
         name: 'OpenSignal',
         description: 'OpenSignal Project Info',
-        imageURI: imageURL,
+        avatar: imageURL,
         properties: properties,
     };
     const blob = new Blob([JSON.stringify(obj)], {type : 'application/json'});

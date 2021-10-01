@@ -29,12 +29,12 @@ const openSignalContract =
     process.env.OPEN_SIGNAL_CONTRACT ||
     'ipfs://bafybeidpfndsm2znzdrh4s6wtauus45tfecg2376pyu73rmfajlxx2vlri/metadata.json';
 const openSignalTokenContractAddress = '0x4BeD939d328c4A9B5dEcfF9668B534f44497e601';
-const openSignalContractAddress = '0x3E48b1dA222561F3d6225950F482674B414C053e';
-const rewardDistributionContractAddress = '0x2dd4407772b880eb02f6dd0b357e4db0a196d24e';
+const openSignalContractAddress = '0x8087B2d5D7Fc67e8AaC512349Ee8b50050B07a3B';
+const rewardDistributionContractAddress = '0x3E1Cf01B6ed8f627A89893102E66227d95616cb9';
 const openSignalTokenContract = process.env.OPEN_SIGNAL_TOKEN_CONTRACT ||
     'ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json';
 const openSignalProxyContractAddress = '0x647E7265f245A6788B6f34744fe8633f60e64953';
-const openSignalSharesContractAddress = '0xc268F33Bd35B28FA02De4d0C7FB5e02e3CBcE924';
+const openSignalSharesContractAddress = '0x8343B63D911FaC972E9F45441808eA48d84450B6';
 const initialState: State = {
     chain_id: '42',
     provider: myweb3.currentProvider,

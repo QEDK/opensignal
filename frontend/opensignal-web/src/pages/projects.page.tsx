@@ -9,7 +9,7 @@ import {
     useGetOpenSignalProxyContract,
 } from '../hooks/Contract.hook';
 import {GitcoinContext} from '../store';
-import React from 'react';
+import React, { useState } from 'react';
 import {
     useGetProjectIds,
     useGetProjects,
@@ -129,7 +129,7 @@ const ProjectPage = () => {
         ) {
             setCreateLoading(true);
             openSignalContract.methods
-                .addSignal(project.id, Web3.utils.toWei(amount.toString()))
+                .addSignal(project.id, Web3.utils.toWei(amount.toString()),Web3.utils.toWei((0).toString()))
                 .send({
                     from: state.wallets[0],
                 })
@@ -174,31 +174,56 @@ const ProjectPage = () => {
         }
     };
 
-    const getRewardContract = () => {
+    const getCurrentRewardEstimate = () => {
         console.log(rewardsDistibutionContract.methods);
-        rewardsDistibutionContract['getCurrentRewardEstimate(address)'](state.wallets[0])
+        rewardsDistibutionContract.methods.getCurrentRewardEstimate(state.wallets[0]).call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
             .then(console.log)
             .catch(console.log)
-
     }
 
-    const getCurrentImplementationAddress = () => {
-        console.log(openSignalProxyContract,'lol')
-        openSignalProxyContract.methods.rewardsDistribution
-        .then(console.log).catch(console.log)
-
-        // openSignalProxyContract.methods.
+    const getCurrentStakingAmount = () => {
+        console.log(rewardsDistibutionContract.methods);
+        rewardsDistibutionContract.methods.getCurrentStakingAmount().call()
+            // .getCurrentRewardEstimate(state.wallets[0])
+            // .call()
+            .then(console.log)
+            .catch(console.log)
     }
+
+    const changeEpochLength = (lengthInSeconds) => {
+        console.log(lengthInSeconds)
+        rewardsDistibutionContract.methods.changeEpochLength(lengthInSeconds).send({from: state.wallets[0]})
+        .then(console.log)
+        .catch(console.log)
+    }
+
+    const getUserIndex = () => {
+        console.log(rewardsDistibutionContract.methods);
+        rewardsDistibutionContract.methods.userIndex(state.wallets[0]).call()
+            // .getCurrentRewardEstimate(state.wallets[0])
+            // .call()
+            .then(console.log)
+            .catch(console.log)
+    }
+
+    const [epochLength, setEpochLength] = useState<any>(296000);
 
     return (
         <Container>
             <div className="page-header">
                 <h3>Projects</h3>
-                <button onClick={getRewardContract}>GET CURRENT REWARD ESTIMATE</button>
+                <button onClick={getUserIndex}>GET USER INDEX ARRAY</button>
+                <button onClick={getCurrentRewardEstimate}>GET CURRENT REWARD ESTIMATE</button>
+                <button onClick={getCurrentStakingAmount}>GET CURRENT STAKING AMOUNT</button>
+                <button onClick={() => changeEpochLength(epochLength)}>Change Epoch Length</button>
+                <input value={epochLength} type='number' onChange={e => {
 
-                <button onClick={getCurrentImplementationAddress}>GET IMPLEMENTATION</button>
+                    setEpochLength(parseInt(e.target.value))
+                    }}></input>
+
+
 
                 <button
                     style={{

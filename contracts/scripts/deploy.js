@@ -1,3 +1,4 @@
+const { assert } = require('chai');
 const hre = require('hardhat')
 const { ethers, upgrades } = require('hardhat');
 
@@ -15,23 +16,13 @@ async function main () {
   const openSignalContract = await OpenSignal.deploy(
     // BiconomyForwarder on Rinkeby
     '0xFD4973FeB2031D4409fB57afEE5dF2051b171104', openSignalTokenContractAddress
-  )
+  );
+  
   await openSignalContract.deployed()
   console.log('OpenSignal deployed to:', openSignalContract.address);
+  const rewardsDist = await openSignalContract.rewardsDistribution();
 
-  // const OpenSignalProxy = await hre.ethers.getContractFactory('OpenSignalProxy')
-  // const openSignalProxyContract = await OpenSignalProxy.deploy(
-  //   openSignalContract.address
-  // )
-  // await openSignalProxyContract.deployed()
-  // console.log('OpenSignalProxy deployed to:', openSignalProxyContract.address);
-
-
-  // const proxy = await upgrades.deployProxy(OpenSignal, { kind: 'uups'});
-  // await proxy.deployed();
-
-    
-
+  console.log('Rewards Distribution address:', rewardsDist);
 
 
 

@@ -46,7 +46,7 @@ const ProjectNewPage = () => {
     const [newProject, setNewProject] = React.useState<Project>(initialState);
     // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
     const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    // const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
     const [rewardsContract] = useGetRewardsDistributionContract(state.rewardDistributionContractAddress);
     const [avatar, setavatar] = React.useState<File | null>(null);
@@ -62,17 +62,12 @@ const ProjectNewPage = () => {
         history.push('/');
     };
 
-    const whoIsOpenSignal = async () => {
-        console.log(rewardsContract,'rewards')
-        const dick = await rewardsContract.methods.getOpenSignalProxy().send({from: state.wallets[0]});
-        console.log(dick,'dick')
-    }
 
     const onNewProject = async () => {
-        if (!tokenMeta) {
-            seterror('Contracts Not found');
-            return;
-        }
+        // if (!tokenMeta) {
+        //     seterror('Contracts Not found');
+        //     return;
+        // }
         if (newProject.selfStake < 2) {
             seterror('Need atleast 2 tokens');
             return;
@@ -130,7 +125,7 @@ const ProjectNewPage = () => {
             openSignalContract.methods
                 .createProject(
                     newProject.name,
-                    imageURL,
+                    metadataURL,
                     Web3.utils.toWei(newProject.selfStake.toString())
                 )
                 .send({
@@ -177,7 +172,7 @@ const ProjectNewPage = () => {
         <Container>
             <div className="page-header">
                 <h3>NEW PROJECT</h3>
-                <button onClick={whoIsOpenSignal}>Who is open signal</button>
+                
             </div>
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column

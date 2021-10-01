@@ -10,9 +10,8 @@ const useGetAllowance = (
     const [allowance, setallowance] = React.useState(0);
     const [loading, setloading] = React.useState<boolean>(true);
     const [err, seterr] = React.useState<any>(null);
-    // console.log(tokenContract._address, 'xx', addr)
     React.useMemo(async () => {
-        console.log(tokenContract._address, 'address')
+
         if (
             addr &&
             tokenContract &&

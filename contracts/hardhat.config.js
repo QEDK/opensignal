@@ -23,6 +23,9 @@ module.exports = {
   },
   defaultNetwork,
   networks: {
+    hardhat: {
+      chainId: 31337,
+    },
     rinkeby: {
       url: process.env.RINKEBY_RPC_URL || 'https://rinkeby-light.eth.linkpool.io',
       accounts: [`0x${process.env.PRIVATE_KEY}`]
