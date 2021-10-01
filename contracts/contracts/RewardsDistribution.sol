@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.9;
 
 import "./libraries/SafeDecimalMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -9,9 +9,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
 contract RewardsDistribution is Initializable, OwnableUpgradeable {
-    using SafeMath for uint;
     using SafeMath for uint256;
-    using SafeDecimalMath for uint;
+    using SafeDecimalMath for uint256;
     using SafeERC20 for IERC20;
 
     struct DistributionData {
@@ -19,7 +18,6 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         uint256 currentStake;
         uint256 minimumStake;
     }
-
 
     address public openSignalProxy;
 
@@ -34,7 +32,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
     uint256 public epochEnd;
     uint256 public epocLength;
 
-    uint256 public totalTokensStaked = 0;
+    uint256 public totalTokensStaked;
     uint256 public totalRewardsToDistribute = 100; //distribute 100 tokens per epoch
 
     function initialize(
@@ -87,9 +85,11 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         } else {
             totalTokensStaked = totalTokensStaked.add(amount);
         }
+
+        return true;
     }
 
-    function getCurrentRewardEstimate(address destination) public returns (uint256) {
+    function getCurrentRewardEstimate(address destination) external view returns (uint256) {
         uint256 index = userIndex[destination];
         require(index != 0, "You are not eligible");
         if (rewardEpochStaking[index].minimumStake == 0) {
@@ -98,16 +98,16 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         return rewardEpochStaking[index].minimumStake.mul(totalRewardsToDistribute.div(totalTokensStaked));
     }
 
-    function getCurrentStakingAmount() public returns (uint256) {
-        uint256 index = userIndex[msg.sender];
+    function getCurrentStakingAmount(address destination) external view returns (uint256) {
+        uint256 index = userIndex[destination];
         if (index == 0) {
             return 0;
         }
         return rewardEpochStaking[index].currentStake;
     }
 
-    function getTokensEligibleForRewards() public returns (uint256) {
-        uint256 index = userIndex[msg.sender];
+    function getTokensEligibleForRewards(address destination) external view returns (uint256) {
+        uint256 index = userIndex[destination];
         if (index == 0) {
             return 0;
         }
@@ -127,7 +127,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
      * @param destination An address to send rewards tokens too
      * @param amount The amount of rewards tokens to send
      */
-    function addRewardDistribution(address destination, uint amount) internal returns (bool) {
+    function addRewardDistribution(address destination, uint256 amount) internal returns (bool) {
         require(destination != address(0), "Cant add a zero address");
         require(amount != 0, "Cant add a zero amount");
 
@@ -191,7 +191,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         * @notice Edits a RewardDistribution in the distributions array.
         * @param amount this is the total amount of tokens that will be distributed. Each participant will get their proportion of amount based on their total tokens staked
      */
-    function distributeRewards(uint amount, uint256 totalTokensStaked) internal returns (bool) {
+    function distributeRewards(uint256 amount) internal returns (bool) {
         require(amount > 0, "Nothing to distribute");
         require(address(openSignalProxy) != address(0), "OpenSignalProxy is not set");
         require(
@@ -217,7 +217,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
 
     function epochHasEnded() internal returns (bool) {
         if (lastEpochStaking.length != 0) {
-            distributeRewards(totalRewardsToDistribute, totalTokensStaked);
+            distributeRewards(totalRewardsToDistribute);
         }
         
         for (uint256 i = 0; i < lastEpochStaking.length; i++) { //ensure that the two arrays are always equal length
@@ -232,6 +232,6 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
 
     /* ========== Events ========== */
 
-    event RewardDistributionAdded(uint index, address destination, uint amount);
-    event RewardsDistributed(uint amount);
+    event RewardDistributionAdded(uint256 index, address destination, uint256 amount);
+    event RewardsDistributed(uint256 amount);
 }

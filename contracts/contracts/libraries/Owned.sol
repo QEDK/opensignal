@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.9;
 
 // https://docs.synthetix.io/contracts/source/contracts/owned
 contract Owned {

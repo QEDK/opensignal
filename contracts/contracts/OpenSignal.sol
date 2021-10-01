@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -58,9 +58,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         minLockinTimeInEpochs = 3;
         rewardsDistribution = new RewardsDistribution();
         rewardsDistribution.initialize(address(this), epoch);
-
     }
-
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {
         require(newLockinTime > 0, "INVALID_DURATION");
