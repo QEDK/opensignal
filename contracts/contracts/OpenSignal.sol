@@ -8,9 +8,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "./BancorFormula.sol";
+import "./BancorFormula.sol"; // Convert this to interface and use a pre-deployed contract!
 import "./OpenSignalShares.sol";
-import "./RewardsDistribution.sol";
+import "./RewardsDistribution.sol"; // We should convert this to use the interface!
 
 contract OpenSignal is ERC2771Context, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -25,7 +25,7 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         uint256 timestamp;
     }
 
-    uint32 public constant epoch = 2592000;
+    uint32 public epoch;
 
     address public governor;
     IERC20 public nativeToken;
@@ -50,14 +50,15 @@ contract OpenSignal is ERC2771Context, ReentrancyGuard {
         _;
     }
 
-    constructor(address _trustedForwarder, IERC20 _nativeToken) ERC2771Context(_trustedForwarder) {
+    constructor(address _trustedForwarder, address _rewardsDistribution, IERC20 _nativeToken, uint32 _epoch) ERC2771Context(_trustedForwarder) {
         governor = msg.sender;
         nativeToken = _nativeToken;
         minStake = 2 ether;
         reserveRatio = 500000;
+        epoch = _epoch;
         minLockinTimeInEpochs = 3;
-        rewardsDistribution = new RewardsDistribution();
-        rewardsDistribution.initialize(address(this), epoch);
+        rewardsDistribution = RewardsDistribution(_rewardsDistribution);
+        rewardsDistribution.initialize(address(this), _nativeToken, _epoch);
     }
 
     function changeMinLockinTimeInEpochs(uint8 newLockinTime) external onlyGovernor {

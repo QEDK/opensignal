@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.9;
 
-import "./libraries/SafeDecimalMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
+import "./libraries/SafeDecimalMath.sol";
 
 contract RewardsDistribution is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
@@ -26,24 +25,28 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
      */
     DistributionData[] public lastEpochStaking;
     DistributionData[] public rewardEpochStaking;
+    IERC20 nativeToken;
     mapping(address => uint256) public userIndex;
 
+    uint256 public epoch;
     uint256 public epochBegin;
     uint256 public epochEnd;
-    uint256 public epocLength;
 
     uint256 public totalTokensStaked;
-    uint256 public totalRewardsToDistribute = 100; //distribute 100 tokens per epoch
+    uint256 public totalRewardsToDistribute;
 
     function initialize(
         address _openSignalContract,
-        uint32 _epochLength
-    ) public initializer {
+        IERC20 _nativeToken,
+        uint32 _epoch
+    ) external initializer {
         __Ownable_init();
         openSignalProxy = _openSignalContract;
-        epocLength = _epochLength;
+        nativeToken = _nativeToken;
+        totalRewardsToDistribute = 100 * 10 ** 18; //distribute 100 tokens per epoch
+        epoch = _epoch;
         epochBegin = block.timestamp;
-        epochEnd = block.timestamp + _epochLength;
+        epochEnd = block.timestamp + _epoch;
     }
 
     // ========== EXTERNAL SETTERS ==========
@@ -68,9 +71,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         require(destination != address(0), "Cant add a zero address");
         require(amount != 0, "Cant add a zero amount");
 
-        if (block.timestamp >= epochEnd) {
-            epochHasEnded();
-        }
+        epochHasEnded();
 
         if (userIndex[destination] == 0) {
             addRewardDistribution(destination, amount);
@@ -89,13 +90,14 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         return true;
     }
 
-    function getCurrentRewardEstimate(address destination) external view returns (uint256) {
-        uint256 index = userIndex[destination];
-        require(index != 0, "You are not eligible");
-        if (rewardEpochStaking[index].minimumStake == 0) {
-            return 0;
-        }
-        return rewardEpochStaking[index].minimumStake.mul(totalRewardsToDistribute.div(totalTokensStaked));
+    function getCurrentReward(uint256 _amount) external view returns (uint256) {
+        // staked amounts included in tokens staked
+        return _amount*(totalRewardsToDistribute/(totalTokensStaked));
+    }
+
+    function getCurrentRewardEstimate(uint256 _amount) external view returns (uint256) {
+        // predicted rewards if staked
+        return _amount*(totalRewardsToDistribute/(totalTokensStaked + _amount));
     }
 
     function getCurrentStakingAmount(address destination) external view returns (uint256) {
@@ -112,11 +114,6 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
             return 0;
         }
         return rewardEpochStaking[index].minimumStake;
-    }
-
-    function changeEpochLength(uint256 _seconds) public returns (bool) {
-        epocLength = _seconds;
-        return true;
     }
 
     /**
@@ -179,7 +176,7 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
 
             if (rewardEpochStaking[index].currentStake == 0) { // they no longer have any staked tokens so remove them from the rewards array
                 removeRewardDistribution(index, sender);
-            } else if (rewardEpochStaking[index].minimumStake >= rewardEpochStaking[index].currentStake) {
+            } else if (rewardEpochStaking[index].minimumStake > rewardEpochStaking[index].currentStake) {
                 rewardEpochStaking[index].minimumStake = rewardEpochStaking[index].currentStake;
             }
         }
@@ -194,20 +191,15 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
     function distributeRewards(uint256 amount) internal returns (bool) {
         require(amount > 0, "Nothing to distribute");
         require(address(openSignalProxy) != address(0), "OpenSignalProxy is not set");
-        require(
-            IERC20(openSignalProxy).balanceOf(address(this)) >= amount,
-            "insufficient tokens available"
-        );
 
         uint256 remainder = amount;
 
-        for (uint i = 0; i < rewardEpochStaking.length; i++) {
+        for (uint i = 1; i < rewardEpochStaking.length; i++) {
             if (rewardEpochStaking[i].destination != address(0) && rewardEpochStaking[i].minimumStake != 0) {
                 uint256 userAllocation = rewardEpochStaking[i].minimumStake.mul(amount.div(totalTokensStaked));
                 remainder = remainder.sub(userAllocation);
-
                 // Transfer the OS Tokens
-                IERC20(openSignalProxy).safeTransferFrom(address(openSignalProxy), rewardEpochStaking[i].destination, userAllocation);
+                nativeToken.safeTransfer(rewardEpochStaking[i].destination, userAllocation);
             }
         }
 
@@ -215,18 +207,22 @@ contract RewardsDistribution is Initializable, OwnableUpgradeable {
         return true;
     }
 
-    function epochHasEnded() internal returns (bool) {
-        if (lastEpochStaking.length != 0) {
+    function epochHasEnded() public returns (bool) {
+        if (block.timestamp < epochEnd) {
+            return false;
+        }
+
+        if (rewardEpochStaking.length != 0) {
             distributeRewards(totalRewardsToDistribute);
         }
-        
-        for (uint256 i = 0; i < lastEpochStaking.length; i++) { //ensure that the two arrays are always equal length
-        
-            lastEpochStaking = rewardEpochStaking;
+
+        lastEpochStaking = rewardEpochStaking; // do we really need this?
+        for (uint256 i = 0; i < rewardEpochStaking.length; i++) { //ensure that the two arrays are always equal length
             rewardEpochStaking[i].minimumStake = rewardEpochStaking[i].currentStake;
         }
 
-        epochEnd = epochEnd.add(epocLength);
+        epochBegin = block.timestamp;
+        epochEnd = epochBegin + epoch;
         return true;
     }
 
