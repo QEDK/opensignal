@@ -2,11 +2,8 @@ require('dotenv').config()
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
 
-
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
-
-const defaultNetwork = 'rinkeby';
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -21,10 +18,11 @@ module.exports = {
       }
     }
   },
-  defaultNetwork,
+  defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       chainId: 31337,
+      accounts: [{ privateKey: `0x${process.env.PRIVATE_KEY}`, balance: '10000000000000000000000000' }]
     },
     rinkeby: {
       url: process.env.RINKEBY_RPC_URL || 'https://rinkeby-light.eth.linkpool.io',
