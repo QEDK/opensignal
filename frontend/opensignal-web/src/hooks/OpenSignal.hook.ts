@@ -68,6 +68,7 @@ const useGetProjects = (ids: string[], contract: any, trigger = false) => {
                     try {
                         Promise.all(ids.map((id) => contract.methods.projects(id).call()))
                             .then((res: any) => {
+                                console.log(res, "projects");
                                 setprojects(
                                     res.map((r: any, i: number) => ({
                                         ...r,

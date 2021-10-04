@@ -8,6 +8,7 @@ import { ProjectNewPage } from "./project-new.page";
 import { ProjectPage } from "./projects.page";
 import { GuidePage } from "./guide";
 import { StakingPage } from "./staking.page";
+import { RewardsPage } from "./rewards.page";
 
 import { GitcoinContext } from "../store";
 import { StatusbarComponent } from "../components";
@@ -79,12 +80,13 @@ const Pages = () => {
                                 <Route
                                     path={"/projects/new"}
                                     exact={true}
-                                    component={ProjectNewPage}
+                                    component={ProjectNewPage as any}
                                 />{" "}
                                 <Route path={"/token"} exact={true} component={TokenPage} />{" "}
                                 <Route path={"/staking"} exact={true} component={StakingPage} />{" "}
                                 <Route path={"/guide"} exact={true} component={GuidePage} />{" "}
                                 <Route path={"/deploy"} exact={true} component={DeployPage} />
+                                <Route path={"/rewards"} exact={true} component={RewardsPage} />
                             </Switch>
                         </Container>
                     </div>

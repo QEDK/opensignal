@@ -6,13 +6,15 @@ import { GitcoinContext } from "../store";
 import { useGetMetadata } from "../hooks/Ipfs.hook";
 import { useGetProjectIds, useGetProjects } from "../hooks/OpenSignal.hook";
 import CardWithImage from "../components/card-with-image.component";
+import { useHistory } from "react-router";
 
 const StakingPage = () => {
     const { state } = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
-    const [opensignalMeta] = useGetMetadata(state.openSignalContract);
-    const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    const history = useHistory();
+    // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
+    const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
+    const [tokenMeta] = useGetMetadata(state.openSignalTokenContractAddress);
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
     const [ids] = useGetProjectIds(openSignalContract, trigger);
     const [projects, projectsLoading, e] = useGetProjects(ids, openSignalContract);

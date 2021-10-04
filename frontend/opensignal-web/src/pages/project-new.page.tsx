@@ -1,19 +1,19 @@
-import { BigNumber } from "ethers";
-import React, { useContext, useRef, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { FiExternalLink } from "react-icons/fi";
+import { Container, Form, Grid, Segment, Button, TextArea, Placeholder } from "semantic-ui-react";
 import { useHistory } from "react-router";
-import { Button, Container, Form, Grid, Placeholder } from "semantic-ui-react";
-import Web3 from "web3";
-import { useGetOpenSignalContract, useGetOpenSignalTokenContract } from "../hooks/Contract.hook";
-import { useGetMetadata } from "../hooks/Ipfs.hook";
 import { useGetAllowance } from "../hooks/OpenSignalToken.hook";
-import { saveOnIPFSwithNftStorage } from "../network/ipfs";
 import { GitcoinContext } from "../store";
-import { getNetworkName } from "../util/eth.util";
-import { errorToastOpts, successToastOpts } from "../util/toast.util";
-import { Box, Flex, Heading } from "@chakra-ui/layout";
+import React from "react";
+import {
+    useGetOpenSignalContract,
+    useGetOpenSignalProxyContract,
+    useGetOpenSignalTokenContract,
+    useGetRewardsDistributionContract,
+} from "../hooks/Contract.hook";
 
+import Web3 from "web3";
+import { useGetMetadata } from "../hooks/Ipfs.hook";
+import { BigNumber } from "ethers";
+import { saveOnIPFS, saveOnIPFSWithWeb3Storage } from "../network/ipfs";
 const initialState: Project = {
     id: "",
     creator: "",
@@ -30,23 +30,26 @@ const initialState: Project = {
 };
 const re = /^[0-9\b]+$/;
 const ProjectNewPage = () => {
-    const { state } = useContext(GitcoinContext);
-    const imgRef = useRef(null);
-    const [approveLoading, setApproveLoading] = useState<boolean>(false);
-    const [projectCreatedTx, setProjectCreatedTx] = useState<string | null>(null);
-    const [createLoading, setCreateLoading] = useState<boolean>(false);
-    const [newProject, setNewProject] = useState<Project>(initialState);
-    const [opensignalMeta] = useGetMetadata(state.openSignalContract);
-    const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
-    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
-    const [avatar, setAvatar] = useState<File | null>(null);
+    const { state } = React.useContext(GitcoinContext);
+    const imgRef = React.useRef(null);
+    const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
+    const [error, seterror] = React.useState<string>("");
+    const [createLoading, setCreateLoading] = React.useState<boolean>(false);
+    const [newProject, setNewProject] = React.useState<Project>(initialState);
+    // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
+    const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
+    // const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
+    const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
+    const [rewardsContract] = useGetRewardsDistributionContract(
+        state.rewardDistributionContractAddress,
+    );
+    const [avatar, setavatar] = React.useState<File | null>(null);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
-        opensignalMeta,
         approveLoading,
     );
+    console.log(allowance, "allow");
 
     const history = useHistory();
     const goToProject = () => {
@@ -54,89 +57,95 @@ const ProjectNewPage = () => {
     };
 
     const onNewProject = async () => {
-        if (!opensignalMeta || !tokenMeta) {
-            toast("Contracts Not found", errorToastOpts);
-            return;
-        }
+        // if (!tokenMeta) {
+        //     seterror('Contracts Not found');
+        //     return;
+        // }
         if (newProject.selfStake < 2) {
-            toast("Need atleast 2 tokens", errorToastOpts);
+            seterror("Need atleast 2 tokens");
             return;
         }
         try {
-            if (isNotApproved) {
+            seterror("");
+            if (notEnoughAllowance) {
                 setApproveLoading(true);
-                try {
-                    const approval = await tokenContract.methods.approve(
-                        opensignalMeta.properties.address,
+                tokenContract.methods
+                    .approve(
+                        state.openSignalContractAddress,
                         Web3.utils.toWei(newProject.selfStake.toString()),
-                    );
-                    const sentApproval = await approval.send({
+                    )
+                    .send({
                         from: state.wallets[0],
+                    })
+                    .then((res: any) => {
+                        setCreateLoading(false);
+                        setApproveLoading(false);
+                        console.log(res);
+                    })
+                    .catch((err: any) => {
+                        console.log(err, "err");
+                        seterror("Error");
+                        setApproveLoading(false);
+                        console.log(err);
                     });
-                    console.log({ sentApproval, approval });
-                    setApproveLoading(false);
-                    toast("Approved ", successToastOpts());
-                    console.log({ approval });
-                } catch (error) {
-                    toast(`Error`, errorToastOpts);
-                    setApproveLoading(false);
-                }
                 return;
             } else {
                 setApproveLoading(false);
             }
 
-            setCreateLoading(true);
+            const { imageURL, metadataURL } = await saveOnIPFSWithWeb3Storage(
+                { ...newProject, avatar: "" },
+                avatar,
+            );
 
-            const metadata = await saveOnIPFSwithNftStorage({ ...newProject, avatar: "" }, avatar);
-
-            console.log({ metadata });
-            setNewProject({ ...newProject, link: metadata.url });
+            setNewProject({ ...newProject, link: metadataURL });
             if (!openSignalContract) {
-                console.log("contract not found");
-                toast("Contract not found", errorToastOpts);
-                return;
+                return console.log("contract not found");
             }
 
-            const createProjectTx = await openSignalContract.methods
-                .createProject(
-                    newProject.name,
-                    metadata.url,
+            setCreateLoading(true);
+            console.log(newProject.selfStake.toString(), "selfStake");
+            console.log(openSignalContract._address, "address of openSignalContract");
+            tokenContract.methods
+                .allowance(state.wallets[0], state.openSignalTokenContractAddress)
+                .call()
+                .then((rez) => console.log(rez, "resultallowance"));
+            await tokenContract.methods
+                .approve(
+                    state.openSignalContractAddress,
                     Web3.utils.toWei(newProject.selfStake.toString()),
                 )
                 .send({
                     from: state.wallets[0],
                 });
-            setCreateLoading(false);
-            setProjectCreatedTx(createProjectTx);
-            toast(
-                <div
-                    style={{
-                        display: "flex",
-                        width: "100%",
-                        alignItems: "center",
-                    }}
-                >
-                    Project created
-                    <FiExternalLink
-                        style={{
-                            marginLeft: "5px",
-                        }}
-                    />
-                </div>,
-                successToastOpts("🎉"),
-            );
-            await new Promise((r) => setTimeout(r, 4500));
-            return goToProject();
+            openSignalContract.methods
+                .createProject(
+                    newProject.name,
+                    metadataURL,
+                    Web3.utils.toWei(newProject.selfStake.toString()),
+                )
+                .send({
+                    from: state.wallets[0],
+                })
+                .then((res: any) => {
+                    setCreateLoading(false);
+                    console.log(res);
+                })
+                .catch((err: any) => {
+                    seterror("Error");
+                    setCreateLoading(false);
+                    console.log(err);
+                });
         } catch (err) {
-            toast("Error", errorToastOpts);
+            console.log(err);
+            seterror("Error");
             setCreateLoading(false);
             setApproveLoading(false);
         }
     };
 
     const fileChange = (e: any) => {
-        setAvatar(e.target.files[0]);
+        setavatar(e.target.files[0]);
         const reader = new FileReader();
         reader.onload = (e: any) => {
             setNewProject({
@@ -145,9 +154,9 @@ const ProjectNewPage = () => {
             });
         };
         reader.readAsDataURL(e.target.files[0]);
-        toast("File loaded", successToastOpts("📁✔️"));
     };
-    const isNotApproved =
+
+    const notEnoughAllowance =
         newProject.selfStake == 0 ||
         (!allowanceLoading &&
             BigNumber.from(allowance).lt(
@@ -155,24 +164,9 @@ const ProjectNewPage = () => {
             ));
     return (
         <Container>
-            <Flex justifyContent="center">
-                <Box p="2">
-                    <Heading size="2xl" color="purple.100">
-                        Let's create your Open Signal Project !
-                    </Heading>
-                </Box>
-            </Flex>
-            {projectCreatedTx ? (
-                <a
-                    href={`https://${getNetworkName(
-                        state.chain_id,
-                    ).toLocaleLowerCase()}.etherscan.io/tx/${projectCreatedTx}`}
-                >
-                    <Toaster />
-                </a>
-            ) : (
-                <Toaster />
-            )}
+            <div className="page-header">
+                <h3>NEW PROJECT</h3>
+            </div>
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column
                     style={{
@@ -316,20 +310,27 @@ const ProjectNewPage = () => {
                                     }
                                 />
                             </Form.Field>
+                            {error ? (
+                                <p
+                                    style={{
+                                        padding: 8,
+                                        color: "crimson",
+                                        width: "100%",
+                                    }}
+                                >
+                                    {error}
+                                </p>
+                            ) : null}
                             <Button
-                                onClick={onNewProject}
+                                onClick={() => onNewProject()}
                                 className="btn"
-                                color={isNotApproved ? "pink" : "purple"}
+                                color={notEnoughAllowance ? "pink" : "purple"}
                                 fluid
                                 size="large"
-                                disabled={projectCreatedTx !== null || newProject.selfStake == 0}
+                                disabled={newProject.selfStake == 0}
                                 loading={approveLoading || createLoading}
                             >
-                                {isNotApproved
-                                    ? "APPROVE TOKEN"
-                                    : projectCreatedTx
-                                    ? "✔️CREATED"
-                                    : "CREATE"}
+                                {notEnoughAllowance ? "APPROVE TOKEN" : "CREATE"}
                             </Button>
                         </Container>
                     </Form>

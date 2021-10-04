@@ -5,7 +5,7 @@ import { isAddress } from "../util/eth.util";
 const useGetAllowance = (
     addr: string,
     tokenContract: any,
-    opensignalMeta: any,
+    openSignalContractAddress: any,
     trigger = false,
 ) => {
     const [allowance, setallowance] = React.useState(0);
@@ -15,18 +15,18 @@ const useGetAllowance = (
         if (
             addr &&
             tokenContract &&
-            opensignalMeta &&
+            tokenContract._address &&
             isAddress(addr) &&
-            isAddress(tokenContract._address) &&
-            isAddress(opensignalMeta.properties.address)
+            isAddress(tokenContract._address)
         ) {
             setallowance(0);
             setloading(true);
             seterr(null);
             try {
                 const allowance = await tokenContract.methods
-                    .allowance(addr, opensignalMeta.properties.address)
+                    .allowance(addr, openSignalContractAddress)
                     .call();
+                console.log(allowance, "allowance");
                 setallowance(allowance);
                 setloading(false);
                 seterr(null);
@@ -40,7 +40,7 @@ const useGetAllowance = (
             setloading(false);
             seterr(null);
         }
-    }, [addr, tokenContract, opensignalMeta, trigger]);
+    }, [addr, tokenContract, trigger]);
     return [allowance, loading, err];
 };
 const useGetTokenBalance = (addr: string, tokenContract: any, trigger = false) => {
