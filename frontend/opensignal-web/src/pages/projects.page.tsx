@@ -30,6 +30,7 @@ import {
     useGetTotalSupply,
 } from "../hooks/OpenSignalShares";
 import OpenSignalTokenIcon from "../assets/icons/opensignal.png";
+import { Flex, Box, Heading, SimpleGrid } from "@chakra-ui/layout";
 const re = /^[0-9\b]+$/;
 const pat = /^((http|https):\/\/)/;
 const ProjectPage = () => {
@@ -197,9 +198,15 @@ const ProjectPage = () => {
     const [epochLength, setEpochLength] = useState<any>(296000);
 
     return (
-        <Container>
+        <Box w="full">
             <div className="page-header">
-                <h3>Projects</h3>
+                <Flex justifyContent="center">
+                    <Box p="2" mb="10">
+                        <Heading size="2xl" color="purple.100">
+                            Projects
+                        </Heading>
+                    </Box>
+                </Flex>
                 <button onClick={getUserIndex}>GET USER INDEX ARRAY</button>
                 <button onClick={getCurrentRewardEstimate}>GET CURRENT REWARD ESTIMATE</button>
                 <button onClick={getCurrentStakingAmount}>GET CURRENT STAKING AMOUNT</button>
@@ -229,33 +236,25 @@ const ProjectPage = () => {
                 </button>
             </div>
 
-            <Grid
-                textAlign="center"
-                verticalAlign="middle"
-                style={{
-                    marginTop: "2rem",
-                }}
-            >
-                <div className="projects">
-                    {projectsLoading ? <BouncyBalls style={{ marginTop: "20%" }} /> : null}
-                    {projects.map((p: any, i: any) => (
-                        <ProjectCard
-                            project={p}
-                            key={i}
-                            onProjectChange={(p, m) => {
-                                setSelectedProject(p);
-                                setSelectedProjectMeta(m);
-                            }}
-                            contract={openSignalContract}
-                            tokenContract={tokenContract}
-                            onChange={() => settrigger(!trigger)}
-                            setApproveLoading={setApproveLoading}
-                            setAddSignalModal={setAddSignalModal}
-                            setRemoveSignalModal={setRemoveSignalModal}
-                        />
-                    ))}
-                </div>
-            </Grid>
+            <SimpleGrid columns={3} spacing={10}>
+                {projectsLoading ? <BouncyBalls style={{ marginTop: "20%" }} /> : null}
+                {projects.map((p: any, i: any) => (
+                    <ProjectCard
+                        project={p}
+                        key={i}
+                        onProjectChange={(p, m) => {
+                            setSelectedProject(p);
+                            setSelectedProjectMeta(m);
+                        }}
+                        contract={openSignalContract}
+                        tokenContract={tokenContract}
+                        onChange={() => settrigger(!trigger)}
+                        setApproveLoading={setApproveLoading}
+                        setAddSignalModal={setAddSignalModal}
+                        setRemoveSignalModal={setRemoveSignalModal}
+                    />
+                ))}
+            </SimpleGrid>
 
             <AddSignalModal
                 open={addSignalModal}
@@ -293,7 +292,7 @@ const ProjectPage = () => {
                 approveLoading={approveProjectShareLoading}
                 onApprove={onApproveProjectShare}
             />
-        </Container>
+        </Box>
     );
 };
 
@@ -336,7 +335,7 @@ const ProjectCard = ({
     };
 
     return projectMeta && projectMeta.properties ? (
-        <div className="project">
+        <Box>
             <div className="project-avatar">
                 {projectMetaLoading ? (
                     <Loader active inverted size="big" />
@@ -455,7 +454,7 @@ const ProjectCard = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </Box>
     ) : (
         <p>loading</p>
     );

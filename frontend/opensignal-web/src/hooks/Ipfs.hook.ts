@@ -5,7 +5,7 @@ const useGetMetadata = (cid: string, trigger = true) => {
     const [metadata, setmetadata] = React.useState<any>(null);
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
-    React.useMemo(async () => {
+    React.useEffect(() => {
         if (cid && cid.toString().startsWith(PREFIX)) {
             setloading(true);
             axios

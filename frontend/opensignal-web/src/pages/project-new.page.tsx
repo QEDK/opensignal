@@ -14,6 +14,7 @@ import Web3 from "web3";
 import { useGetMetadata } from "../hooks/Ipfs.hook";
 import { BigNumber } from "ethers";
 import { saveOnIPFS, saveOnIPFSWithWeb3Storage } from "../network/ipfs";
+import { Box, Flex, Heading } from "@chakra-ui/layout";
 const initialState: Project = {
     id: "",
     creator: "",
@@ -176,9 +177,13 @@ const ProjectNewPage = () => {
             ));
     return (
         <Container>
-            <div className="page-header">
-                <h3>NEW PROJECT</h3>
-            </div>
+            <Flex justifyContent="center">
+                <Box p="2" mb="10">
+                    <Heading size="2xl" color="purple.100">
+                        Create project
+                    </Heading>
+                </Box>
+            </Flex>
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column
                     style={{

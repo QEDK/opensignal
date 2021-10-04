@@ -6,26 +6,51 @@ import { GitcoinContext } from "../store";
 import MetamaskIcon from "../assets/icons/metamask.png";
 
 import { minimizeAddress, getNetworkName } from "../util/eth.util";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useGetMetadata } from "../hooks/Ipfs.hook";
 import { useGetOpenSignalTokenContract } from "../hooks/Contract.hook";
 import { useGetTokenBalance } from "../hooks/OpenSignalToken.hook";
 import { ethers } from "ethers";
 import { ACTIONS } from "../store/actions";
+import { Box, HStack, Heading, Text, VStack, Flex, Stack } from "@chakra-ui/layout";
+
+import { useColorModeValue } from "@chakra-ui/color-mode";
+import { Button } from "@chakra-ui/button";
 
 const StatusbarComponent = () => {
-    const { state, dispatch } = React.useContext(GitcoinContext);
+    const headingColor = useColorModeValue("yellow.600", "yellow.500");
 
     return (
-        <div className={"nav-bar"}>
-            <div className={"nav"}>
-                <div className="nav-item">
-                    <NavLink to="/">OpenSignal</NavLink>
-                </div>
-            </div>
-
-            <WalletComponent />
-        </div>
+        <Box className="nav-bar">
+            <HStack justify="space-between" w="100%" h={16}>
+                <Link to="/">
+                    <VStack _hover={{ cursor: "pointer" }} align="left" spacing="0">
+                        <HStack>
+                            <Heading fontSize="md" color={headingColor}>
+                                OpenSignal
+                            </Heading>
+                        </HStack>
+                        <Text fontSize="xs" color="purple.500" fontWeight="bold" as="i">
+                            by MOONSHOT COLLECTIVE{" "}
+                        </Text>
+                    </VStack>
+                </Link>
+                <Stack direction="row" spacing={6}>
+                    <Link to="/">
+                        <Button w="sm">Home</Button>
+                    </Link>
+                    <Link to="/staking">
+                        <Button w="sm">Staking</Button>
+                    </Link>
+                    <Link to="/dashboard">
+                        <Button w="sm">Dashboard</Button>
+                    </Link>
+                </Stack>
+                <HStack>
+                    <WalletComponent />
+                </HStack>
+            </HStack>
+        </Box>
     );
 };
 
