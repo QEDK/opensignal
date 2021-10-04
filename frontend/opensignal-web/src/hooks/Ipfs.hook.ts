@@ -5,12 +5,14 @@ const useGetMetadata = (cid: string, trigger = true) => {
     const [metadata, setmetadata] = React.useState<any>(null);
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
-    React.useMemo(async () => {
+    React.useEffect(() => {
+        console.log(cid, "cid");
         if (cid && cid.toString().startsWith(PREFIX)) {
             setloading(true);
             axios
                 .get(getIPFSlink(cid))
                 .then((result) => {
+                    console.log(result, "result");
                     try {
                         setmetadata({
                             ...result.data,
