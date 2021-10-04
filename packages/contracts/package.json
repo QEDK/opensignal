@@ -1,11 +1,14 @@
 {
-  "name": "opensignal",
-  "version": "1.0.0",
+  "name": "@open-signal/contracts",
+  "version": "0.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "standard --fix",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "deploy:local": "npx hardhat run scripts/deploylocal.js",
+    "chain": "npx hardhat node",
     "solhint": "solhint --fix \"contracts/**/*.sol\""
   },
   "repository": {
