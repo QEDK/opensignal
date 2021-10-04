@@ -17,9 +17,13 @@ import {
 } from "@chakra-ui/react";
 import { toast } from "react-hot-toast";
 import { BigNumber } from "ethers";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import Web3 from "web3";
-import { useGetOpenSignalContract } from "../hooks/Contract.hook";
+
+import {
+    useGetOpenSignalContract,
+    useGetRewardsDistributionContract,
+} from "../hooks/Contract.hook";
 import { useGetMetadata } from "../hooks/Ipfs.hook";
 import { GitcoinContext } from "../store";
 import { useGetProjectURI } from "../hooks/OpenSignal.hook";
@@ -27,8 +31,12 @@ import { useGetProjectURI } from "../hooks/OpenSignal.hook";
 export default function CardWithImage({ project }: { project: Project }) {
     const { state } = useContext(GitcoinContext);
     console.log(project);
+    const [currentStakingAmount, setCurrentStakingAmount] = useState<number>(0);
     const [opensignalMeta] = useGetMetadata(state.openSignalContract);
     const [openSignalContract] = useGetOpenSignalContract(opensignalMeta);
+    const [rewardsDistibutionContract] = useGetRewardsDistributionContract(
+        state.rewardDistributionContractAddress,
+    );
     const [projectURI, projectURILoading, projectURIErr] = useGetProjectURI(
         project.id,
         openSignalContract,
@@ -36,6 +44,24 @@ export default function CardWithImage({ project }: { project: Project }) {
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
     console.log(projectMeta);
     const pId = Web3.utils.padLeft(Web3.utils.hexToBytes(project.id) as any, 32);
+    const getCurrentStakingAmount = async () => {
+        console.log(rewardsDistibutionContract.methods);
+        rewardsDistibutionContract.methods
+            .getCurrentStakingAmount()
+            .call()
+            // .getCurrentRewardEstimate(state.wallets[0])
+            // .call()
+            .then((amount: string) => {
+                console.log(amount);
+                setCurrentStakingAmount(parseInt(amount, 10));
+            })
+            .catch(console.log);
+    };
+    useEffect(() => {
+        (async () => {
+            await getCurrentStakingAmount();
+        })();
+    }, []);
     const OnIncreaseSignal = () => {
         const address = state.wallets[0];
         if (!address) {
