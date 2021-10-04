@@ -1,10 +1,10 @@
-import {ethers} from 'ethers';
-import React from 'react';
-import {isAddress} from '../util/eth.util';
-import makeBlockie from 'ethereum-blockies-base64';
-import {CONTRACTS} from './Contract.hook';
-import Web3 from 'web3';
-const TOPICS = ['NewProject(bytes32,string)'];
+import { ethers } from "ethers";
+import React from "react";
+import { isAddress } from "../util/eth.util";
+import makeBlockie from "ethereum-blockies-base64";
+import { CONTRACTS } from "./Contract.hook";
+import Web3 from "web3";
+const TOPICS = ["NewProject(bytes32,string)"];
 const useGetCurrentRewardEstimate = (address: string, contract: any, trigger = false) => {
     const [rewardEstimate, setRewardEstimate] = React.useState<number>();
     const [loading, setloading] = React.useState<boolean>(false);
@@ -32,7 +32,7 @@ const useGetCurrentRewardEstimate = (address: string, contract: any, trigger = f
                                 seterr(err);
                             });
                     } catch (err) {
-                        console.log('err', err);
+                        console.log("err", err);
                         setRewardEstimate(null);
                         setloading(false);
                         seterr(err);
@@ -66,19 +66,15 @@ const useGetProjects = (ids: string[], contract: any, trigger = false) => {
                     setloading(true);
                     seterr(null);
                     try {
-                        Promise.all(
-                            ids.map((id) =>
-                                contract.methods.projects(id).call()
-                            )
-                        )
+                        Promise.all(ids.map((id) => contract.methods.projects(id).call()))
                             .then((res: any) => {
-                                console.log(res,'projects')
+                                console.log(res, "projects");
                                 setprojects(
                                     res.map((r: any, i: number) => ({
                                         ...r,
                                         id: ids[i],
                                         avatar: makeBlockie(ids[i]),
-                                    }))
+                                    })),
                                 );
                                 setloading(false);
                                 seterr(null);
@@ -108,7 +104,7 @@ const useGetProjects = (ids: string[], contract: any, trigger = false) => {
     return [projects, loading, err];
 };
 const useGetProjectURI = (id: string, contract: any, trigger = false) => {
-    const [projectURI, setprojectURI] = React.useState<string>('');
+    const [projectURI, setprojectURI] = React.useState<string>("");
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
@@ -117,7 +113,7 @@ const useGetProjectURI = (id: string, contract: any, trigger = false) => {
                 setloading(true);
 
                 if (isAddress(contract._address)) {
-                    setprojectURI('');
+                    setprojectURI("");
                     setloading(true);
                     seterr(null);
                     try {
@@ -130,22 +126,22 @@ const useGetProjectURI = (id: string, contract: any, trigger = false) => {
                                 seterr(null);
                             })
                             .catch((err: any) => {
-                                setprojectURI('');
+                                setprojectURI("");
                                 setloading(false);
                                 seterr(err);
                             });
                     } catch (err) {
-                        setprojectURI('');
+                        setprojectURI("");
                         setloading(false);
                         seterr(err);
                     }
                 } else {
-                    setprojectURI('');
+                    setprojectURI("");
                     setloading(false);
                     seterr(null);
                 }
             } catch (err) {
-                setprojectURI('');
+                setprojectURI("");
                 setloading(false);
                 seterr(err);
             }
@@ -155,7 +151,7 @@ const useGetProjectURI = (id: string, contract: any, trigger = false) => {
 };
 
 const useGetreserveRatio = (contract: any, trigger = false) => {
-    const [reserveRatio, setreserveRatio] = React.useState<string>('');
+    const [reserveRatio, setreserveRatio] = React.useState<string>("");
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
@@ -164,7 +160,7 @@ const useGetreserveRatio = (contract: any, trigger = false) => {
                 setloading(true);
 
                 if (isAddress(contract._address)) {
-                    setreserveRatio('');
+                    setreserveRatio("");
                     setloading(true);
                     seterr(null);
                     try {
@@ -177,22 +173,22 @@ const useGetreserveRatio = (contract: any, trigger = false) => {
                                 seterr(null);
                             })
                             .catch((err: any) => {
-                                setreserveRatio('');
+                                setreserveRatio("");
                                 setloading(false);
                                 seterr(err);
                             });
                     } catch (err) {
-                        setreserveRatio('');
+                        setreserveRatio("");
                         setloading(false);
                         seterr(err);
                     }
                 } else {
-                    setreserveRatio('');
+                    setreserveRatio("");
                     setloading(false);
                     seterr(null);
                 }
             } catch (err) {
-                setreserveRatio('');
+                setreserveRatio("");
                 setloading(false);
                 seterr(err);
             }
@@ -207,9 +203,9 @@ const useGetSaleReturn = (
     resetBalance?: string,
     reserveRatio?: string,
     sellAmount?: string,
-    trigger: boolean = false
+    trigger = false,
 ) => {
-    const [saleReturn, setsaleReturn] = React.useState<string>('');
+    const [saleReturn, setsaleReturn] = React.useState<string>("");
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
@@ -221,34 +217,32 @@ const useGetSaleReturn = (
             reserveRatio &&
             sellAmount
         ) {
-            setsaleReturn('');
+            setsaleReturn("");
             setloading(true);
             seterr(null);
             try {
-                const contract = getbancorContract(
-                    '0x11D6990f1aB66354189fe2477e547Deb86df16de'
-                );
+                const contract = getbancorContract("0x11D6990f1aB66354189fe2477e547Deb86df16de");
 
                 const saleReturn = await contract.methods
                     .calculateSaleReturn(
                         totalSupply,
                         resetBalance,
                         reserveRatio,
-                        ethers.utils.parseEther(sellAmount)
+                        ethers.utils.parseEther(sellAmount),
                     )
                     .call();
-                console.log('saleReturn', saleReturn);
+                console.log("saleReturn", saleReturn);
                 setsaleReturn(ethers.utils.formatEther(saleReturn));
                 setloading(false);
                 seterr(null);
             } catch (err) {
-                console.log('err123123', err);
-                setsaleReturn('');
+                console.log("err123123", err);
+                setsaleReturn("");
                 setloading(false);
                 seterr(err);
             }
         } else {
-            setsaleReturn('');
+            setsaleReturn("");
             setloading(false);
             seterr(null);
         }
@@ -257,10 +251,8 @@ const useGetSaleReturn = (
 };
 
 const getbancorContract = (deploymentAddr: string) => {
-    let myweb3: any = new Web3(window.ethereum);
+    const myweb3: any = new Web3(window.ethereum);
     return new myweb3.eth.Contract(CONTRACTS.BancorFormula.abi, deploymentAddr);
 };
 
-export {
-    useGetCurrentRewardEstimate,
-};
+export { useGetCurrentRewardEstimate };

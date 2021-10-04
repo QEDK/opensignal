@@ -1,86 +1,78 @@
-import {Container, Grid, Button, Icon, Input} from 'semantic-ui-react';
-import {Header, Loader, Modal} from 'semantic-ui-react';
-import {useHistory} from 'react-router';
-import {BigNumber, ethers} from 'ethers';
+import { Container, Grid, Button, Icon, Input } from "semantic-ui-react";
+import { Header, Loader, Modal } from "semantic-ui-react";
+import { useHistory } from "react-router";
+import { BigNumber, ethers } from "ethers";
 import {
     useGetOpenSignalContract,
     useGetOpenSignalTokenContract,
     useGetRewardsDistributionContract,
     useGetOpenSignalProxyContract,
-} from '../hooks/Contract.hook';
-import {GitcoinContext} from '../store';
-import React, { useState } from 'react';
+} from "../hooks/Contract.hook";
+import { GitcoinContext } from "../store";
+import React, { useState } from "react";
 import {
     useGetProjectIds,
     useGetProjects,
     useGetProjectURI,
     useGetreserveRatio,
     useGetSaleReturn,
-} from '../hooks/OpenSignal.hook';
-import {
-    useGetCurrentRewardEstimate,
-} from '../hooks/rewardsDistribution.hook';
-import {useGetMetadata} from '../hooks/Ipfs.hook';
-import {BouncyBalls} from '../components/util.component';
-import {isAddress} from '../util/eth.util';
-import Web3 from 'web3';
-import {useGetAllowance} from '../hooks/OpenSignalToken.hook';
+} from "../hooks/OpenSignal.hook";
+import { useGetCurrentRewardEstimate } from "../hooks/rewardsDistribution.hook";
+import { useGetMetadata } from "../hooks/Ipfs.hook";
+import { BouncyBalls } from "../components/util.component";
+import { isAddress } from "../util/eth.util";
+import Web3 from "web3";
+import { useGetAllowance } from "../hooks/OpenSignalToken.hook";
 import {
     getShareContract,
     useGetShareAllowance,
     useGetShareBalance,
     useGetTotalSupply,
-} from '../hooks/OpenSignalShares';
-import OpenSignalTokenIcon from '../assets/icons/opensignal.png';
+} from "../hooks/OpenSignalShares";
+import OpenSignalTokenIcon from "../assets/icons/opensignal.png";
 const re = /^[0-9\b]+$/;
 const pat = /^((http|https):\/\/)/;
 const ProjectPage = () => {
-    const {state} = React.useContext(GitcoinContext);
+    const { state } = React.useContext(GitcoinContext);
     const [trigger, settrigger] = React.useState<boolean>(false);
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
-    const [selectedProjectMeta, setSelectedProjectMeta] =
-        React.useState<Project | null>(null);
-    const [selectedProject, setSelectedProject] =
-        React.useState<Project | null>(null);
+    const [selectedProjectMeta, setSelectedProjectMeta] = React.useState<Project | null>(null);
+    const [selectedProject, setSelectedProject] = React.useState<Project | null>(null);
     const [addSignalModal, setAddSignalModal] = React.useState<boolean>(false);
     const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
     const [approveProjectShareLoading, setApproveProjectShareLoading] =
         React.useState<boolean>(false);
-    const [removeSignalModal, setRemoveSignalModal] =
-        React.useState<boolean>(false);
+    const [removeSignalModal, setRemoveSignalModal] = React.useState<boolean>(false);
     const history = useHistory();
 
     // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
     const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
     const [reserveRatio] = useGetreserveRatio(openSignalContract);
     const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
-    const [openSignalProxyContract] = useGetOpenSignalProxyContract(state.openSignalProxyContractAddress);
-    const [rewardsDistibutionContract] = useGetRewardsDistributionContract(state.rewardDistributionContractAddress);
-    const [ids, _, err] = useGetProjectIds(openSignalContract, trigger);
-    const [projects, projectsLoading, e] = useGetProjects(
-        ids,
-        openSignalContract
+    const [openSignalProxyContract] = useGetOpenSignalProxyContract(
+        state.openSignalProxyContractAddress,
     );
+    const [rewardsDistibutionContract] = useGetRewardsDistributionContract(
+        state.rewardDistributionContractAddress,
+    );
+    const [ids, _, err] = useGetProjectIds(openSignalContract, trigger);
+    const [projects, projectsLoading, e] = useGetProjects(ids, openSignalContract);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
         state.openSignalContractAddress,
-        approveLoading
+        approveLoading,
     );
-    console.log(allowance)
-
+    console.log(allowance);
 
     const goToNewProject = () => {
-        history.push('/projects/new');
+        history.push("/projects/new");
     };
 
     const onApprove = (amount: number) => {
         setApproveLoading(true);
         tokenContract.methods
-            .approve(
-                state.openSignalContractAddress,
-                Web3.utils.toWei(amount.toString())
-            )
+            .approve(state.openSignalContractAddress, Web3.utils.toWei(amount.toString()))
             .send({
                 from: state.wallets[0],
             })
@@ -94,18 +86,12 @@ const ProjectPage = () => {
         return;
     };
 
-    const onApproveProjectShare = (
-        shareContractAddress: any,
-        amount: number
-    ) => {
+    const onApproveProjectShare = (shareContractAddress: any, amount: number) => {
         setApproveProjectShareLoading(true);
         try {
             const shareContract = getShareContract(shareContractAddress);
             shareContract.methods
-                .approve(
-                    state.openSignalContractAddress,
-                    Web3.utils.toWei(amount.toString())
-                )
+                .approve(state.openSignalContractAddress, Web3.utils.toWei(amount.toString()))
                 .send({
                     from: state.wallets[0],
                 })
@@ -123,15 +109,14 @@ const ProjectPage = () => {
     };
 
     const OnIncreaseSignal = (project: Project | null, amount: number) => {
-        if (
-            project &&
-            openSignalContract &&
-            isAddress(openSignalContract._address) &&
-            amount > 0
-        ) {
+        if (project && openSignalContract && isAddress(openSignalContract._address) && amount > 0) {
             setCreateLoading(true);
             openSignalContract.methods
-                .addSignal(project.id, Web3.utils.toWei(amount.toString()),Web3.utils.toWei((0).toString()))
+                .addSignal(
+                    project.id,
+                    Web3.utils.toWei(amount.toString()),
+                    Web3.utils.toWei((0).toString()),
+                )
                 .send({
                     from: state.wallets[0],
                 })
@@ -145,23 +130,14 @@ const ProjectPage = () => {
         }
     };
 
-    const OnDecreaseSignal = (
-        project: Project | null,
-        amount: number,
-        minAmount: number
-    ) => {
-        if (
-            project &&
-            openSignalContract &&
-            isAddress(openSignalContract._address) &&
-            amount > 0
-        ) {
+    const OnDecreaseSignal = (project: Project | null, amount: number, minAmount: number) => {
+        if (project && openSignalContract && isAddress(openSignalContract._address) && amount > 0) {
             setCreateLoading(true);
             openSignalContract.methods
                 .removeSignal(
                     project.id,
                     Web3.utils.toWei(amount.toString()),
-                    Web3.utils.toWei((minAmount * 0.975).toString())
+                    Web3.utils.toWei((minAmount * 0.975).toString()),
                 )
                 .send({
                     from: state.wallets[0],
@@ -178,37 +154,45 @@ const ProjectPage = () => {
 
     const getCurrentRewardEstimate = () => {
         console.log(rewardsDistibutionContract.methods);
-        rewardsDistibutionContract.methods.getCurrentRewardEstimate(state.wallets[0]).call()
+        rewardsDistibutionContract.methods
+            .getCurrentRewardEstimate(state.wallets[0])
+            .call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
             .then(console.log)
-            .catch(console.log)
-    }
+            .catch(console.log);
+    };
 
     const getCurrentStakingAmount = () => {
         console.log(rewardsDistibutionContract.methods);
-        rewardsDistibutionContract.methods.getCurrentStakingAmount().call()
+        rewardsDistibutionContract.methods
+            .getCurrentStakingAmount()
+            .call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
             .then(console.log)
-            .catch(console.log)
-    }
+            .catch(console.log);
+    };
 
     const changeEpochLength = (lengthInSeconds) => {
-        console.log(lengthInSeconds)
-        rewardsDistibutionContract.methods.changeEpochLength(lengthInSeconds).send({from: state.wallets[0]})
-        .then(console.log)
-        .catch(console.log)
-    }
+        console.log(lengthInSeconds);
+        rewardsDistibutionContract.methods
+            .changeEpochLength(lengthInSeconds)
+            .send({ from: state.wallets[0] })
+            .then(console.log)
+            .catch(console.log);
+    };
 
     const getUserIndex = () => {
         console.log(rewardsDistibutionContract.methods);
-        rewardsDistibutionContract.methods.userIndex(state.wallets[0]).call()
+        rewardsDistibutionContract.methods
+            .userIndex(state.wallets[0])
+            .call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
             .then(console.log)
-            .catch(console.log)
-    }
+            .catch(console.log);
+    };
 
     const [epochLength, setEpochLength] = useState<any>(296000);
 
@@ -220,23 +204,24 @@ const ProjectPage = () => {
                 <button onClick={getCurrentRewardEstimate}>GET CURRENT REWARD ESTIMATE</button>
                 <button onClick={getCurrentStakingAmount}>GET CURRENT STAKING AMOUNT</button>
                 <button onClick={() => changeEpochLength(epochLength)}>Change Epoch Length</button>
-                <input value={epochLength} type='number' onChange={e => {
-
-                    setEpochLength(parseInt(e.target.value))
-                    }}></input>
-
-
+                <input
+                    value={epochLength}
+                    type="number"
+                    onChange={(e) => {
+                        setEpochLength(parseInt(e.target.value));
+                    }}
+                ></input>
 
                 <button
                     style={{
-                        position: 'absolute',
+                        position: "absolute",
                         right: 0,
                         top: 0,
-                        border: '1px solid #ddd',
-                        color: '#ddd ',
-                        backgroundColor: 'transparent',
-                        padding: ' 0.5rem 1rem',
-                        cursor: 'pointer',
+                        border: "1px solid #ddd",
+                        color: "#ddd ",
+                        backgroundColor: "transparent",
+                        padding: " 0.5rem 1rem",
+                        cursor: "pointer",
                     }}
                     onClick={goToNewProject}
                 >
@@ -248,13 +233,11 @@ const ProjectPage = () => {
                 textAlign="center"
                 verticalAlign="middle"
                 style={{
-                    marginTop: '2rem',
+                    marginTop: "2rem",
                 }}
             >
                 <div className="projects">
-                    {projectsLoading ? (
-                        <BouncyBalls style={{marginTop: '20%'}} />
-                    ) : null}
+                    {projectsLoading ? <BouncyBalls style={{ marginTop: "20%" }} /> : null}
                     {projects.map((p: any, i: any) => (
                         <ProjectCard
                             project={p}
@@ -314,7 +297,7 @@ const ProjectPage = () => {
     );
 };
 
-export {ProjectPage};
+export { ProjectPage };
 
 const ProjectCard = ({
     project,
@@ -332,16 +315,15 @@ const ProjectCard = ({
     setRemoveSignalModal: (i: boolean) => void;
     onProjectChange: (p: Project, meta: Project) => void;
 }) => {
-    const {state} = React.useContext(GitcoinContext);
+    const { state } = React.useContext(GitcoinContext);
 
-    const [projectURI, projectURILoading, projectURIErr] = useGetProjectURI(
-        project.id,
-        contract
-    );
+    const [projectURI, projectURILoading, projectURIErr] = useGetProjectURI(project.id, contract);
 
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
-    const [shareBalance, shareBalanceLoading, shareBalanceErr] =
-        useGetShareBalance(project?.deployment, state.wallets[0]);
+    const [shareBalance, shareBalanceLoading, shareBalanceErr] = useGetShareBalance(
+        project?.deployment,
+        state.wallets[0],
+    );
 
     const onIncreaeSignal = () => {
         setAddSignalModal(true);
@@ -352,7 +334,7 @@ const ProjectCard = ({
         setRemoveSignalModal(true);
         onProjectChange(project, projectMeta);
     };
-    
+
     return projectMeta && projectMeta.properties ? (
         <div className="project">
             <div className="project-avatar">
@@ -361,11 +343,7 @@ const ProjectCard = ({
                 ) : (
                     <img
                         object-fit="cover"
-                        src={
-                            projectMeta?.avatar
-                                ? projectMeta.avatar
-                                : project.avatar
-                        }
+                        src={projectMeta?.avatar ? projectMeta.avatar : project.avatar}
                     />
                 )}
                 <div className="project-avatar-sub">
@@ -384,12 +362,12 @@ const ProjectCard = ({
                 <div className="project-header">
                     <div
                         style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            height: '2.75rem',
+                            display: "flex",
+                            flexDirection: "row",
+                            height: "2.75rem",
                         }}
                     >
-                        <h3 style={{position: 'relative'}}>
+                        <h3 style={{ position: "relative" }}>
                             {projectMetaLoading ? (
                                 <Loader active inverted size="small" />
                             ) : (
@@ -398,12 +376,11 @@ const ProjectCard = ({
                         </h3>
                         {projectMeta?.properties.link ? (
                             <a
-                                style={{padding: 8}}
+                                style={{ padding: 8 }}
                                 href={
                                     pat.test(projectMeta?.properties.link)
                                         ? projectMeta?.properties.link
-                                        : 'https://' +
-                                          projectMeta?.properties.link
+                                        : "https://" + projectMeta?.properties.link
                                 }
                                 target="_blank"
                             >
@@ -414,12 +391,11 @@ const ProjectCard = ({
 
                         {projectMeta?.properties.twitter ? (
                             <a
-                                style={{padding: 8}}
+                                style={{ padding: 8 }}
                                 href={
                                     pat.test(projectMeta?.properties.twitter)
                                         ? projectMeta?.properties.twitter
-                                        : 'https://' +
-                                          projectMeta?.properties.twitter
+                                        : "https://" + projectMeta?.properties.twitter
                                 }
                                 target="_blank"
                             >
@@ -428,16 +404,14 @@ const ProjectCard = ({
                             </a>
                         ) : null}
                     </div>
-                    <p style={{margin: 0}}>{`ID: ${project.id}`}</p>
-                    <p
-                        style={{margin: 0}}
-                    >{`Deployment: ${project.deployment}`}</p>
-                    <p style={{margin: 0}}>{`Creator: ${project.creator}`}</p>
+                    <p style={{ margin: 0 }}>{`ID: ${project.id}`}</p>
+                    <p style={{ margin: 0 }}>{`Deployment: ${project.deployment}`}</p>
+                    <p style={{ margin: 0 }}>{`Creator: ${project.creator}`}</p>
                 </div>
-                <div style={{padding: 8, flex: 1}}>
+                <div style={{ padding: 8, flex: 1 }}>
                     <p
                         style={{
-                            display: 'inline-block',
+                            display: "inline-block",
                             paddingRight: 12,
                             margin: 0,
                         }}
@@ -455,10 +429,7 @@ const ProjectCard = ({
                                 <p>{` ${shareBalance} `}</p>
 
                                 <i className="my-icon">
-                                    <img
-                                        src={OpenSignalTokenIcon}
-                                        alt="opensignal token"
-                                    />
+                                    <img src={OpenSignalTokenIcon} alt="opensignal token" />
                                 </i>
                             </div>
                         )}
@@ -468,38 +439,26 @@ const ProjectCard = ({
                     <div className="signal">
                         <p> {`Signal: `}</p>
 
-                        <p>
-                            {` ${Web3.utils.fromWei(
-                                project.signal.toString()
-                            )} `}
-                        </p>
+                        <p>{` ${Web3.utils.fromWei(project.signal.toString())} `}</p>
 
                         <i className="my-icon">
-                            <img
-                                src={OpenSignalTokenIcon}
-                                alt="opensignal token"
-                            />
+                            <img src={OpenSignalTokenIcon} alt="opensignal token" />
                         </i>
                     </div>
                     <div className="signal">
                         <p> {`Self Stake: `}</p>
 
-                        <p>
-                            {` ${Web3.utils.fromWei(
-                                project.selfStake.toString()
-                            )} `}
-                        </p>
+                        <p>{` ${Web3.utils.fromWei(project.selfStake.toString())} `}</p>
                         <i className="my-icon">
-                            <img
-                                src={OpenSignalTokenIcon}
-                                alt="opensignal token"
-                            />
+                            <img src={OpenSignalTokenIcon} alt="opensignal token" />
                         </i>
                     </div>
                 </div>
             </div>
         </div>
-    ) : <p>loading</p>;
+    ) : (
+        <p>loading</p>
+    );
 };
 
 const AddSignalModal = ({
@@ -523,11 +482,11 @@ const AddSignalModal = ({
     allowance: number;
     approveLoading: boolean;
 }) => {
-    const {state} = React.useContext(GitcoinContext);
+    const { state } = React.useContext(GitcoinContext);
     const [amount, setAmount] = React.useState(0);
 
     const notEnoughAllowance = BigNumber.from(allowance || 0).lt(
-        BigNumber.from(amount).mul(BigNumber.from(10).pow(18))
+        BigNumber.from(amount).mul(BigNumber.from(10).pow(18)),
     );
 
     return (
@@ -541,29 +500,24 @@ const AddSignalModal = ({
                 <Modal.Description>
                     <Header>Enter amount</Header>
                     <Input
-                        style={{width: '100%'}}
+                        style={{ width: "100%" }}
                         type="number"
                         className="signal-amount"
-                        value={amount || ''}
-                        placeholder={'Enter Amount'}
+                        value={amount || ""}
+                        placeholder={"Enter Amount"}
                         onChange={(e) =>
                             setAmount(
-                                e.target.value == '' ||
-                                    (re.test(e.target.value) &&
-                                        Number(e.target.value) < 1e15)
+                                e.target.value == "" ||
+                                    (re.test(e.target.value) && Number(e.target.value) < 1e15)
                                     ? Number(e.target.value)
-                                    : Number(amount)
+                                    : Number(amount),
                             )
                         }
                         label={
                             <button
                                 className="limit-btn green"
                                 onClick={() =>
-                                    setAmount(
-                                        state.tokenBalance < 0
-                                            ? amount
-                                            : state.tokenBalance
-                                    )
+                                    setAmount(state.tokenBalance < 0 ? amount : state.tokenBalance)
                                 }
                             >
                                 <p>MAX</p>
@@ -597,7 +551,7 @@ const AddSignalModal = ({
                     />
                 ) : (
                     <Button
-                        content={'Increase Signal'}
+                        content={"Increase Signal"}
                         loading={createLoading}
                         labelPosition="right"
                         icon="angle up"
@@ -628,11 +582,7 @@ const RmoveSignalModal = ({
     createLoading: boolean;
     approveLoading: boolean;
     onApprove: (address: string, i: number) => void;
-    OnDecreaseSignal: (
-        project: Project | null,
-        amount: number,
-        minAmount: number
-    ) => void;
+    OnDecreaseSignal: (project: Project | null, amount: number, minAmount: number) => void;
     project: Project | null;
     projectMeta: Project | null;
     wallet: string;
@@ -643,30 +593,30 @@ const RmoveSignalModal = ({
     const [shareBalance, shareBalanceLoading, err] = useGetShareBalance(
         project?.deployment,
         wallet,
-        createLoading
+        createLoading,
     );
 
     const [shareAllowance, shareAllowanceLoading] = useGetShareAllowance(
         contract?._address,
         project?.deployment,
         wallet,
-        approveLoading
+        approveLoading,
     );
 
     const [totalSupply, totalSupplyLoading, totalSupplyErr] = useGetTotalSupply(
-        project?.deployment
+        project?.deployment,
     );
 
     const [saleReturn, saleReturnLoading] = useGetSaleReturn(
-        'TODO',
-        project?.signal.toString() || '',
+        "TODO",
+        project?.signal.toString() || "",
         totalSupply,
         reserveRatio,
-        amount.toString()
+        amount.toString(),
     );
 
-    const notEnoughAllowance = BigNumber.from(shareAllowance || '0').lt(
-        ethers.utils.parseEther((amount || '0').toString())
+    const notEnoughAllowance = BigNumber.from(shareAllowance || "0").lt(
+        ethers.utils.parseEther((amount || "0").toString()),
     );
 
     return (
@@ -688,33 +638,24 @@ const RmoveSignalModal = ({
                     </Header>
 
                     <Input
-                        style={{width: '100%'}}
+                        style={{ width: "100%" }}
                         className="signal-amount"
-                        value={amount || ''}
-                        placeholder={'Enter Amount'}
+                        value={amount || ""}
+                        placeholder={"Enter Amount"}
                         onChange={(e) =>
                             setAmount(
-                                e.target.value == '' ||
-                                    (re.test(e.target.value) &&
-                                        Number(e.target.value) < 1e15)
+                                e.target.value == "" ||
+                                    (re.test(e.target.value) && Number(e.target.value) < 1e15)
                                     ? Number(e.target.value)
-                                    : Number(amount)
+                                    : Number(amount),
                             )
                         }
                         label={
                             <button
                                 className="limit-btn red"
                                 onClick={() => {
-                                    console.log(
-                                        'shareBalance',
-                                        shareBalanceLoading,
-                                        shareBalance
-                                    );
-                                    setAmount(
-                                        shareBalanceLoading
-                                            ? amount
-                                            : shareBalance
-                                    );
+                                    console.log("shareBalance", shareBalanceLoading, shareBalance);
+                                    setAmount(shareBalanceLoading ? amount : shareBalance);
                                 }}
                             >
                                 <p>MAX</p>
@@ -729,9 +670,7 @@ const RmoveSignalModal = ({
                         }
                         labelPosition="right"
                     />
-                    {!saleReturnLoading &&
-                    Number(saleReturn) > 0 &&
-                    Number(amount) > 0 ? (
+                    {!saleReturnLoading && Number(saleReturn) > 0 && Number(amount) > 0 ? (
                         <Header>{`Sale Return: ${saleReturn}`}</Header>
                     ) : null}
                 </Modal.Description>
@@ -748,24 +687,16 @@ const RmoveSignalModal = ({
                         icon="checkmark"
                         loading={approveLoading || shareAllowanceLoading}
                         content="APPROVE"
-                        onClick={() =>
-                            onApprove(project?.deployment || '', amount)
-                        }
+                        onClick={() => onApprove(project?.deployment || "", amount)}
                         className="signal-approve"
                     />
                 ) : (
                     <Button
-                        content={'Decrease Signal'}
-                        loading={
-                            createLoading ||
-                            totalSupplyLoading ||
-                            saleReturnLoading
-                        }
+                        content={"Decrease Signal"}
+                        loading={createLoading || totalSupplyLoading || saleReturnLoading}
                         labelPosition="right"
                         icon="angle down"
-                        onClick={() =>
-                            OnDecreaseSignal(project, amount, saleReturn)
-                        }
+                        onClick={() => OnDecreaseSignal(project, amount, saleReturn)}
                         negative
                     />
                 )}

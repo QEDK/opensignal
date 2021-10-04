@@ -1,67 +1,60 @@
-import {
-    Container,
-    Form,
-    Grid,
-    Segment,
-    Button,
-    TextArea,
-    Placeholder,
-} from 'semantic-ui-react';
-import {useHistory} from 'react-router';
-import {useGetAllowance} from '../hooks/OpenSignalToken.hook';
-import {GitcoinContext} from '../store';
-import React from 'react';
+import { Container, Form, Grid, Segment, Button, TextArea, Placeholder } from "semantic-ui-react";
+import { useHistory } from "react-router";
+import { useGetAllowance } from "../hooks/OpenSignalToken.hook";
+import { GitcoinContext } from "../store";
+import React from "react";
 import {
     useGetOpenSignalContract,
     useGetOpenSignalProxyContract,
     useGetOpenSignalTokenContract,
     useGetRewardsDistributionContract,
-} from '../hooks/Contract.hook';
+} from "../hooks/Contract.hook";
 
-import Web3 from 'web3';
-import {useGetMetadata} from '../hooks/Ipfs.hook';
-import {BigNumber} from 'ethers';
-import {saveOnIPFS, saveOnIPFSWithWeb3Storage} from '../network/ipfs';
+import Web3 from "web3";
+import { useGetMetadata } from "../hooks/Ipfs.hook";
+import { BigNumber } from "ethers";
+import { saveOnIPFS, saveOnIPFSWithWeb3Storage } from "../network/ipfs";
 const initialState: Project = {
-    id: '',
-    creator: '',
-    deployment: '',
-    name: '',
-    description: '',
-    link: '',
-    twitter: '',
-    avatar: '',
+    id: "",
+    creator: "",
+    deployment: "",
+    name: "",
+    description: "",
+    link: "",
+    twitter: "",
+    avatar: "",
     selfStake: 0,
     signal: 0,
-    project_id: '',
+    project_id: "",
     tags: [],
 };
 const re = /^[0-9\b]+$/;
 const ProjectNewPage = () => {
-    const {state} = React.useContext(GitcoinContext);
+    const { state } = React.useContext(GitcoinContext);
     const imgRef = React.useRef(null);
     const [approveLoading, setApproveLoading] = React.useState<boolean>(false);
-    const [error, seterror] = React.useState<string>('');
+    const [error, seterror] = React.useState<string>("");
     const [createLoading, setCreateLoading] = React.useState<boolean>(false);
     const [newProject, setNewProject] = React.useState<Project>(initialState);
     // const [opensignalMeta] = useGetMetadata(state.openSignalContract);
     const [openSignalContract] = useGetOpenSignalContract(state.openSignalContractAddress);
     // const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
-    const [rewardsContract] = useGetRewardsDistributionContract(state.rewardDistributionContractAddress);
+    const [rewardsContract] = useGetRewardsDistributionContract(
+        state.rewardDistributionContractAddress,
+    );
     const [avatar, setavatar] = React.useState<File | null>(null);
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
-        approveLoading
+        approveLoading,
     );
-    console.log(allowance,'allow');
+    console.log(allowance, "allow");
 
     const history = useHistory();
     const goToProject = () => {
-        history.push('/');
+        history.push("/");
     };
-
 
     const onNewProject = async () => {
         // if (!tokenMeta) {
@@ -69,17 +62,17 @@ const ProjectNewPage = () => {
         //     return;
         // }
         if (newProject.selfStake < 2) {
-            seterror('Need atleast 2 tokens');
+            seterror("Need atleast 2 tokens");
             return;
         }
         try {
-            seterror('');
+            seterror("");
             if (notEnoughAllowance) {
                 setApproveLoading(true);
                 tokenContract.methods
                     .approve(
                         state.openSignalContractAddress,
-                        Web3.utils.toWei(newProject.selfStake.toString())
+                        Web3.utils.toWei(newProject.selfStake.toString()),
                     )
                     .send({
                         from: state.wallets[0],
@@ -90,8 +83,8 @@ const ProjectNewPage = () => {
                         console.log(res);
                     })
                     .catch((err: any) => {
-                        console.log(err,'err')
-                        seterror('Error');
+                        console.log(err, "err");
+                        seterror("Error");
                         setApproveLoading(false);
                         console.log(err);
                     });
@@ -100,33 +93,36 @@ const ProjectNewPage = () => {
                 setApproveLoading(false);
             }
 
-            const {imageURL, metadataURL} = await saveOnIPFSWithWeb3Storage(
-                {...newProject, avatar: ''},
-                avatar
+            const { imageURL, metadataURL } = await saveOnIPFSWithWeb3Storage(
+                { ...newProject, avatar: "" },
+                avatar,
             );
 
-            setNewProject({...newProject, link: metadataURL});
+            setNewProject({ ...newProject, link: metadataURL });
             if (!openSignalContract) {
-                return console.log('contract not found');
+                return console.log("contract not found");
             }
 
             setCreateLoading(true);
-            console.log(newProject.selfStake.toString(), 'selfStake');
-            console.log(openSignalContract._address, 'address of openSignalContract');
-            tokenContract.methods.allowance(state.wallets[0], state.openSignalTokenContractAddress).call().then(rez => console.log(rez, 'resultallowance'))
+            console.log(newProject.selfStake.toString(), "selfStake");
+            console.log(openSignalContract._address, "address of openSignalContract");
+            tokenContract.methods
+                .allowance(state.wallets[0], state.openSignalTokenContractAddress)
+                .call()
+                .then((rez) => console.log(rez, "resultallowance"));
             await tokenContract.methods
-                    .approve(
-                        state.openSignalContractAddress,
-                        Web3.utils.toWei(newProject.selfStake.toString())
-                    )
-                    .send({
-                        from: state.wallets[0],
-                    })
+                .approve(
+                    state.openSignalContractAddress,
+                    Web3.utils.toWei(newProject.selfStake.toString()),
+                )
+                .send({
+                    from: state.wallets[0],
+                });
             openSignalContract.methods
                 .createProject(
                     newProject.name,
                     metadataURL,
-                    Web3.utils.toWei(newProject.selfStake.toString())
+                    Web3.utils.toWei(newProject.selfStake.toString()),
                 )
                 .send({
                     from: state.wallets[0],
@@ -136,13 +132,13 @@ const ProjectNewPage = () => {
                     console.log(res);
                 })
                 .catch((err: any) => {
-                    seterror('Error');
+                    seterror("Error");
                     setCreateLoading(false);
                     console.log(err);
                 });
         } catch (err) {
-            console.log(err)
-            seterror('Error');
+            console.log(err);
+            seterror("Error");
             setCreateLoading(false);
             setApproveLoading(false);
         }
@@ -164,22 +160,19 @@ const ProjectNewPage = () => {
         newProject.selfStake == 0 ||
         (!allowanceLoading &&
             BigNumber.from(allowance).lt(
-                BigNumber.from(newProject.selfStake).mul(
-                    BigNumber.from(10).pow(18)
-                )
+                BigNumber.from(newProject.selfStake).mul(BigNumber.from(10).pow(18)),
             ));
     return (
         <Container>
             <div className="page-header">
                 <h3>NEW PROJECT</h3>
-                
             </div>
             <Grid textAlign="center" verticalAlign="middle">
                 <Grid.Column
                     style={{
                         maxWidth: 450,
-                        marginTop: '4rem',
-                        border: '2px solid white',
+                        marginTop: "4rem",
+                        border: "2px solid white",
                         borderRadius: 8,
                     }}
                 >
@@ -188,17 +181,17 @@ const ProjectNewPage = () => {
                             <Form.Field>
                                 <div
                                     style={{
-                                        width: '100%',
+                                        width: "100%",
                                         marginBottom: 4,
                                     }}
                                 >
                                     {newProject.avatar ? (
                                         <img
                                             style={{
-                                                maxHeight: '20rem',
-                                                objectFit: 'cover',
-                                                width: '100%',
-                                                border: '2px solid rgba(255,255,255,.5)',
+                                                maxHeight: "20rem",
+                                                objectFit: "cover",
+                                                width: "100%",
+                                                border: "2px solid rgba(255,255,255,.5)",
                                             }}
                                             src={newProject.avatar}
                                             alt="project avatar"
@@ -210,13 +203,11 @@ const ProjectNewPage = () => {
                                     )}
                                 </div>
                                 <Button
-                                    style={{width: '100%'}}
+                                    style={{ width: "100%" }}
                                     content="Choose Photo"
                                     labelPosition="left"
                                     icon="file"
-                                    onClick={() =>
-                                        (imgRef?.current || ({} as any)).click()
-                                    }
+                                    onClick={() => (imgRef?.current || ({} as any)).click()}
                                 />
                                 <input
                                     accept="image/png, image/jpeg"
@@ -270,27 +261,22 @@ const ProjectNewPage = () => {
                                     icon="tag"
                                     iconPosition="left"
                                     placeholder="Tags"
-                                    value={newProject.tags.join(' ,')}
+                                    value={newProject.tags.join(" ,")}
                                     onChange={(e) => {
                                         let value = e.target.value;
 
                                         if (
-                                            value.substr(-2) === '  ' &&
-                                            newProject.tags[
-                                                newProject.tags.length - 1
-                                            ].trim() != ''
+                                            value.substr(-2) === "  " &&
+                                            newProject.tags[newProject.tags.length - 1].trim() != ""
                                         ) {
-                                            value = value.trim() + ' ,';
+                                            value = value.trim() + " ,";
                                         }
-                                        if (value.includes('   ')) {
-                                            value = value.substr(
-                                                0,
-                                                value.length - 1
-                                            );
+                                        if (value.includes("   ")) {
+                                            value = value.substr(0, value.length - 1);
                                         }
                                         setNewProject({
                                             ...newProject,
-                                            tags: value.split(' ,'),
+                                            tags: value.split(" ,"),
                                         });
                                     }}
                                 />
@@ -315,14 +301,11 @@ const ProjectNewPage = () => {
                                         setNewProject({
                                             ...newProject,
                                             selfStake:
-                                                e.target.value == '' ||
+                                                e.target.value == "" ||
                                                 (re.test(e.target.value) &&
-                                                    Number(e.target.value) <
-                                                        1e15)
+                                                    Number(e.target.value) < 1e15)
                                                     ? Number(e.target.value)
-                                                    : Number(
-                                                          newProject.selfStake
-                                                      ),
+                                                    : Number(newProject.selfStake),
                                         })
                                     }
                                 />
@@ -331,8 +314,8 @@ const ProjectNewPage = () => {
                                 <p
                                     style={{
                                         padding: 8,
-                                        color: 'crimson',
-                                        width: '100%',
+                                        color: "crimson",
+                                        width: "100%",
                                     }}
                                 >
                                     {error}
@@ -341,15 +324,13 @@ const ProjectNewPage = () => {
                             <Button
                                 onClick={() => onNewProject()}
                                 className="btn"
-                                color={notEnoughAllowance ? 'pink' : 'purple'}
+                                color={notEnoughAllowance ? "pink" : "purple"}
                                 fluid
                                 size="large"
                                 disabled={newProject.selfStake == 0}
                                 loading={approveLoading || createLoading}
                             >
-                                {notEnoughAllowance
-                                    ? 'APPROVE TOKEN'
-                                    : 'CREATE'}
+                                {notEnoughAllowance ? "APPROVE TOKEN" : "CREATE"}
                             </Button>
                         </Container>
                     </Form>
@@ -358,4 +339,4 @@ const ProjectNewPage = () => {
         </Container>
     );
 };
-export {ProjectNewPage};
+export { ProjectNewPage };

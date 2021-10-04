@@ -1,18 +1,17 @@
-import {ethers} from 'ethers';
-import React from 'react';
-import {isAddress} from '../util/eth.util';
+import { ethers } from "ethers";
+import React from "react";
+import { isAddress } from "../util/eth.util";
 
 const useGetAllowance = (
     addr: string,
     tokenContract: any,
     openSignalContractAddress: any,
-    trigger = false
+    trigger = false,
 ) => {
     const [allowance, setallowance] = React.useState(0);
     const [loading, setloading] = React.useState<boolean>(true);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
-
         if (
             addr &&
             tokenContract &&
@@ -27,7 +26,7 @@ const useGetAllowance = (
                 const allowance = await tokenContract.methods
                     .allowance(addr, openSignalContractAddress)
                     .call();
-                console.log(allowance,'allowance')
+                console.log(allowance, "allowance");
                 setallowance(allowance);
                 setloading(false);
                 seterr(null);
@@ -44,33 +43,29 @@ const useGetAllowance = (
     }, [addr, tokenContract, trigger]);
     return [allowance, loading, err];
 };
-const useGetTokenBalance = (
-    addr: string,
-    tokenContract: any,
-    trigger = false
-) => {
-    const [balance, setbalance] = React.useState('');
+const useGetTokenBalance = (addr: string, tokenContract: any, trigger = false) => {
+    const [balance, setbalance] = React.useState("");
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
-        if (addr && isAddress(addr) && isAddress(addr)) {
-            setbalance('');
+        if (addr && tokenContract && isAddress(addr) && isAddress(addr)) {
+            setbalance("");
             setloading(true);
             seterr(null);
             try {
-                const balance = await tokenContract.methods
-                    .balanceOf(addr)
-                    .call();
+                const balance = await tokenContract.methods.balanceOf(addr).call();
+
                 setbalance(ethers.utils.formatEther(balance));
                 setloading(false);
                 seterr(null);
             } catch (err) {
-                setbalance('');
+                console.log("err", err);
+                setbalance("");
                 setloading(false);
                 seterr(err);
             }
         } else {
-            setbalance('');
+            setbalance("");
             setloading(false);
             seterr(null);
         }
@@ -78,4 +73,4 @@ const useGetTokenBalance = (
     return [balance, loading, err];
 };
 
-export {useGetAllowance, useGetTokenBalance};
+export { useGetAllowance, useGetTokenBalance };

@@ -1,8 +1,8 @@
 const BouncyBalls = (props: any) => {
     return (
-        <div className={'boucny-balls'} {...props}>
+        <div className={"boucny-balls"} {...props}>
             <h3 className="loading">Loading</h3>
-            <div className={'boucny-balls-wrapper'}>
+            <div className={"boucny-balls-wrapper"}>
                 <div></div>
                 <div></div>
                 <div></div>
@@ -13,4 +13,4 @@ const BouncyBalls = (props: any) => {
     );
 };
 
-export {BouncyBalls};
+export { BouncyBalls };

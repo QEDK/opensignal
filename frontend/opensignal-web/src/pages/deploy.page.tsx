@@ -1,23 +1,19 @@
-import {Container, Form, Grid, Button} from 'semantic-ui-react';
-import {useGetOpenSignalTokenContract} from '../hooks/Contract.hook';
-import React from 'react';
-import {GitcoinContext} from '../store';
-import {NFTStorage, File} from 'nft.storage';
-import {deployContract} from '../contracts';
-import {useGetMetadata} from '../hooks/Ipfs.hook';
+import { Container, Form, Grid, Button } from "semantic-ui-react";
+import { useGetOpenSignalTokenContract } from "../hooks/Contract.hook";
+import React from "react";
+import { GitcoinContext } from "../store";
+import { NFTStorage, File } from "nft.storage";
+import { deployContract } from "../contracts";
+import { useGetMetadata } from "../hooks/Ipfs.hook";
 const DeployPage = () => {
-    const {state, dispatch} = React.useContext(GitcoinContext);
+    const { state, dispatch } = React.useContext(GitcoinContext);
     const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
     const [opensignalMeta] = useGetMetadata(state.openSignalContract);
 
     const onDeployOpenSignal = async (name: string, args?: any[]) => {
-        console.log('args', args);
+        console.log("args", args);
         try {
-            const address = await deployContract(
-                state.chain_id,
-                name,
-                args || []
-            );
+            const address = await deployContract(state.chain_id, name, args || []);
             const meta = await SaveOnIfps(name, address);
 
             dispatch({
@@ -28,19 +24,15 @@ const DeployPage = () => {
             console.log(err);
         }
     };
-    React.useEffect(() => {}, []);
     const SaveOnIfps = async (name: string, address: string) => {
-        const apiKey =
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGFmRDg4MmY5YzlCZGE2QjMyOTVlZjIwZDFiM0VDNjA4NDJCREQxMTIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMDQ4NTQ2MDM0OSwibmFtZSI6Ik9wZW5TaWduYWwifQ.-Am4LeJJXbE6ONW6NfHdU2qIHGedHNuuIrfZPcpV0jU';
-        const client = new NFTStorage({token: apiKey});
-
+        const client = new NFTStorage({ token: process.env.REACT_APP_NFT_STORAGE_TOKEN || "" });
         const metadata = await client.store({
             name: name,
             description: `${name} Contract Address`,
             image: new Blob(),
-            properties: {address: address},
+            properties: { address: address },
         });
-        console.log('metadata', metadata);
+        console.log("metadata", metadata);
         return metadata;
     };
     return (
@@ -53,7 +45,7 @@ const DeployPage = () => {
                 <Grid.Column
                     style={{
                         maxWidth: 450,
-                        marginTop: '2rem',
+                        marginTop: "2rem",
                     }}
                 >
                     <Form>
@@ -70,20 +62,20 @@ const DeployPage = () => {
 
                             <Button
                                 onClick={() =>
-                                    onDeployOpenSignal('OpenSignal', [
+                                    onDeployOpenSignal("OpenSignal", [
                                         state.wallets[0],
                                         tokenMeta.properties.address,
                                     ])
                                 }
                                 className="btn"
-                                color={'pink'}
+                                color="pink"
                                 fluid
                                 size="large"
                             >
-                                {'DEPLOY'}
+                                DEPLOY
                             </Button>
                         </Container>
-                        <Container style={{marginTop: '2rem'}}>
+                        <Container style={{ marginTop: "2rem" }}>
                             <Form.Field>
                                 <p className="page-header">OpenSignalToken</p>
                                 <Form.Input
@@ -95,15 +87,13 @@ const DeployPage = () => {
                             </Form.Field>
 
                             <Button
-                                onClick={() =>
-                                    onDeployOpenSignal('OpenSignalToken')
-                                }
+                                onClick={() => onDeployOpenSignal("OpenSignalToken")}
                                 className="btn"
-                                color={'pink'}
+                                color="pink"
                                 fluid
                                 size="large"
                             >
-                                {'DEPLOY'}
+                                DEPLOY
                             </Button>
                         </Container>
                     </Form>
@@ -113,4 +103,4 @@ const DeployPage = () => {
     );
 };
 
-export {DeployPage};
+export { DeployPage };

@@ -1,14 +1,10 @@
-import Web3 from 'web3';
-import React from 'react';
-import {HttpProviderBase} from 'web3-core-helpers';
-import {isAddress} from '../util/eth.util';
+import Web3 from "web3";
+import React from "react";
+import { HttpProviderBase } from "web3-core-helpers";
+import { isAddress } from "../util/eth.util";
 
-const useGetBalance = (
-    addr: string,
-    provider: HttpProviderBase,
-    trigger = false
-) => {
-    const [balance, setbalance] = React.useState('');
+const useGetBalance = (addr: string, provider: HttpProviderBase, trigger = false) => {
+    const [balance, setbalance] = React.useState("");
     React.useMemo(async () => {
         if (provider && addr && isAddress(addr)) {
             try {
@@ -17,13 +13,13 @@ const useGetBalance = (
                 const b = parseFloat(a.toString()).toFixed(2);
                 setbalance(b);
             } catch (error) {
-                console.log('error', error);
+                console.log("error", error);
             }
         } else {
-            setbalance('');
+            setbalance("");
         }
     }, [addr, provider, trigger]);
     return balance;
 };
 
-export {useGetBalance};
+export { useGetBalance };

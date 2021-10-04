@@ -1,6 +1,6 @@
-import axios from 'axios';
-import React from 'react';
-const PREFIX = 'https://';
+import axios from "axios";
+import React from "react";
+const PREFIX = "https://";
 const useGetMetadata = (cid: string, trigger = true) => {
     const [metadata, setmetadata] = React.useState<any>(null);
     const [loading, setloading] = React.useState<boolean>(false);
@@ -18,7 +18,7 @@ const useGetMetadata = (cid: string, trigger = true) => {
                         });
                         setloading(false);
                     } catch (err) {
-                        console.log('err', err);
+                        console.log("err", err);
                         setloading(false);
                         seterr(err);
                         setmetadata(null);
@@ -34,15 +34,14 @@ const useGetMetadata = (cid: string, trigger = true) => {
     return [metadata, loading, err];
 };
 
-export {useGetMetadata};
+export { useGetMetadata };
 
 const getIPFSlink = (cid: string) => {
     if (cid && cid.toString().startsWith(PREFIX)) {
         return cid;
     }
-    
 };
 
 const getIPFSImage = (cid: string) => {
     return cid + `image.jpeg`;
-}
+};
