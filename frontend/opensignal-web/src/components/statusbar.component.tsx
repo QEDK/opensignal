@@ -1,5 +1,5 @@
 import React from "react";
-
+import { RiSignalTowerFill } from "react-icons/ri";
 import { useGetBalance } from "../hooks/Balance.hook";
 import { GitcoinContext } from "../store";
 
@@ -33,8 +33,7 @@ export { StatusbarComponent };
 
 const WalletComponent = () => {
     const { state, dispatch } = React.useContext(GitcoinContext);
-    const [tokenMeta] = useGetMetadata(state.openSignalTokenContract);
-    const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
+    const [tokenContract] = useGetOpenSignalTokenContract(state.openSignalTokenContractAddress);
     const balance = useGetBalance(state.wallets[0], state.provider);
     const [tokenBalance, tokenBalanceLoading] = useGetTokenBalance(
         state.wallets[0],
@@ -81,10 +80,21 @@ const WalletComponent = () => {
     return (
         <div className="wallet">
             <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ marginLeft: 8, textAlign: "center" }}>{`Token ${
-                    tokenBalanceLoading ? "0" : tokenBalance
-                }`}</div>
-                <div style={{ marginLeft: 8, textAlign: "center" }}>{`三 ${balance}`}</div>
+                <div
+                    style={{
+                        marginLeft: 8,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        color: "white",
+                    }}
+                >
+                    <RiSignalTowerFill />
+                    {`${tokenBalanceLoading ? "0" : tokenBalance}`}
+                </div>
+                <div
+                    style={{ marginLeft: 8, textAlign: "center", color: "#FFCC00" }}
+                >{`三 ${balance}`}</div>
             </div>
             {state.wallets[0] ? (
                 <button className="address">
@@ -100,6 +110,7 @@ const WalletComponent = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
+                    color: "#FFCC00",
                 }}
             >
                 <div>

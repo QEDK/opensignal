@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.9;
+
+import "@openzeppelin/contracts/utils/Create2.sol";
+
+contract OpenSignalFactory {
+    modifier onlyGovernor() {
+        require(_msgSender() == governor, "ONLY_GOVERNOR");
+        _;
+    }
+
+    function initialize() external {
+        governor = msg.sender;
+    }
+
+    function getDeploymentAddress() external view onlyGovernor returns (address) {
+
+    }
+}
