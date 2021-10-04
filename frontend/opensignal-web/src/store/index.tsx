@@ -30,8 +30,8 @@ const openSignalContract =
     process.env.OPEN_SIGNAL_CONTRACT ||
     "ipfs://bafybeidpfndsm2znzdrh4s6wtauus45tfecg2376pyu73rmfajlxx2vlri/metadata.json";
 const openSignalTokenContractAddress = "0x4BeD939d328c4A9B5dEcfF9668B534f44497e601";
-const openSignalContractAddress = "0x8087B2d5D7Fc67e8AaC512349Ee8b50050B07a3B";
-const rewardDistributionContractAddress = "0x3E1Cf01B6ed8f627A89893102E66227d95616cb9";
+const openSignalContractAddress = "0x5627C20EA760C9d0a0FD19261BB2A0f772eeaDDC";
+const rewardDistributionContractAddress = "0x70513ADbeA3CB433290F156da8803Cc32E57fda8";
 const openSignalTokenContract =
     process.env.OPEN_SIGNAL_TOKEN_CONTRACT ||
     "ipfs://bafyreiazlc7d46ylm7qsedty5hao4swre7saqkmmop4ohejzothzrr74cq/metadata.json";
