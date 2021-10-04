@@ -63,6 +63,11 @@ const ProjectPage = () => {
         state.openSignalContractAddress,
         approveLoading,
     );
+
+    const [currentRewardEstimate, setCurrentRewardEstimate] = useState();
+    const [currentReward, setCurrentReward] = useState();
+    const [currentStakingAmount, setCurrentStakingAmount] = useState();
+    const [tokensEligibleForRewards, setTokensEligibleForRewards] = useState();
     console.log(allowance);
 
     const goToNewProject = () => {
@@ -155,11 +160,26 @@ const ProjectPage = () => {
     const getCurrentRewardEstimate = () => {
         console.log(rewardsDistibutionContract.methods);
         rewardsDistibutionContract.methods
-            .getCurrentRewardEstimate(state.wallets[0])
+            .getCurrentRewardEstimate(currentStakingAmount)
             .call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
-            .then(console.log)
+            .then((data) => {
+                setCurrentRewardEstimate(data);
+            })
+            .catch(console.log);
+    };
+
+    const getCurrentReward = () => {
+        console.log(rewardsDistibutionContract.methods);
+        rewardsDistibutionContract.methods
+            .getCurrentReward(tokensEligibleForRewards)
+            .call()
+            // .getCurrentRewardEstimate(state.wallets[0])
+            // .call()
+            .then((data) => {
+                setCurrentReward(data);
+            })
             .catch(console.log);
     };
 
@@ -170,7 +190,22 @@ const ProjectPage = () => {
             .call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
-            .then(console.log)
+            .then((data) => {
+                setCurrentStakingAmount(data);
+            })
+            .catch(console.log);
+    };
+
+    const getTokensEligibleForRewards = () => {
+        console.log(rewardsDistibutionContract.methods);
+        rewardsDistibutionContract.methods
+            .getTokensEligibleForRewards(state.wallets[0])
+            .call()
+            // .getCurrentRewardEstimate(state.wallets[0])
+            // .call()
+            .then((data) => {
+                setTokensEligibleForRewards(data);
+            })
             .catch(console.log);
     };
 
@@ -200,9 +235,31 @@ const ProjectPage = () => {
         <Container>
             <div className="page-header">
                 <h3>Projects</h3>
-                <button onClick={getUserIndex}>GET USER INDEX ARRAY</button>
-                <button onClick={getCurrentRewardEstimate}>GET CURRENT REWARD ESTIMATE</button>
-                <button onClick={getCurrentStakingAmount}>GET CURRENT STAKING AMOUNT</button>
+                {/* <button onClick={getUserIndex}>GET USER INDEX ARRAY</button> */}
+                <div className="flex-column">
+                    <button onClick={getCurrentRewardEstimate}>GET CURRENT REWARD ESTIMATE</button>
+                    <p>{currentRewardEstimate}</p>
+                    {currentRewardEstimate && currentStakingAmount && (
+                        <p>APY: {(currentRewardEstimate * 100) / currentStakingAmount}%</p>
+                    )}
+                </div>
+                <div className="flex-column">
+                    <button onClick={getCurrentStakingAmount}>GET CURRENT STAKING AMOUNT</button>
+                    <p>{currentStakingAmount}</p>
+                </div>
+                <div className="flex-column">
+                    <button onClick={getTokensEligibleForRewards}>
+                        GET TOKENS ELIGIBLE FOR REWARDS
+                    </button>
+                    <p>{tokensEligibleForRewards}</p>
+                </div>
+                <div className="flex-column">
+                    <button onClick={getCurrentReward}>GET CURRENT REWARD</button>
+                    <p>{currentReward}</p>
+                    {currentReward && tokensEligibleForRewards && (
+                        <p>APY: {(currentReward * 100) / tokensEligibleForRewards}%</p>
+                    )}
+                </div>
                 <button onClick={() => changeEpochLength(epochLength)}>Change Epoch Length</button>
                 <input
                     value={epochLength}
