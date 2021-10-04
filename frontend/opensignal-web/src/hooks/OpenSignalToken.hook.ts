@@ -48,7 +48,7 @@ const useGetTokenBalance = (addr: string, tokenContract: any, trigger = false) =
     const [loading, setloading] = React.useState<boolean>(false);
     const [err, seterr] = React.useState<any>(null);
     React.useMemo(async () => {
-        if (addr && isAddress(addr) && isAddress(addr)) {
+        if (addr && tokenContract && isAddress(addr) && isAddress(addr)) {
             setbalance("");
             setloading(true);
             seterr(null);
