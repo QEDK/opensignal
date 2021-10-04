@@ -2,7 +2,7 @@ import { Container, Form, Grid, Segment, Button, TextArea, Placeholder } from "s
 import { useHistory } from "react-router";
 import { useGetAllowance } from "../hooks/OpenSignalToken.hook";
 import { GitcoinContext } from "../store";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     useGetOpenSignalContract,
     useGetOpenSignalProxyContract,
@@ -47,6 +47,7 @@ const ProjectNewPage = () => {
     const [allowance, allowanceLoading, allowanceErr] = useGetAllowance(
         state.wallets[0],
         tokenContract,
+        state.openSignalContractAddress,
         approveLoading,
     );
     console.log(allowance, "allow");
@@ -55,6 +56,17 @@ const ProjectNewPage = () => {
     const goToProject = () => {
         history.push("/");
     };
+
+    useEffect(() => {
+        console.log(state.wallets[0], state.openSignalContractAddress, "ssss");
+        tokenContract &&
+            state.wallets[0] &&
+            tokenContract.methods &&
+            tokenContract.methods
+                .allowance(state.wallets[0], state.openSignalContractAddress)
+                .call()
+                .then((res) => console.log(res, "result"));
+    }, [tokenContract, state.wallets]);
 
     const onNewProject = async () => {
         // if (!tokenMeta) {
@@ -106,18 +118,18 @@ const ProjectNewPage = () => {
             setCreateLoading(true);
             console.log(newProject.selfStake.toString(), "selfStake");
             console.log(openSignalContract._address, "address of openSignalContract");
-            tokenContract.methods
-                .allowance(state.wallets[0], state.openSignalTokenContractAddress)
-                .call()
-                .then((rez) => console.log(rez, "resultallowance"));
-            await tokenContract.methods
-                .approve(
-                    state.openSignalContractAddress,
-                    Web3.utils.toWei(newProject.selfStake.toString()),
-                )
-                .send({
-                    from: state.wallets[0],
-                });
+            // tokenContract.methods
+            //     .allowance(state.wallets[0], state.openSignalTokenContractAddress)
+            //     .call()
+            //     .then((rez) => console.log(rez, "resultallowance"));
+            // await tokenContract.methods
+            //     .approve(
+            //         state.openSignalContractAddress,
+            //         Web3.utils.toWei(newProject.selfStake.toString()),
+            //     )
+            //     .send({
+            //         from: state.wallets[0],
+            //     });
             openSignalContract.methods
                 .createProject(
                     newProject.name,
