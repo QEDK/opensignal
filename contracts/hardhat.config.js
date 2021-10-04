@@ -24,10 +24,10 @@ module.exports = {
       chainId: 31337,
       accounts: [{ privateKey: `0x${process.env.PRIVATE_KEY}`, balance: '10000000000000000000000000' }]
     },
-    rinkeby: {
-      url: process.env.RINKEBY_RPC_URL || 'https://rinkeby-light.eth.linkpool.io',
-      accounts: [`0x${process.env.PRIVATE_KEY}`]
-    }
+    // rinkeby: {
+    //   url: process.env.RINKEBY_RPC_URL || 'https://rinkeby-light.eth.linkpool.io',
+    //   accounts: [`0x${process.env.PRIVATE_KEY}`]
+    // }
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY
