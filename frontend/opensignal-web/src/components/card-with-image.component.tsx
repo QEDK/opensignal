@@ -42,15 +42,14 @@ export default function CardWithImage({ project }: { project: Project }) {
         openSignalContract,
     );
     const [projectMeta, projectMetaLoading] = useGetMetadata(projectURI);
-    console.log(projectMeta);
+    console.log({ projectMeta });
     const pId = Web3.utils.padLeft(Web3.utils.hexToBytes(project.id) as any, 32);
     const getCurrentStakingAmount = async () => {
+        console.log(state.wallets[0]);
         console.log(rewardsDistibutionContract.methods);
         rewardsDistibutionContract.methods
-            .getCurrentStakingAmount()
+            .getCurrentStakingAmount(state.wallets[0])
             .call()
-            // .getCurrentRewardEstimate(state.wallets[0])
-            // .call()
             .then((amount: string) => {
                 console.log(amount);
                 setCurrentStakingAmount(parseInt(amount, 10));

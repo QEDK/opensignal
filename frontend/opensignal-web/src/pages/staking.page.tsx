@@ -1,10 +1,10 @@
 import React from "react";
 import { Container, Grid } from "semantic-ui-react";
-import { Box, Flex, Heading } from "@chakra-ui/layout";
+import { Box, Flex, Heading, SimpleGrid } from "@chakra-ui/layout";
 import { useGetOpenSignalContract, useGetOpenSignalTokenContract } from "../hooks/Contract.hook";
 import { GitcoinContext } from "../store";
 import { useGetMetadata } from "../hooks/Ipfs.hook";
-import { useGetProjectIds, useGetProjects } from "../hooks/OpenSignal.hook";
+import { useGetProjectIds, useGetProjects, useGetProjectURI } from "../hooks/OpenSignal.hook";
 import CardWithImage from "../components/card-with-image.component";
 import { useHistory } from "react-router";
 
@@ -18,6 +18,8 @@ const StakingPage = () => {
     const [tokenContract] = useGetOpenSignalTokenContract(tokenMeta);
     const [ids] = useGetProjectIds(openSignalContract, trigger);
     const [projects, projectsLoading, e] = useGetProjects(ids, openSignalContract);
+
+    console.log({ projects });
     return (
         <Container>
             <Flex justifyContent="center">
@@ -27,19 +29,18 @@ const StakingPage = () => {
                     </Heading>
                 </Box>
             </Flex>
-            <Grid
+            <SimpleGrid
                 textAlign="center"
                 verticalAlign="middle"
                 style={{
                     marginTop: "2rem",
                 }}
+                columns={3}
             >
-                <div className="staking-projects">
-                    {projects.map((p: any, i: any) => (
-                        <CardWithImage project={p} key={i} />
-                    ))}
-                </div>
-            </Grid>
+                {projects.map((p: any, i: any) => (
+                    <CardWithImage project={p} key={i} />
+                ))}
+            </SimpleGrid>
         </Container>
     );
 };
