@@ -166,7 +166,7 @@ const ProjectPage = () => {
     const getCurrentStakingAmount = () => {
         console.log(rewardsDistibutionContract.methods);
         rewardsDistibutionContract.methods
-            .getCurrentStakingAmount()
+            .getCurrentStakingAmount(state.wallets[0])
             .call()
             // .getCurrentRewardEstimate(state.wallets[0])
             // .call()
